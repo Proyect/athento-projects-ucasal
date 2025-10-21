@@ -1,0 +1,17 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Código OTP para firma del acta '{{fil.filename}}'
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p> Estimado docente, utilice este código para la firma del acta. </p>   
+    <p style="font-size:20px; color:cornflowerblue">{{otp}}</p>   
+    <p>Saludos cordiales</p>
+  </body>
+</html>

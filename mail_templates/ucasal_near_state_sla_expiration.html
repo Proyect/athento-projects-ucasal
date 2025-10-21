@@ -1,0 +1,24 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Nueva acta de exámen '{{fil.filename}}' para firmar
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p> Estimado docente, hay un nuevo acta a su disposición para firmar. </p>   
+    
+    {% if elapsed_time != '' %}
+    <p>
+      Ya han pasado {{elapsed_time}} desde que está disponible para su firma. 
+      Le rogamos la firme a la brevedad.
+    </p>
+    {% endif %}
+    {{url}}
+    <p>Saludos cordiales</p>
+  </body>
+</html>

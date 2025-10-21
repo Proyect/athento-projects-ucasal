@@ -1,0 +1,2 @@
+class InvalidOtpError(Exception):
+  pass
