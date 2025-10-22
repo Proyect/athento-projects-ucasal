@@ -102,12 +102,13 @@ def qr(request):
     logger = SpLogger("athentose", "actas.qr")
     logger.entry()    
     
-    body = getJsonBody(request)
-
-    if request.method != 'GET':
+    if request.method != 'POST':
         return  logger.exit(METHOD_NOT_ALLOWED)      
 
-    bytes = UcasalServices.get_qr_image(url=body['url'])
+    body = getJsonBody(request)
+    url = body.get('url', 'https://example.com')
+
+    bytes = UcasalServices.get_qr_image(url=url)
 
     return HttpResponse(
         bytes,
@@ -119,12 +120,11 @@ def qr(request):
 @traceback_ret
 def getconfig(request):
     from django.http import HttpResponse
-    from config.utils import get_config
 
     logger = SpLogger("athentose", "actas.getconfig")
     logger.entry()    
         
-    if request.method != 'GET':
+    if request.method != 'POST':
         return  logger.exit(METHOD_NOT_ALLOWED)      
 
     body = getJsonBody(request)

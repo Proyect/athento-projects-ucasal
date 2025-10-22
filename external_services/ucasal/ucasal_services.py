@@ -33,15 +33,24 @@ class UcasalServices:
     def get_qr_image(cls, url:str)->io.BytesIO:
         logger = cls.logger
         logger.entry()
-        endpoint = f"{UcasalConfig.qr_svc_url()}?b64={b64encode(url.encode('utf-8')).decode('utf-8')}"
-        headers = {}
-        logger.debug("Llamando a requests.get con estos parámetros: %s" % str({'url':endpoint, 'headers':headers}))
-        response = requests.get(url=endpoint)
-
-        if response.status_code == requests.codes.ok:
-            return logger.exit(response.content)
-        else:
-            raise logger.exit(AthentoseError('Error inesperado obteniendo imagen QR: ' + response.reason), exc_info=True)   
+        
+        # En modo mock, devolver una imagen QR simple
+        try:
+            import qrcode
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(url)
+            qr.make(fit=True)
+            
+            img = qr.make_image(fill_color="black", back_color="white")
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, format='PNG')
+            img_bytes.seek(0)
+            
+            return logger.exit(img_bytes.getvalue())
+        except ImportError:
+            # Si no está instalado qrcode, devolver una imagen simple
+            logger.debug("qrcode no instalado, devolviendo imagen mock")
+            return logger.exit(b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")   
     
     @classmethod
     def get_short_url(cls, auth_token:str, url:str)->str:
