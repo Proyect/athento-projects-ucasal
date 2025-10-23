@@ -6,3 +6,5 @@ class ModelConfig(AppConfig):
     verbose_name = 'Model Package'
 
 
+
+

@@ -21,7 +21,7 @@ except ImportError:
 from ucasal.utils import UcasalConfig
 from ucasal.utils import get_totp_key
 from django.http import HttpResponse
-from model import File
+from model.File import File
 from core.exceptions import AthentoseError
 from django.core.files import File as FileObject
 try:

@@ -8,8 +8,21 @@ services:
       - .env
     volumes:
       - .:/app:cached
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./tmp:/app/tmp
     depends_on:
       - db
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=ucasal.docker_settings
+      - DATABASE_ENGINE=django.db.backends.postgresql
+      - DATABASE_NAME=ucasal
+      - DATABASE_USER=ucasal
+      - DATABASE_PASSWORD=ucasal
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
 
   db:
     image: postgres:13
@@ -21,6 +34,24 @@ services:
       - "5440:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ucasal"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   pgdata:
+  redisdata:
