@@ -49,3 +49,6 @@ Thumbs.db
 *.wmv
 
 ucasal.code-workspace
+
+*.aux #datas 
+   
