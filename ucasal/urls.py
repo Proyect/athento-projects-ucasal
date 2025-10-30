@@ -3,17 +3,19 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
-from endpoints.actas.actas import routes
+from endpoints.actas.actas import routes as actas_routes
+from endpoints.titulos.titulos import routes as titulos_routes
 
 app_name = 'ucasal'
 
 def home_view(request):
     return JsonResponse({
-        'message': 'UCASAL API - Sistema de Actas',
+        'message': 'UCASAL API - Sistema de Actas y Títulos',
         'version': '1.0.0',
         'endpoints': {
             'admin': '/admin/',
             'actas': '/actas/',
+            'titulos': '/titulos/',
             'qr': '/actas/qr/',
             'getconfig': '/actas/getconfig/',
             'docs': '/docs/'
@@ -79,8 +81,8 @@ urlpatterns = [
     path('docs/', docs_view, name='docs'),
     path('admin/', admin.site.urls),
     path('actas/', include('endpoints.actas.urls')),
-    # Incluir las rutas definidas en actas.py
-] + routes
+    # Incluir las rutas definidas en actas.py y titulos.py
+] + actas_routes + titulos_routes
 
 # Servir archivos estáticos y media en desarrollo
 if settings.DEBUG:

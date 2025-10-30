@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'ucasal',
     'core',
     'endpoints.actas',
+    'endpoints.titulos',
     'model',
 ]
 

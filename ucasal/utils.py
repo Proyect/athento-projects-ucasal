@@ -35,6 +35,31 @@ serie_actas_revisadas_name = 'actas_revisadas'
 # Nombre del doctype del Acta
 acta_examen_doctype_name = 'acta'
 
+# Nombres de campos de Título
+titulo_tipo_dni_metadata_name = 'metadata.titulo_tipo_dni'
+titulo_dni_metadata_name = 'metadata.titulo_dni'
+titulo_lugar_metadata_name = 'metadata.titulo_lugar'
+titulo_lugar_id_metadata_name = 'metadata.titulo_lugar_id'
+titulo_facultad_metadata_name = 'metadata.titulo_facultad'
+titulo_facultad_id_metadata_name = 'metadata.titulo_facultad_id'
+titulo_carrera_metadata_name = 'metadata.titulo_carrera'
+titulo_carrera_id_metadata_name = 'metadata.titulo_carrera_id'
+titulo_modalidad_metadata_name = 'metadata.titulo_modalidad'
+titulo_modalidad_id_metadata_name = 'metadata.titulo_modalidad_id'
+titulo_plan_metadata_name = 'metadata.titulo_plan'
+titulo_titulo_metadata_name = 'metadata.titulo_titulo'
+
+# Nombre del doctype del Título
+titulo_doctype_name = 'títulos'
+
+# Nombres de series de Títulos
+serie_titulos_name = 'títulos'
+serie_titulos_pendiente_ua_name = 'títulos_pendiente_ua'
+serie_titulos_pendiente_rector_name = 'títulos_pendiente_rector'
+serie_titulos_pendiente_sg_name = 'títulos_pendiente_sg'
+serie_titulos_emitidos_name = 'títulos_emitidos'
+serie_titulos_rechazados_name = 'títulos_rechazados'
+
 
 class ActaStates:
     recibida = 'Recibida'
@@ -43,6 +68,19 @@ class ActaStates:
     firmada = 'Firmada'
     fallo_blockchain = 'Fallo en Blockchain'
     rechazada = 'Rechazada'
+
+class TituloStates:
+    recibido = 'Recibido'
+    pendiente_aprobacion_ua = 'Pendiente Aprobación UA'
+    aprobado_ua = 'Aprobado por UA'
+    pendiente_aprobacion_r = 'Pendiente Aprobación R'
+    aprobado_r = 'Aprobado por R'
+    pendiente_firma_sg = 'Pendiente Firma SG'
+    firmado_sg = 'Firmado por SG'
+    pendiente_blockchain = 'Pendiente Blockchain'
+    registrado_blockchain = 'Registrado en Blockchain'
+    titulo_emitido = 'Título Emitido'
+    rechazado = 'Rechazado'
 
 class AthentoseError(Exception):
     pass
@@ -91,6 +129,24 @@ class UcasalConfig:
     @staticmethod
     def otp_validation_url_template()->str:
         return SAC.get_str('ucasal.endopint.otp.validation_url_template')
+    
+    @staticmethod
+    def titulo_validation_url_template()->str:
+        env = SAC.get_str('ucasal.endpoint.acortar_url.env', default='produccion')
+        if env == 'desarrollo':
+            return SAC.get_str('ucasal.titulo.validation_url_template', 
+                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&e=testing&uuid={{uuid}}')
+        else:
+            return SAC.get_str('ucasal.titulo.validation_url_template',
+                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&uuid={{uuid}}')
+    
+    @staticmethod
+    def base_url()->str:
+        # URL base del sistema para callbacks
+        try:
+            return SAC.get_str('ucasal.base_url', default='https://ucasal-uat.athento.com')
+        except:
+            return 'https://ucasal-uat.athento.com'
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])
