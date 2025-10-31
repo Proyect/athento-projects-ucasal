@@ -99,8 +99,9 @@ class File(models.Model):
     estado = models.CharField(max_length=50, default='recibida')
     
     # Campos legacy (compatibilidad con código existente)
-    doctype_legacy = models.CharField(max_length=50, default='acta', db_column='doctype')
-    life_cycle_state_legacy = models.CharField(max_length=50, default='recibida', db_column='life_cycle_state')
+    # Nota: db_column no se usa aquí porque la migración 0002 ya renombró las columnas
+    doctype_legacy = models.CharField(max_length=50, default='acta')
+    life_cycle_state_legacy = models.CharField(max_length=50, default='recibida')
     
     # Relaciones con objetos mock (para operations)
     doctype_obj = models.ForeignKey(

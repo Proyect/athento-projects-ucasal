@@ -80,6 +80,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('docs/', docs_view, name='docs'),
     path('admin/', admin.site.urls),
+    path('api/auth/', include('endpoints.auth.urls')),
     path('actas/', include('endpoints.actas.urls')),
     # Incluir las rutas definidas en actas.py y titulos.py
 ] + actas_routes + titulos_routes

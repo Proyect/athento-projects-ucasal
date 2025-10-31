@@ -4,8 +4,7 @@ from operations.classes.document_operation import DocumentOperation
 from operations.enums import ProcessOperationParameterType, ProcessOperationParameterChoiceType
 from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
-from file.models import File
-from series.models import Serie
+from model.File import File, Serie
 try:
     from sp_logger import SpLogger
 except ImportError:

@@ -1,0 +1,2 @@
+# Auth endpoints package
+
