@@ -51,4 +51,6 @@ Thumbs.db
 ucasal.code-workspace
 
 *.aux #datas 
-.env   
+.env
+.env.local
+.env.remote
