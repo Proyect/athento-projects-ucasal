@@ -60,6 +60,7 @@ class GdeAsignarEspacioTitulo(DocumentOperation):
             logger.debug(f"Estado actual del título: '{estado_actual}'")
 
             # Mapeo de estados a series
+            # NOTA: Estados de blockchain suspendidos - usar flujo directo Firmado por SG → Emitido
             estado_serie_map = {
                 TituloStates.recibido: serie_titulos_name,
                 TituloStates.pendiente_aprobacion_ua: serie_titulos_pendiente_ua_name,
@@ -67,9 +68,10 @@ class GdeAsignarEspacioTitulo(DocumentOperation):
                 TituloStates.pendiente_aprobacion_r: serie_titulos_pendiente_rector_name,
                 TituloStates.aprobado_r: serie_titulos_pendiente_sg_name,
                 TituloStates.pendiente_firma_sg: serie_titulos_pendiente_sg_name,
-                TituloStates.firmado_sg: serie_titulos_emitidos_name,
-                TituloStates.pendiente_blockchain: serie_titulos_pendiente_sg_name,
-                TituloStates.registrado_blockchain: serie_titulos_emitidos_name,
+                TituloStates.firmado_sg: serie_titulos_emitidos_name,  # Flujo directo sin blockchain
+                # Estados de blockchain suspendidos - mantener mapeo por compatibilidad pero no se usarán
+                # TituloStates.pendiente_blockchain: serie_titulos_pendiente_sg_name,
+                # TituloStates.registrado_blockchain: serie_titulos_emitidos_name,
                 TituloStates.titulo_emitido: serie_titulos_emitidos_name,
                 TituloStates.rechazado: serie_titulos_rechazados_name,
             }

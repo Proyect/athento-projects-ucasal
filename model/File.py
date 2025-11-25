@@ -145,6 +145,14 @@ class File(models.Model):
     class Meta:
         managed = True
         db_table = 'file_file'
+        indexes = [
+            models.Index(fields=['doctype_legacy', 'estado'], name='file_doctype_estado_idx'),
+            models.Index(fields=['doctype_obj', 'life_cycle_state_obj'], name='file_doctype_state_idx'),
+            models.Index(fields=['created_at'], name='file_created_at_idx'),
+            models.Index(fields=['updated_at'], name='file_updated_at_idx'),
+            models.Index(fields=['removed'], name='file_removed_idx'),
+            models.Index(fields=['serie'], name='file_serie_idx'),
+        ]
         verbose_name = 'File'
         verbose_name_plural = 'Files'
         ordering = ['-created_at']
