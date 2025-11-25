@@ -211,6 +211,126 @@ Resultado BFA guardado exitosamente
 Acta rechazada exitosamente
 ```
 
+---
+
+## Endpoints de Títulos
+
+### 9. Recibir Título
+
+**POST** `/titulos/recibir/`
+
+Recibe el PDF del título desde Decanato y lo crea en Athento mediante la API `file_create`.
+
+**Headers:**
+```
+Content-Type: multipart/form-data
+```
+
+**Form Data:**
+- `filename`: DNI/Lugar/SECTOR/CARRERA/MODO/PLAN (formato: 6 componentes numéricos separados por `/`)
+- `serie`: `títulos`
+- `doctype`: `títulos`
+- `file`: Archivo PDF del título (requerido)
+- `json_data`: (opcional) JSON string con metadatos adicionales
+
+**Integración con Athento:**
+
+- **Endpoint**: `POST {ATHENTO_BASE_URL}/api/v1/file/`
+- **Base URL**: `https://ucasal-uat.athento.com` (configurable)
+- **Documentación**: `https://ucasal-uat.athento.com/api/v1/explorer/?application=file&endpoint=file_create`
+- **Autenticación**: Basic Auth (usuario y contraseña configurados)
+- **Metadatos enviados**: Todos con prefijo `metadata.`
+
+**Response:**
+```json
+{
+  "success": true,
+  "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "filename": "8205853/10/3/16/2/8707",
+  "doctype": "títulos",
+  "serie": "títulos"
+}
+```
+
+### 10. Generar Código QR para Título
+
+**POST** `/titulos/qr/`
+
+**Body:**
+```json
+{
+  "url": "https://www.ucasal.edu.ar/validar/titulo/test-uuid"
+}
+```
+
+**Response:** Imagen PNG del código QR
+
+### 11. Informar Estado del Título
+
+**POST** `/titulos/{uuid}/estado/`
+
+**Body:**
+```json
+{
+  "estado": "Aprobado por UA",
+  "observaciones": "Título aprobado correctamente"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "estado": "Aprobado por UA",
+  "estado_codigo": 2
+}
+```
+
+### 12. Validar OTP para Título
+
+**POST** `/titulos/{uuid}/validar-otp/`
+
+**Body:**
+```json
+{
+  "otp": "123456",
+  "usuario": "usuario@ucasal.edu.ar"
+}
+```
+
+**Response:**
+```json
+{
+  "otp_valido": true,
+  "usuario": "usuario@ucasal.edu.ar",
+  "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
+```
+
+### 13. Callback Blockchain para Título ⚠️ SUSPENDIDO
+
+**POST** `/titulos/{uuid}/bfaresponse/`
+
+**⚠️ NOTA IMPORTANTE:** Este endpoint está **SUSPENDIDO temporalmente**. 
+La funcionalidad de blockchain para títulos ha sido deshabilitada. Se implementará firma digital en su lugar.
+
+**Response (cuando está suspendido):**
+```json
+{
+  "error": "Endpoint suspendido",
+  "message": "El endpoint de blockchain para títulos está suspendido temporalmente. Se implementará firma digital en su lugar.",
+  "status": "blockchain_suspended"
+}
+```
+**Status Code:** `503 Service Unavailable`
+
+**Documentación histórica (cuando estaba activo):**
+- Body esperado: `{"status": "success"}` o `{"status": "failure"}`
+- Respuesta anterior: `"Resultado BFA guardado exitosamente"`
+
+---
+
 ## Modelos
 
 ### Acta
