@@ -1,0 +1,59 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Título '{{fil.filename}}' emitido exitosamente
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a,</p>
+    
+    <p>Le informamos que el título <strong>'{{fil.filename}}'</strong> ha sido emitido exitosamente.</p>
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      <li>Facultad: {{fil.gmv.metadata.titulo_facultad|default:"N/A"}}</li>
+      <li>Plan: {{fil.gmv.metadata.titulo_plan|default:"N/A"}}</li>
+      {% endif %}
+      <li>Fecha de emisión: {{fecha_emision|default:"N/A"}}</li>
+    </ul>
+    
+    {% if url_validacion %}
+    <p>El título puede ser validado mediante el siguiente enlace:</p>
+    <p><a href="{{url_validacion}}">{{url_validacion}}</a></p>
+    {% endif %}
+    
+    <p>El título está disponible en el sistema y listo para su entrega.</p>
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

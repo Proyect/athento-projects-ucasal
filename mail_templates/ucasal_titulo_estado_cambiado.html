@@ -1,0 +1,61 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Cambio de estado del título '{{fil.filename}}'
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a,</p>
+    
+    <p>Le informamos que el título <strong>'{{fil.filename}}'</strong> ha cambiado de estado.</p>
+    
+    <p><strong>Estado anterior:</strong> {{estado_anterior|default:"N/A"}}</p>
+    <p><strong>Estado nuevo:</strong> {{estado_nuevo|default:fil.life_cycle_state_obj.name|default:fil.life_cycle_state_legacy}}</p>
+    
+    {% if observaciones %}
+    <p><strong>Observaciones:</strong> {{observaciones}}</p>
+    {% endif %}
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      <li>Facultad: {{fil.gmv.metadata.titulo_facultad|default:"N/A"}}</li>
+      {% endif %}
+    </ul>
+    
+    {% if url_titulo %}
+    <p><a href="{{url_titulo}}">Ver título en el sistema</a></p>
+    {% endif %}
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

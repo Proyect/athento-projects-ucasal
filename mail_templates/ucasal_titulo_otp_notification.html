@@ -1,0 +1,56 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Código OTP para título '{{fil.filename}}'
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a,</p>
+    
+    <p>Le informamos que se ha generado un código OTP para el título <strong>'{{fil.filename}}'</strong>.</p>
+    
+    <p><strong>Utilice este código para la operación solicitada:</strong></p>
+    <p style="font-size:24px; color:#1976d2; font-weight:bold; text-align:center; padding:20px; background-color:#e3f2fd; border-radius:5px;">
+      {{otp}}
+    </p>
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      {% endif %}
+    </ul>
+    
+    <p><strong>Importante:</strong> Este código tiene validez limitada. Úselo a la brevedad.</p>
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

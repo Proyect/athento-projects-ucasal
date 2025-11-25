@@ -1,0 +1,60 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Título '{{fil.filename}}' próximo a vencer SLA
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a,</p>
+    
+    <p>Le informamos que el título <strong>'{{fil.filename}}'</strong> está próximo a vencer su tiempo de procesamiento (SLA).</p>
+    
+    <p><strong>Estado actual:</strong> {{fil.life_cycle_state_obj.name|default:fil.life_cycle_state_legacy}}</p>
+    
+    {% if elapsed_time != '' %}
+    <p>
+      Ya han pasado <strong>{{elapsed_time}}</strong> desde que el título está en este estado. 
+      Le rogamos procesarlo a la brevedad.
+    </p>
+    {% endif %}
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      {% endif %}
+    </ul>
+    
+    <p>Por favor, acceda al sistema para procesar este título.</p>
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

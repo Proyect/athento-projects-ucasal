@@ -1,0 +1,55 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Título '{{fil.filename}}' pendiente de aprobación
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a,</p>
+    
+    <p>Le informamos que hay un título pendiente de su aprobación.</p>
+    
+    <p><strong>Título:</strong> {{fil.filename}}</p>
+    <p><strong>Estado:</strong> {{estado|default:fil.life_cycle_state_obj.name|default:fil.life_cycle_state_legacy}}</p>
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      <li>Facultad: {{fil.gmv.metadata.titulo_facultad|default:"N/A"}}</li>
+      <li>Plan: {{fil.gmv.metadata.titulo_plan|default:"N/A"}}</li>
+      {% endif %}
+    </ul>
+    
+    {% if tiempo_restante %}
+    <p><strong>Tiempo restante para procesar:</strong> {{tiempo_restante}}</p>
+    {% endif %}
+    
+    {% if url_titulo %}
+    <p><a href="{{url_titulo}}">Acceder al título para aprobación</a></p>
+    {% endif %}
+    
+    <p>Por favor, acceda al sistema para revisar y aprobar este título.</p>
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+

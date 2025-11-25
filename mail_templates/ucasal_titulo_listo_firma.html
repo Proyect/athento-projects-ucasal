@@ -1,0 +1,72 @@
+<!-- SUBJECT -->
+{% load filetags %} 
+Título '{{fil.filename}}' listo para firma digital
+<!-- BODY -->
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% load filetags %}
+    <p>Estimado/a Secretario/a General,</p>
+    
+    <p>Le informamos que hay un título listo para su firma digital.</p>
+    
+    <p><strong>Título:</strong> {{fil.filename}}</p>
+    
+    <p><strong>Información del título:</strong></p>
+    <ul>
+      <li>UUID: {{fil.uuid}}</li>
+      <li>Título: {{fil.titulo}}</li>
+      {% if fil.gmv %}
+      <li>DNI: {{fil.gmv.metadata.titulo_dni|default:"N/A"}}</li>
+      <li>Carrera: {{fil.gmv.metadata.titulo_carrera|default:"N/A"}}</li>
+      <li>Facultad: {{fil.gmv.metadata.titulo_facultad|default:"N/A"}}</li>
+      <li>Plan: {{fil.gmv.metadata.titulo_plan|default:"N/A"}}</li>
+      {% endif %}
+    </ul>
+    
+    {% if instrucciones_firma %}
+    <p><strong>Instrucciones para la firma:</strong></p>
+    <p>{{instrucciones_firma}}</p>
+    {% else %}
+    <p><strong>Instrucciones para la firma:</strong></p>
+    <ol>
+      <li>Acceda al título en el sistema</li>
+      <li>Revise la información del título</li>
+      <li>Proceda con la firma digital</li>
+      <li>Confirme la firma</li>
+    </ol>
+    {% endif %}
+    
+    {% if url_titulo %}
+    <p><a href="{{url_titulo}}">Acceder al título para firma</a></p>
+    {% endif %}
+    
+    <p>Por favor, proceda con la firma digital del título a la brevedad.</p>
+    
+    <p>Saludos cordiales,<br>
+    Sistema de Gestión de Títulos - UCASAL</p>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
