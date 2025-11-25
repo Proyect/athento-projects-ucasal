@@ -40,13 +40,21 @@ class ActasEndpointsTest(TestCase):
         )
         
         # Crear File correspondiente (los endpoints usan File, no Acta)
+        # Crear un archivo temporal para el File
+        test_file = SimpleUploadedFile(
+            "test_acta.pdf",
+            b"fake pdf content",
+            content_type="application/pdf"
+        )
+        
         # Asignar valores directamente a los campos para evitar problemas con setters durante creación
         self.file = File(
             uuid=acta_uuid,
             titulo='Acta de Prueba',
             doctype_obj=self.doctype,
             life_cycle_state_obj=self.lifecycle_state,
-            estado='pendiente_otp'
+            estado='pendiente_otp',
+            file=test_file
         )
         # Asignar valores legacy directamente (db_column='doctype' y 'life_cycle_state')
         # Estos campos se mapean a las columnas correctas en la BD después de la migración 0002
@@ -150,10 +158,15 @@ class ActasEndpointsTest(TestCase):
         
         self.assertEqual(response.status_code, 404)
     
-    def test_registerotp_endpoint_invalid_otp(self):
+    @patch('external_services.ucasal.ucasal_services.UcasalServices.validate_otp')
+    def test_registerotp_endpoint_invalid_otp(self, mock_validate_otp):
         """Test: Endpoint registerotp con OTP inválido"""
+        from model.exceptions.invalid_otp_error import InvalidOtpError
+        # Mockear para que lance InvalidOtpError
+        mock_validate_otp.side_effect = InvalidOtpError('OTP inválido')
+        
         data = {
-            'otp': 'invalid_otp',
+            'otp': '123456',
             'ip': '192.168.1.1',
             'latitude': -34.6037,
             'longitude': -58.3816,
@@ -166,18 +179,26 @@ class ActasEndpointsTest(TestCase):
                                   content_type='application/json')
         
         self.assertEqual(response.status_code, 400)
+        mock_validate_otp.assert_called_once()
     
-    def test_registerotp_endpoint_missing_fields(self):
+    @patch('external_services.ucasal.ucasal_services.UcasalServices.validate_otp')
+    @patch('external_services.ucasal.ucasal_services.UcasalServices.get_auth_token')
+    def test_registerotp_endpoint_missing_fields(self, mock_get_token, mock_validate_otp):
         """Test: Endpoint registerotp con campos faltantes"""
+        # Mockear servicios para que pasen la validación de OTP
+        mock_validate_otp.return_value = None  # No lanza excepción
+        mock_get_token.return_value = 'mock_token'
+        
         data = {
             'otp': '123456'
-            # Faltan otros campos requeridos
+            # Faltan otros campos requeridos: ip, latitude, longitude, accuracy, user_agent
         }
         
         response = self.client.post(f'/actas/{self.file.uuid}/registerotp/', 
                                   data=json.dumps(data),
                                   content_type='application/json')
         
+        # El endpoint debería validar los campos faltantes y retornar 400
         self.assertEqual(response.status_code, 400)
     
     def test_sendotp_endpoint_success(self):

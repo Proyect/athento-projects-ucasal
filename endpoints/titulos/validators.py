@@ -66,9 +66,15 @@ def validate_facultad_codigo(value):
 
 
 def validate_titulo_estado_transicion(estado_actual, estado_nuevo):
-    """Valida transiciones de estado válidas para títulos"""
+    """
+    Valida transiciones de estado válidas para títulos.
+    
+    NOTA: Las transiciones a blockchain están suspendidas temporalmente.
+    El flujo ahora es: Firmado por SG → Título Emitido (sin blockchain)
+    """
     from ucasal.utils import TituloStates
     
+    # Transiciones válidas SIN blockchain (suspendido temporalmente)
     transiciones_validas = {
         TituloStates.recibido: [
             TituloStates.pendiente_aprobacion_ua,
@@ -85,18 +91,19 @@ def validate_titulo_estado_transicion(estado_actual, estado_nuevo):
         ],
         TituloStates.aprobado_r: [
             TituloStates.pendiente_firma_sg,
-            TituloStates.pendiente_blockchain
+            # TituloStates.pendiente_blockchain  # SUSPENDIDO: blockchain deshabilitado
         ],
         TituloStates.pendiente_firma_sg: [TituloStates.firmado_sg],
         TituloStates.firmado_sg: [
-            TituloStates.pendiente_blockchain,
-            TituloStates.titulo_emitido
+            # TituloStates.pendiente_blockchain,  # SUSPENDIDO: blockchain deshabilitado
+            TituloStates.titulo_emitido  # Flujo directo: Firmado por SG → Título Emitido
         ],
-        TituloStates.pendiente_blockchain: [
-            TituloStates.registrado_blockchain,
-            TituloStates.fallo_blockchain
-        ],
-        TituloStates.registrado_blockchain: [TituloStates.titulo_emitido],
+        # Estados de blockchain suspendidos - no se pueden usar en transiciones
+        # TituloStates.pendiente_blockchain: [
+        #     TituloStates.registrado_blockchain,
+        #     TituloStates.fallo_blockchain
+        # ],
+        # TituloStates.registrado_blockchain: [TituloStates.titulo_emitido],
     }
     
     if estado_actual not in transiciones_validas:

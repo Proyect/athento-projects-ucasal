@@ -6,16 +6,40 @@ from ucasal.mocks.sp_logger import SpLogger
 from base64 import b64encode
 from ucasal.utils import UcasalConfig
 from model.exceptions.invalid_otp_error import InvalidOtpError
+from django.core.cache import cache
+import hashlib
+
 class UcasalServices:
     logger = SpLogger("athentose", "UcasalServices")
 
     #TODO: setear "VERIFY_CERTIFICATE = True" cuando quede productivo 
     VERIFY_CERTIFICATE = False
     
+    # Tiempo de cache para tokens (50 minutos, tokens duran 1 hora)
+    TOKEN_CACHE_TIMEOUT = 3000  # 50 minutos en segundos
+    
     @classmethod
     def get_auth_token(cls, user:str, password:str)->str:
+        """
+        Obtiene token de autenticación de UCASAL.
+        Usa cache para evitar llamadas repetidas.
+        """
         logger = cls.logger
         logger.entry()
+        
+        # Generar clave de cache basada en usuario
+        cache_key = f'ucasal_auth_token_{hashlib.md5(user.encode()).hexdigest()}'
+        
+        # Intentar obtener del cache
+        try:
+            cached_token = cache.get(cache_key)
+            if cached_token:
+                logger.debug(f"Token obtenido del cache para usuario {user}")
+                return logger.exit(cached_token)
+        except Exception as e:
+            logger.debug(f"Error accediendo al cache: {e}")
+        
+        # Si no está en cache, obtener del servicio
         endpoint = UcasalConfig.token_svc_url()
         data = f'usuario={user}&clave={password}'
         
@@ -25,16 +49,41 @@ class UcasalServices:
         response = requests.post(url=endpoint, data=data, headers=headers)
 
         if response.status_code == requests.codes.ok:
-            return logger.exit(response.text.strip())
+            token = response.text.strip()
+            
+            # Guardar en cache
+            try:
+                cache.set(cache_key, token, cls.TOKEN_CACHE_TIMEOUT)
+                logger.debug(f"Token guardado en cache para usuario {user}")
+            except Exception as e:
+                logger.debug(f"Error guardando token en cache: {e}")
+            
+            return logger.exit(token)
         else:
             raise logger.exit(AthentoseError('Error inesperado obteniento token de autenticación: ' + response.reason), exc_info=True)  
             
     @classmethod
-    def get_qr_image(cls, url:str)->io.BytesIO:
+    def get_qr_image(cls, url:str)->bytes:
+        """
+        Genera imagen QR para una URL.
+        Usa cache para URLs ya generadas.
+        """
         logger = cls.logger
         logger.entry()
         
-        # En modo mock, devolver una imagen QR simple
+        # Generar clave de cache basada en la URL
+        cache_key = f'ucasal_qr_image_{hashlib.md5(url.encode()).hexdigest()}'
+        
+        # Intentar obtener del cache
+        try:
+            cached_qr = cache.get(cache_key)
+            if cached_qr:
+                logger.debug(f"QR obtenido del cache para {url[:50]}...")
+                return logger.exit(cached_qr)
+        except Exception as e:
+            logger.debug(f"Error accediendo al cache: {e}")
+        
+        # Si no está en cache, generar QR
         try:
             import qrcode
             qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -45,8 +94,16 @@ class UcasalServices:
             img_bytes = io.BytesIO()
             img.save(img_bytes, format='PNG')
             img_bytes.seek(0)
+            qr_bytes = img_bytes.getvalue()
             
-            return logger.exit(img_bytes.getvalue())
+            # Guardar en cache (24 horas)
+            try:
+                cache.set(cache_key, qr_bytes, 86400)
+                logger.debug(f"QR guardado en cache")
+            except Exception as e:
+                logger.debug(f"Error guardando QR en cache: {e}")
+            
+            return logger.exit(qr_bytes)
         except ImportError:
             # Si no está instalado qrcode, devolver una imagen simple
             logger.debug("qrcode no instalado, devolviendo imagen mock")
@@ -54,9 +111,26 @@ class UcasalServices:
     
     @classmethod
     def get_short_url(cls, auth_token:str, url:str)->str:
-        #TODO: consultar servicio de UCASAL
+        """
+        Acorta una URL usando el servicio UCASAL.
+        Usa cache para URLs ya acortadas.
+        """
         logger = cls.logger
         logger.entry()
+        
+        # Generar clave de cache basada en la URL original
+        cache_key = f'ucasal_short_url_{hashlib.md5(url.encode()).hexdigest()}'
+        
+        # Intentar obtener del cache
+        try:
+            cached_short_url = cache.get(cache_key)
+            if cached_short_url:
+                logger.debug(f"URL corta obtenida del cache para {url[:50]}...")
+                return logger.exit(cached_short_url)
+        except Exception as e:
+            logger.debug(f"Error accediendo al cache: {e}")
+        
+        # Si no está en cache, obtener del servicio
         endpoint = UcasalConfig.shorten_url_svc_url()
         headers = {'Authorization': f'Bearer {auth_token}'}
         json = {
@@ -75,7 +149,16 @@ class UcasalServices:
         logger.debug(f'response.json(): {response.json()}')
 
         if response.status_code in [200, 201]:
-            return logger.exit(response.json()['url_corta'])
+            short_url = response.json()['url_corta']
+            
+            # Guardar en cache (24 horas)
+            try:
+                cache.set(cache_key, short_url, 86400)
+                logger.debug(f"URL corta guardada en cache")
+            except Exception as e:
+                logger.debug(f"Error guardando URL corta en cache: {e}")
+            
+            return logger.exit(short_url)
         else:
             raise logger.exit(AthentoseError('Error inesperado obteniendo url corta: ' + response.reason), exc_info=True)   
 

@@ -20,6 +20,7 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    'django_prometheus',  # Debe ir antes de otras apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,14 +28,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'ucasal',
     'core',
     'endpoints.actas',
     'endpoints.titulos',
+    'endpoints.auth.apps.AuthConfig',
     'model',
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',  # Al inicio
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.RequestLoggingMiddleware',
     'core.middleware.SecurityHeadersMiddleware',
@@ -45,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.ErrorHandlingMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',  # Al final
 ]
 
 ROOT_URLCONF = 'ucasal.urls'
@@ -115,11 +120,30 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PERMISSION_CLASSES': [],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # Por defecto no requiere autenticación - se configura en cada vista
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+}
+
+# JWT Settings
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 # Logging
@@ -159,13 +183,26 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# Cache configuration
+# Cache configuration with Redis
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            'IGNORE_EXCEPTIONS': True,  # No fallar si Redis está caído
+        },
+        'KEY_PREFIX': 'ucasal',
+        'TIMEOUT': 300,  # 5 minutos por defecto
     }
 }
+
+# Session cache (usar Redis para sesiones también)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -175,3 +212,9 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ucasal.edu.ar')
+
+# Prometheus settings
+PROMETHEUS_EXPORT_MIGRATIONS = False
+
+# Health check endpoint (para monitoreo)
+HEALTH_CHECK_ENABLED = True

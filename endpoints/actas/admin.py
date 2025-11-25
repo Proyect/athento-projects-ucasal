@@ -20,7 +20,9 @@ class ActaAdmin(admin.ModelAdmin):
         'firmada_con_otp',
         'codigo_sector',
         'fecha_creacion',
-        'fecha_firma'
+        'fecha_firma',
+        'numero_revision',
+        ('docente_asignado', admin.EmptyFieldListFilter)
     ]
     
     search_fields = [
@@ -35,8 +37,20 @@ class ActaAdmin(admin.ModelAdmin):
         'uuid',
         'fecha_creacion',
         'fecha_modificacion',
-        'hash_documento'
+        'hash_documento',
+        'link_file_display'
     ]
+    
+    def link_file_display(self, obj):
+        """Mostrar enlace al File relacionado si existe"""
+        from model.File import File
+        try:
+            file_obj = File.objects.get(uuid=obj.uuid)
+            url = reverse('admin:model_file_change', args=[file_obj.uuid])
+            return format_html('<a href="{}">Ver archivo relacionado (UUID: {})</a>', url, str(file_obj.uuid)[:8])
+        except File.DoesNotExist:
+            return format_html('<span style="color: #999;">No hay archivo relacionado</span>')
+    link_file_display.short_description = 'Archivo relacionado'
     
     fieldsets = (
         ('Información Principal', {
@@ -95,7 +109,18 @@ class ActaAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
     
-    actions = ['marcar_como_firmada', 'marcar_como_rechazada', 'reactivar_acta']
+    date_hierarchy = 'fecha_creacion'
+    
+    actions = [
+        'marcar_como_firmada', 
+        'marcar_como_rechazada', 
+        'reactivar_acta',
+        'cambiar_estado_recibida',
+        'cambiar_estado_pendiente_otp',
+        'desactivar_actas',
+        'activar_actas',
+        'exportar_actas'
+    ]
     
     def marcar_como_firmada(self, request, queryset):
         updated = queryset.filter(estado__in=['pendiente_otp', 'pendiente_blockchain']).update(
@@ -103,7 +128,7 @@ class ActaAdmin(admin.ModelAdmin):
             firmada_con_otp=True
         )
         self.message_user(request, f'{updated} actas marcadas como firmadas.')
-    marcar_como_firmada.short_description = "Marcar como firmadas"
+    marcar_como_firmada.short_description = "✅ Marcar como firmadas"
     
     def marcar_como_rechazada(self, request, queryset):
         updated = queryset.filter(estado='pendiente_otp').update(
@@ -111,7 +136,7 @@ class ActaAdmin(admin.ModelAdmin):
             motivo_rechazo='Rechazada desde el admin'
         )
         self.message_user(request, f'{updated} actas marcadas como rechazadas.')
-    marcar_como_rechazada.short_description = "Marcar como rechazadas"
+    marcar_como_rechazada.short_description = "❌ Marcar como rechazadas"
     
     def reactivar_acta(self, request, queryset):
         updated = queryset.filter(estado='rechazada').update(
@@ -119,5 +144,49 @@ class ActaAdmin(admin.ModelAdmin):
             motivo_rechazo=''
         )
         self.message_user(request, f'{updated} actas reactivadas.')
-    reactivar_acta.short_description = "Reactivar actas rechazadas"
+    reactivar_acta.short_description = "🔄 Reactivar actas rechazadas"
+    
+    def cambiar_estado_recibida(self, request, queryset):
+        updated = queryset.update(estado='recibida')
+        self.message_user(request, f'{updated} actas cambiadas a estado "Recibida".')
+    cambiar_estado_recibida.short_description = "📥 Cambiar a Recibida"
+    
+    def cambiar_estado_pendiente_otp(self, request, queryset):
+        updated = queryset.update(estado='pendiente_otp')
+        self.message_user(request, f'{updated} actas cambiadas a estado "Pendiente OTP".')
+    cambiar_estado_pendiente_otp.short_description = "⏳ Cambiar a Pendiente OTP"
+    
+    def desactivar_actas(self, request, queryset):
+        updated = queryset.filter(activa=True).update(activa=False)
+        self.message_user(request, f'{updated} actas desactivadas.')
+    desactivar_actas.short_description = "🚫 Desactivar actas"
+    
+    def activar_actas(self, request, queryset):
+        updated = queryset.filter(activa=False).update(activa=True)
+        self.message_user(request, f'{updated} actas activadas.')
+    activar_actas.short_description = "✅ Activar actas"
+    
+    def exportar_actas(self, request, queryset):
+        """Exportar información básica de actas seleccionadas"""
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="actas_export.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['UUID', 'Título', 'Docente', 'Estado', 'Código Sector', 'Fecha Creación'])
+        
+        for acta in queryset:
+            writer.writerow([
+                str(acta.uuid),
+                acta.titulo,
+                acta.docente_asignado,
+                acta.get_estado_display(),
+                acta.codigo_sector,
+                acta.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        return response
+    exportar_actas.short_description = "📥 Exportar a CSV"
 

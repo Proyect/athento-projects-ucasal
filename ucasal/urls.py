@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.http import JsonResponse
 from endpoints.actas.actas import routes as actas_routes
 from endpoints.titulos.titulos import routes as titulos_routes
+from core.health import health_check
 
 app_name = 'ucasal'
 
@@ -79,9 +80,12 @@ def docs_view(request):
 urlpatterns = [
     path('', home_view, name='home'),
     path('docs/', docs_view, name='docs'),
+    path('health/', health_check, name='health'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('endpoints.auth.urls')),
     path('actas/', include('endpoints.actas.urls')),
+    # Prometheus metrics endpoint
+    path('', include('django_prometheus.urls')),
     # Incluir las rutas definidas en actas.py y titulos.py
 ] + actas_routes + titulos_routes
 

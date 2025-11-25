@@ -31,6 +31,14 @@ except ImportError:
 from external_services.ucasal.ucasal_services import UcasalServices
 from ucasal.utils import uuid_previo_metadata_name
 from model.exceptions.invalid_otp_error import InvalidOtpError
+from core.metrics import (
+    actas_otp_enviados, actas_otp_validos, actas_otp_invalidos,
+    actas_firmadas_total, actas_blockchain_registradas, actas_blockchain_fallos,
+    actas_tiempo_firma, endpoint_actas_registerotp_total, endpoint_actas_sendotp_total,
+    endpoint_duration, ucasal_service_requests, ucasal_service_duration,
+    ucasal_service_errors, errors_total
+)
+from core.decorators import rate_limit_decorator
 
 from datetime import datetime
 import pytz
@@ -39,6 +47,7 @@ from django.conf import settings
 import hashlib
 from posixpath import join as urljoin
 import os
+import time
 
 """"
 
@@ -66,12 +75,16 @@ Devuelve el siguiente diccionario:
 
 @default_permissions
 @traceback_ret
+@rate_limit_decorator(key='ip', rate='10/m', method='POST')  # 10 requests por minuto por IP
 ## Envía OTP al docente por correo electrónico
 ## Este endpoint no se usa más, ya que el docente obtiene el OTP desde su app de autenticación
 def sendotp(request, uuid):
+    start_time = time.time()
     logger = SpLogger("athentose", "actas.sendotp")
     logger.entry()
     if request.method != 'POST':
+        endpoint_duration.labels(endpoint='sendotp', method='POST').observe(time.time() - start_time)
+        endpoint_actas_sendotp_total.labels(status='method_not_allowed').inc()
         return  logger.exit(METHOD_NOT_ALLOWED)      
 
     #TODO: validar que uuid sea de un doctype acta
@@ -79,20 +92,31 @@ def sendotp(request, uuid):
     notification_template_name = 'ucasal_custom_otp_notification'
     send_to = 'metadata.acta_docente_asignado'
 
-    info = SpFormTotpNotifier.send_otp_notification(
-        uuid=uuid, 
-        send_to=send_to,
-        notification_template_name=notification_template_name,
-        otp_validity_seconds = UcasalConfig.otp_validity_seconds()
-    )
-    
-    return logger.exit(HttpResponse(encodeJSON({
-      'sent_to': info['send_to'],    
-      #'otp': info['otp'],
-      'expiration': info['expiration'] 
-      }), 
-      content_type="application/json"
-    ))
+    try:
+        info = SpFormTotpNotifier.send_otp_notification(
+            uuid=uuid, 
+            send_to=send_to,
+            notification_template_name=notification_template_name,
+            otp_validity_seconds = UcasalConfig.otp_validity_seconds()
+        )
+        
+        # Métricas
+        actas_otp_enviados.inc()
+        endpoint_actas_sendotp_total.labels(status='success').inc()
+        endpoint_duration.labels(endpoint='sendotp', method='POST').observe(time.time() - start_time)
+        
+        return logger.exit(HttpResponse(encodeJSON({
+          'sent_to': info['send_to'],    
+          #'otp': info['otp'],
+          'expiration': info['expiration'] 
+          }), 
+          content_type="application/json"
+        ))
+    except Exception as e:
+        endpoint_actas_sendotp_total.labels(status='error').inc()
+        endpoint_duration.labels(endpoint='sendotp', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type=type(e).__name__, endpoint='sendotp').inc()
+        raise
 
 # ucasal_qr_673c253a-d851-4c10-9f85-69ca3e3bd39a.png
 @default_permissions
@@ -146,12 +170,14 @@ def getconfig(request):
 @default_permissions
 @traceback_ret
 def bfaresponse(request, uuid):
+    start_time = time.time()
     try:    
         fil:File = None
         logger = SpLogger("ucasal", "actas.bfaresponse")
         logger.entry()
 
         if request.method != 'POST':
+            endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
             return  logger.exit(METHOD_NOT_ALLOWED)
         
         body = getJsonBody(request)
@@ -161,6 +187,8 @@ def bfaresponse(request, uuid):
         # Validar 'status' del body
         result = body.get('status')
         if result not in ['success', 'failure']:
+            endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
+            errors_total.labels(error_type='ValidationError', endpoint='bfaresponse').inc()
             raise AthentoseError(f"'status' debe ser 'success' o 'failure' en lugar de {result}")
     
         
@@ -192,31 +220,51 @@ def bfaresponse(request, uuid):
         # Cambiar ciclo de vida 
         if result == 'success':
             # Notificar a UCASAL el registro exitoso en blockchain
-            auth_token = UcasalServices.get_auth_token(user=UcasalConfig.token_svc_user(), password = UcasalConfig.token_svc_password())
-            UcasalServices.notify_blockchain_success(auth_token=auth_token, uuid=fil.uuid)
+            service_start = time.time()
+            try:
+                auth_token = UcasalServices.get_auth_token(user=UcasalConfig.token_svc_user(), password = UcasalConfig.token_svc_password())
+                UcasalServices.notify_blockchain_success(auth_token=auth_token, uuid=fil.uuid)
+                ucasal_service_requests.labels(service='notify_blockchain_success', status='success').inc()
+            except Exception as e:
+                ucasal_service_requests.labels(service='notify_blockchain_success', status='error').inc()
+                ucasal_service_errors.labels(service='notify_blockchain_success', error_type=type(e).__name__).inc()
+            finally:
+                ucasal_service_duration.labels(service='notify_blockchain_success').observe(time.time() - service_start)
+            
+            # Métricas de éxito
+            actas_blockchain_registradas.inc()
             
             #TODO: ¿validar que el sello corresponda al hash?
             #TODO: ¿validar que el sello no haya sido previamente registrado el sello?
             #fil.set_metadata('metadata.acta_resultado_bfa', 'exitoso', overwrite=True)
             fil.change_life_cycle_state(ActaStates.firmada) #, force_transition=True)
         else:
+            # Métricas de fallo
+            actas_blockchain_fallos.inc()
+            
             #TODO: ¿qué hacemos en caso de falla?
             #fil.set_metadata('metadata.acta_resultado_bfa', 'fallido', overwrite=True)
             fil.change_life_cycle_state(ActaStates.fallo_blockchain) #, force_transition=True)
 
         fil.set_feature('registro.en.blockchain', result)
+        
+        endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
 
         return logger.exit(HttpResponse(
             'Resultado BFA guardado exitosamente'
         ))
     except FileNotFoundError as e:
         _save_bfaresponse_error_to_feature(fil)
+        endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type='FileNotFoundError', endpoint='bfaresponse').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='404'
         ), exc_info=True)
     except AthentoseError as e:
         _save_bfaresponse_error_to_feature(fil)
+        endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type='AthentoseError', endpoint='bfaresponse').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='400'
@@ -224,6 +272,8 @@ def bfaresponse(request, uuid):
     
     except Exception as e:
         _save_bfaresponse_error_to_feature(fil)
+        endpoint_duration.labels(endpoint='bfaresponse', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type=type(e).__name__, endpoint='bfaresponse').inc()
         raise logger.exit(HttpResponse(
             str(e), 
             status='500'
@@ -231,14 +281,18 @@ def bfaresponse(request, uuid):
 
 @default_permissions
 @traceback_ret
+@rate_limit_decorator(key='ip', rate='5/m', method='POST')  # 5 requests por minuto por IP (más restrictivo)
 ## Valida el OTP ingresado por el docente, firma el PDF y envía el hash a BFA 
 #  (por medio del endpoint de UACASAL)
 def registerotp(request, uuid):    
+    start_time = time.time()
     try:
         logger = SpLogger("athentose", "actas.registerotp")
         logger.entry()
 
         if request.method != 'POST':
+            endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+            endpoint_actas_registerotp_total.labels(status='method_not_allowed').inc()
             return  logger.exit(METHOD_NOT_ALLOWED)          
         
         body = getJsonBody(request)
@@ -276,10 +330,31 @@ def registerotp(request, uuid):
         if(not _is_non_empty_string(mail_docente)):
             raise AthentoseError(f"El mail del docente debe ser un string no vacío en lugar de '{mail_docente}'")
         
-        UcasalServices.validate_otp(user=mail_docente, otp=otp)
+        # Validar OTP con métricas
+        service_start = time.time()
+        try:
+            UcasalServices.validate_otp(user=mail_docente, otp=otp)
+            actas_otp_validos.inc()
+            ucasal_service_requests.labels(service='validate_otp', status='success').inc()
+        except InvalidOtpError:
+            actas_otp_invalidos.inc()
+            ucasal_service_requests.labels(service='validate_otp', status='error').inc()
+            ucasal_service_errors.labels(service='validate_otp', error_type='InvalidOtpError').inc()
+            raise
+        finally:
+            ucasal_service_duration.labels(service='validate_otp').observe(time.time() - service_start)
 
         # Obtener token de autenticación de UCASAL
-        auth_token = UcasalServices.get_auth_token(user=UcasalConfig.token_svc_user(), password = UcasalConfig.token_svc_password())
+        service_start = time.time()
+        try:
+            auth_token = UcasalServices.get_auth_token(user=UcasalConfig.token_svc_user(), password = UcasalConfig.token_svc_password())
+            ucasal_service_requests.labels(service='get_auth_token', status='success').inc()
+        except Exception as e:
+            ucasal_service_requests.labels(service='get_auth_token', status='error').inc()
+            ucasal_service_errors.labels(service='get_auth_token', error_type=type(e).__name__).inc()
+            raise
+        finally:
+            ucasal_service_duration.labels(service='get_auth_token').observe(time.time() - service_start)
 
         # Verificar si el documento ya fue firmado con OTP
         firmada_con_opt = fil.gfv('firmada.con.OTP')
@@ -366,12 +441,39 @@ def registerotp(request, uuid):
         # Calcular el hash del PDF
         pdf_hash = _get_pdf_hash(fil)
         callback_url = urljoin(request.build_absolute_uri('/'), 'ucasal/api/actas/', str(fil.uuid), 'bfaresponse')
-        ok_response_text = UcasalServices.register_in_blockchain(auth_token=auth_token, hash=pdf_hash, file_uuid=str(fil.uuid), callback_url=callback_url)
+        
+        # Registrar en blockchain con métricas
+        service_start = time.time()
+        try:
+            ok_response_text = UcasalServices.register_in_blockchain(auth_token=auth_token, hash=pdf_hash, file_uuid=str(fil.uuid), callback_url=callback_url)
+            ucasal_service_requests.labels(service='register_in_blockchain', status='success').inc()
+        except Exception as e:
+            ucasal_service_requests.labels(service='register_in_blockchain', status='error').inc()
+            ucasal_service_errors.labels(service='register_in_blockchain', error_type=type(e).__name__).inc()
+            raise
+        finally:
+            ucasal_service_duration.labels(service='register_in_blockchain').observe(time.time() - service_start)
+        
         fil.set_feature('ucasal.svc.ok_response', ok_response_text)
         # Cambiar estado a Pendiente Blockchain
         #TODO: forzar transición?
         fil.change_life_cycle_state(ActaStates.pendiente_blockchain) #, force_transition=True)
         fil.set_feature('registro.en.blockchain', 'pending')
+        
+        # Métricas de éxito
+        endpoint_actas_registerotp_total.labels(status='success').inc()
+        endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+        
+        # Calcular tiempo de firma si es posible
+        try:
+            from endpoints.actas.models import Acta
+            acta = Acta.objects.get(uuid=uuid)
+            if acta.fecha_creacion and acta.fecha_firma:
+                tiempo_firma = (acta.fecha_firma - acta.fecha_creacion).total_seconds()
+                actas_tiempo_firma.observe(tiempo_firma)
+            actas_firmadas_total.labels(docente=mail_docente).inc()
+        except:
+            pass  # Si no existe el modelo Acta, no importa
 
         return logger.exit(HttpResponse(
             encodeJSON({
@@ -381,21 +483,33 @@ def registerotp(request, uuid):
             content_type="application/json"
         ))            
     except FileNotFoundError as e:
+        endpoint_actas_registerotp_total.labels(status='not_found').inc()
+        endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type='FileNotFoundError', endpoint='registerotp').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='404'
         ), exc_info=True)        
     except AthentoseError as e:
+        endpoint_actas_registerotp_total.labels(status='error').inc()
+        endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type='AthentoseError', endpoint='registerotp').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='400'
         ), exc_info=True)
     except InvalidOtpError as e:
+        endpoint_actas_registerotp_total.labels(status='invalid_otp').inc()
+        endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type='InvalidOtpError', endpoint='registerotp').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='400'
         ), exc_info=True)
     except Exception as e:
+        endpoint_actas_registerotp_total.labels(status='error').inc()
+        endpoint_duration.labels(endpoint='registerotp', method='POST').observe(time.time() - start_time)
+        errors_total.labels(error_type=type(e).__name__, endpoint='registerotp').inc()
         return logger.exit(HttpResponse(
             str(e), 
             status='500'
@@ -492,8 +606,9 @@ def _get_pdf_hash(fil):
     return hashlib.sha256(byte_content).hexdigest()
 
 def _get_acta(uuid:str):
+    """Helper para obtener acta por UUID con optimización."""
     try:
-        return File.objects.get(uuid=uuid) 
+        return File.objects.select_related('doctype_obj', 'life_cycle_state_obj', 'serie').get(uuid=uuid) 
     except File.DoesNotExist:
         return None
     

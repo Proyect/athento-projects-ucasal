@@ -79,6 +79,13 @@ class Acta(models.Model):
         verbose_name = "Acta"
         verbose_name_plural = "Actas"
         ordering = ['-fecha_creacion']
+        indexes = [
+            models.Index(fields=['estado', 'activa'], name='acta_estado_activa_idx'),
+            models.Index(fields=['docente_asignado'], name='acta_docente_idx'),
+            models.Index(fields=['fecha_creacion'], name='acta_fecha_creacion_idx'),
+            models.Index(fields=['fecha_firma'], name='acta_fecha_firma_idx'),
+            models.Index(fields=['uuid_acta_previa'], name='acta_uuid_previa_idx'),
+        ]
     
     def __str__(self):
         return f"{self.titulo} - {self.docente_asignado} ({self.estado})"
