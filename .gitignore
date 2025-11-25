@@ -54,3 +54,4 @@ ucasal.code-workspace
 .env
 .env.local
 .env.remote
+*.env.*
