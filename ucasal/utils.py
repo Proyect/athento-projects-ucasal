@@ -4,9 +4,15 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from json import loads as decodeJSON, dumps as encodeJSON
 import traceback
 try:
-    from sp_athento_config import SpAthentoConfig as SAC
+    # Intentar importar implementación real desde ucasal
+    from ucasal.sp_athento_config import SpAthentoConfig as SAC
 except ImportError:
-    from ucasal.mocks.sp_athento_config import SpAthentoConfig as SAC
+    try:
+        # Intentar importar desde path raíz (para compatibilidad)
+        from sp_athento_config import SpAthentoConfig as SAC
+    except ImportError:
+        # Fallback a mock si no hay implementación real
+        from ucasal.mocks.sp_athento_config import SpAthentoConfig as SAC
 try:
     from sp_logger import SpLogger
 except ImportError:
@@ -77,8 +83,10 @@ class TituloStates:
     aprobado_r = 'Aprobado por R'
     pendiente_firma_sg = 'Pendiente Firma SG'
     firmado_sg = 'Firmado por SG'
-    pendiente_blockchain = 'Pendiente Blockchain'
-    registrado_blockchain = 'Registrado en Blockchain'
+    # Estados de blockchain SUSPENDIDOS temporalmente - se implementará firma digital
+    # TODO: Revisar cuando se implemente la firma digital
+    pendiente_blockchain = 'Pendiente Blockchain'  # DEPRECATED: suspendido temporalmente
+    registrado_blockchain = 'Registrado en Blockchain'  # DEPRECATED: suspendido temporalmente
     titulo_emitido = 'Título Emitido'
     rechazado = 'Rechazado'
 

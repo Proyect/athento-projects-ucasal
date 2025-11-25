@@ -18,6 +18,7 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').sp
 
 # Application definition
 INSTALLED_APPS = [
+    'django_prometheus',  # Debe ir antes de otras apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',  # Al inicio
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'core.middleware.RequestLoggingMiddleware',
@@ -45,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.ErrorHandlingMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',  # Al final
 ]
 
 ROOT_URLCONF = 'ucasal.urls'
@@ -74,6 +77,32 @@ DATABASES = {
         'NAME': os.environ.get('DATABASE_NAME', str(BASE_DIR / 'ucasal' / 'db.sqlite3')),
     }
 }
+
+# Cache configuration (opcional, solo si Redis está disponible)
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+                'IGNORE_EXCEPTIONS': True,  # No fallar si Redis está caído
+            },
+            'KEY_PREFIX': 'ucasal',
+            'TIMEOUT': 300,  # 5 minutos por defecto
+        }
+    }
+else:
+    # Fallback a cache en memoria si Redis no está disponible
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -170,3 +199,6 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Prometheus settings
+PROMETHEUS_EXPORT_MIGRATIONS = False
