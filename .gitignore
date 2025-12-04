@@ -56,3 +56,17 @@ ucasal.code-workspace
 .env.remote
 *.env.*
 *.env
+*.ps1
+*.xlsx
+*.xls
+*.pdf
+*.doc
+*.docx
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.webp
+*.sql
+
