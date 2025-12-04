@@ -48,7 +48,9 @@ DATABASES = {
 
 MEDIA_ROOT = str(BASE_DIR / 'media')
 MEDIA_TMP = str(BASE_DIR / 'tmp')
+MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
+STATIC_ROOT = str(BASE_DIR / 'staticfiles')
 
 TEMPLATES = [
     {

@@ -1,0 +1,15 @@
+{% extends "ui/base.html" %}
+{% block content %}
+<h3 class="mb-3">Detalle del título</h3>
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+{% if data %}
+  <pre class="bg-light p-2 border rounded">{{ data|safe }}</pre>
+  <div class="mt-3">
+    <a class="btn btn-outline-secondary" href="/athento/files/{{ uuid }}/download">Descargar</a>
+  </div>
+{% else %}
+  <div class="text-muted">Sin datos</div>
+{% endif %}
+{% endblock %}

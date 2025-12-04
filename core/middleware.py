@@ -123,14 +123,20 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         response['Cross-Origin-Opener-Policy'] = 'same-origin'
         
         # CSP básico
-        response['Content-Security-Policy'] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data:; "
-            "font-src 'self'; "
-            "connect-src 'self';"
-        )
+        csp = [
+            "default-src 'self'",
+            # Permitir Bootstrap (JS) desde jsdelivr
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            # Permitir CSS de Bootstrap y Bootstrap Icons desde jsdelivr
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            # Imágenes locales y data URIs
+            "img-src 'self' data:",
+            # Permitir fuentes desde self y jsdelivr
+            "font-src 'self' https://cdn.jsdelivr.net data:",
+            # Conexiones XHR/fetch
+            "connect-src 'self'",
+        ]
+        response['Content-Security-Policy'] = '; '.join(csp)
         
         return response
 

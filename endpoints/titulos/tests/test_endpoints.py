@@ -221,14 +221,12 @@ class TitulosEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 405)
     
     @patch('external_services.ucasal.ucasal_services.UcasalServices.get_auth_token')
-    @patch('endpoints.titulos.titulos.requests.patch')
-    def test_informar_estado_endpoint_success(self, mock_patch, mock_get_token):
+    @patch('external_services.ucasal.ucasal_services.UcasalServices.notify_titulo_estado')
+    def test_informar_estado_endpoint_success(self, mock_notify, mock_get_token):
         """Test: Endpoint informar_estado exitoso"""
         # Mockear servicios externos
         mock_get_token.return_value = 'mock_auth_token'
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_patch.return_value = mock_response
+        mock_notify.return_value = 'OK (mock)'
         
         data = {
             'estado': TituloStates.aprobado_ua,
@@ -244,7 +242,7 @@ class TitulosEndpointsTest(TestCase):
         self.assertTrue(response_data.get('success'))
         self.assertEqual(response_data.get('estado'), TituloStates.aprobado_ua)
         mock_get_token.assert_called_once()
-        mock_patch.assert_called_once()
+        mock_notify.assert_called_once()
     
     def test_informar_estado_endpoint_titulo_not_found(self):
         """Test: Endpoint informar_estado con título inexistente"""

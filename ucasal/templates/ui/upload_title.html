@@ -1,0 +1,58 @@
+{% extends "ui/base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-10">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-upload me-2"></i>
+        <strong>Subir título</strong>
+      </div>
+      <div class="card-body">
+        {% if error %}<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>{% endif %}
+        {% if ok %}
+          <div class="alert alert-success"><i class="bi bi-check2-circle me-1"></i>Título subido correctamente</div>
+          {% if result %}
+            <details class="mb-3">
+              <summary class="text-muted">Ver respuesta</summary>
+              <pre class="bg-light p-2 border rounded mt-2">{{ result|safe }}</pre>
+            </details>
+          {% endif %}
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="mt-2">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Archivo (PDF)</label>
+            <input class="form-control" type="file" name="file" accept="application/pdf" required />
+            <div class="form-text">Solo archivos .pdf</div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Filename</label>
+              <input class="form-control" type="text" name="filename" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Doctype</label>
+              <input class="form-control" type="text" name="doctype" placeholder="form_titulo" required />
+              <div class="form-text">Ej.: form_titulo</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Serie</label>
+              <input class="form-control" type="text" name="serie" placeholder="UUID de la serie" required />
+            </div>
+          </div>
+          <div class="mt-3">
+            <label class="form-label">Metadatas (JSON opcional)</label>
+            <textarea class="form-control" rows="4" name="metadatas" placeholder='{"metadata.form_titulo_firmar": "ok"}'></textarea>
+            <div class="form-text">Pega aquí pares clave/valor de metadatos admitidos por Athento.</div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-cloud-upload me-1"></i>Subir</button>
+            <a class="btn btn-outline-secondary" href="/ui/titulos/"><i class="bi bi-arrow-left"></i> Volver</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ except ImportError:
     from ucasal.mocks.sp_logger import SpLogger
 from ucasal.utils import UcasalConfig
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from model.File import File
 from core.exceptions import AthentoseError
 from external_services.ucasal.ucasal_services import UcasalServices
@@ -40,6 +41,7 @@ from core.metrics import (
 
 @default_permissions
 @traceback_ret
+@csrf_exempt
 def recibir_titulo(request):
     """
     Recibe el PDF del título desde Decanato y lo crea en Athento.
@@ -71,9 +73,7 @@ def recibir_titulo(request):
         file_obj = request.FILES.get('file')
         json_data_raw = request.POST.get('json_data')
 
-        # Validaciones básicas
-        if not filename:
-            raise AthentoseError('El campo "filename" es requerido')
+        # Validaciones básicas y construcción de filename si es necesario
         if not file_obj:
             raise AthentoseError('El campo "file" es requerido (PDF del título)')
         if not doctype_name:
@@ -81,17 +81,65 @@ def recibir_titulo(request):
         if file_obj.content_type != 'application/pdf':
             raise AthentoseError(f'El archivo debe ser PDF. Recibido: {file_obj.content_type}')
 
-        # Parsear filename: DNI/Lugar/SECTOR/CARRERA/MODO/PLAN
-        filename_parts = filename.split('/')
-        if len(filename_parts) != 6:
-            raise AthentoseError(
-                'filename debe tener formato: DNI/Lugar/SECTOR/CARRERA/MODO/PLAN. '
-                f'Recibido: {filename}'
-            )
+        def _digits_or_none(value):
+            import re
+            if not value:
+                return None
+            m = re.search(r"\((\d+)\)", str(value))
+            if m:
+                return m.group(1)
+            only_digits = ''.join(ch for ch in str(value) if ch.isdigit())
+            return only_digits or None
 
+        def _get_any(keys):
+            for k in keys:
+                v = request.POST.get(k)
+                if v:
+                    return v
+            return None
+
+        def _try_build_filename():
+            dni_v = _get_any(['dni', 'DNI', 'ndocu', 'NDOCU'])
+            lugar_v = _get_any(['lugar', 'Lugar'])
+            facultad_v = _get_any(['facultad', 'Facultad', 'sector', 'Sector'])
+            carrera_v = _get_any(['carrera', 'Carrera'])
+            modalidad_v = _get_any(['modalidad', 'Modalidad', 'modo', 'Modo'])
+            plan_v = _get_any(['plan', 'Plan'])
+            dni_v = ''.join(ch for ch in str(dni_v or '').strip() if ch.isdigit()) or None
+            lugar_v = _digits_or_none(lugar_v)
+            facultad_v = _digits_or_none(facultad_v)
+            carrera_v = _digits_or_none(carrera_v)
+            modalidad_v = _digits_or_none(modalidad_v)
+            plan_v = _digits_or_none(plan_v)
+            parts = [dni_v, lugar_v, facultad_v, carrera_v, modalidad_v, plan_v]
+            if all(parts):
+                return f"{dni_v}/{lugar_v}/{facultad_v}/{carrera_v}/{modalidad_v}/{plan_v}"
+            return None
+
+        def _is_valid_filename(name):
+            parts = (name or '').split('/')
+            if len(parts) != 6:
+                return False
+            try:
+                _ = [int(p) for p in parts[1:]]
+                if not parts[0] or not parts[0].isdigit():
+                    return False
+                return True
+            except Exception:
+                return False
+
+        if not filename or not _is_valid_filename(filename):
+            candidate = _try_build_filename()
+            if candidate and _is_valid_filename(candidate):
+                filename = candidate
+            else:
+                raise AthentoseError(
+                    'filename debe tener formato: DNI/Lugar/SECTOR/CARRERA/MODO/PLAN o proveer campos (dni, lugar, facultad/sector, carrera, modalidad, plan) para construirlo.'
+                )
+
+        filename_parts = filename.split('/')
         dni, lugar, sector, carrera, modo, plan = filename_parts
 
-        # Validar componentes numéricos
         try:
             lugar_int = int(lugar)
             sector_int = int(sector)
@@ -111,19 +159,27 @@ def recibir_titulo(request):
                 logger.debug(f'Error parseando json_data, usando valores por defecto: {e}')
 
         # Preparar metadatos para Athento (formato metadata.campo)
+        tipo_dni_in = request.POST.get('tipo_dni') or request.POST.get('Tipo DNI') or titulo_data.get('Tipo DNI') or 'DNI'
+        dni_in = request.POST.get('dni') or request.POST.get('DNI') or titulo_data.get('DNI', dni)
+        lugar_in = request.POST.get('lugar') or request.POST.get('Lugar') or titulo_data.get('Lugar', lugar)
+        facultad_in = request.POST.get('facultad') or request.POST.get('Facultad') or str(sector)
+        carrera_in = request.POST.get('carrera') or request.POST.get('Carrera') or str(carrera)
+        modalidad_in = request.POST.get('modalidad') or request.POST.get('Modalidad') or str(modo)
+        plan_in = request.POST.get('plan') or request.POST.get('Plan') or str(plan)
+        titulo_in = request.POST.get('titulo') or request.POST.get('Título') or titulo_data.get('Título', '')
         metadatas = {
-            'metadata.titulo_tipo_dni': titulo_data.get('Tipo DNI', 'DNI'),
-            'metadata.titulo_dni': titulo_data.get('DNI', dni),
-            'metadata.titulo_lugar': titulo_data.get('Lugar', lugar),
+            'metadata.titulo_tipo_dni': tipo_dni_in,
+            'metadata.titulo_dni': dni_in,
+            'metadata.titulo_lugar': lugar_in,
             'metadata.titulo_lugar_id': lugar,
-            'metadata.titulo_facultad': titulo_data.get('Facultad', sector),
+            'metadata.titulo_facultad': facultad_in,
             'metadata.titulo_facultad_id': sector,
-            'metadata.titulo_carrera': titulo_data.get('Carrera', carrera),
+            'metadata.titulo_carrera': carrera_in,
             'metadata.titulo_carrera_id': carrera,
-            'metadata.titulo_modalidad': titulo_data.get('Modalidad', modo),
+            'metadata.titulo_modalidad': modalidad_in,
             'metadata.titulo_modalidad_id': modo,
-            'metadata.titulo_plan': titulo_data.get('Plan', plan),
-            'metadata.titulo_titulo': titulo_data.get('Título', ''),
+            'metadata.titulo_plan': plan_in,
+            'metadata.titulo_titulo': titulo_in,
         }
 
         # Obtener configuración de Athento
@@ -161,12 +217,27 @@ def recibir_titulo(request):
         for key, value in metadatas.items():
             data[key] = str(value)
 
-        # Autenticación Basic Auth
-        credentials = base64.b64encode(
-            f'{ATHENTO_API_USER}:{ATHENTO_API_PASSWORD}'.encode()
-        ).decode('utf-8')
+        # Pasar a través cualquier otro campo form-data recibido (ej. 'form_titulo')
+        for key, value in request.POST.items():
+            if key not in {'filename', 'doctype', 'serie', 'json_data'} and key not in data:
+                data[key] = value
 
-        headers = {'Authorization': f'Basic {credentials}'}
+        # Autenticación Basic Auth (prioridad: header -> campos form -> configuración)
+        incoming_auth = request.META.get('HTTP_AUTHORIZATION', '')
+        form_user = request.POST.get('auth_user')
+        form_pass = request.POST.get('auth_password')
+        if incoming_auth.startswith('Basic '):
+            headers = {'Authorization': incoming_auth}
+        elif form_user and form_pass:
+            credentials = base64.b64encode(
+                f'{form_user}:{form_pass}'.encode()
+            ).decode('utf-8')
+            headers = {'Authorization': f'Basic {credentials}'}
+        else:
+            credentials = base64.b64encode(
+                f'{ATHENTO_API_USER}:{ATHENTO_API_PASSWORD}'.encode()
+            ).decode('utf-8')
+            headers = {'Authorization': f'Basic {credentials}'}
 
         # Llamar a API de Athento
         athento_url = f'{ATHENTO_BASE_URL}/api/v1/file/'
@@ -298,25 +369,22 @@ def informar_estado(request, uuid):
 
         estado_codigo = estado_map.get(estado_descripcion, 0)
 
-        # Obtener token y llamar a UCASAL
+        # Obtener token y llamar a UCASAL a través del servicio (mockeable)
         auth_token = UcasalServices.get_auth_token(
             user=UcasalConfig.token_svc_user(),
             password=UcasalConfig.token_svc_password()
         )
 
-        # Usar el mismo endpoint que actas (change_acta_svc_url funciona para títulos también)
-        ucasal_url = f'{UcasalConfig.change_acta_svc_url()}/{uuid}'
-        headers = {'Authorization': f'Bearer {auth_token}'}
-        data = {'estado': estado_codigo}
-
-        if observaciones:
-            data['observaciones'] = observaciones
-
         logger.debug(f'Informando estado a UCASAL: {estado_codigo} para título {uuid}')
 
-        response = requests.patch(ucasal_url, json=data, headers=headers, timeout=30)
+        notify_resp = UcasalServices.notify_titulo_estado(
+            auth_token=auth_token,
+            uuid=str(uuid),
+            estado=estado_codigo,
+            observaciones=observaciones or ''
+        )
 
-        if response.status_code == requests.codes.ok:
+        if True:  # notify_titulo_estado lanza excepción si falla
             # Obtener estado anterior antes de cambiar
             estado_anterior = fil.life_cycle_state.name if fil.life_cycle_state else fil.life_cycle_state_legacy
             
@@ -345,8 +413,7 @@ def informar_estado(request, uuid):
                 }),
                 content_type='application/json'
             ))
-        else:
-            raise AthentoseError(f'Error en UCASAL: {response.status_code} - {response.text}')
+        
 
     except FileNotFoundError as e:
         return logger.exit(HttpResponse(str(e), status=404), exc_info=True)
@@ -462,7 +529,7 @@ def bfaresponse(request, uuid):
 
     except Exception as e:
         logger = SpLogger("ucasal", "titulos.bfaresponse")
-        return logger.exit(HttpResponse(str(e), status='500'), exc_info=True)
+        return logger.exit(HttpResponse(str(e), status=500), exc_info=True)
 
 
 def _notificar_cambio_estado_titulo(fil, estado_anterior, estado_nuevo, observaciones='', logger=None):
@@ -817,11 +884,217 @@ DNI: {dni}"""
         return logger.exit(HttpResponse(str(e), status=400), exc_info=True)
     except Exception as e:
         endpoint_duration.labels(endpoint='firmar_titulo', method='POST').observe(time.time() - start_time)
-        errors_total.labels(error_type=type(e).__name__, endpoint='firmar_titulo').inc()
+
+
+def _form_html(base_url: str):
+    return '''<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Subir Título</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; max-width: 900px; }
+    fieldset { margin-bottom: 16px; }
+    label { display:block; margin: 6px 0 2px; }
+    input, select { width: 100%; padding: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .hint { font-size: 12px; color: #666; }
+    .ok { color: #0a0; }
+    .err { color: #a00; white-space: pre-wrap; }
+    button { padding: 10px 16px; }
+    .grid { display:grid; gap:8px; }
+    .actions { display:flex; gap: 8px; align-items:center; }
+  </style>
+</head>
+<body>
+  <h1>Subir Título</h1>
+  <p class="hint">Este formulario arma automáticamente el nombre de archivo con el formato DNI/Lugar/SECTOR/CARRERA/MODO/PLAN y lo envía al endpoint <code>/titulos/recibir/</code>.</p>
+
+  <form id="f" class="grid" action="{base_url}/titulos/recibir/" method="post" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Autenticación Athento (opcional)</legend>
+      <div class="row">
+        <div>
+          <label>Usuario (Basic)</label>
+          <input name="auth_user" type="text" placeholder="usuario@ucasal.edu.ar" />
+        </div>
+        <div>
+          <label>Contraseña (Basic)</label>
+          <input name="auth_password" type="password" />
+        </div>
+      </div>
+      <p class="hint">Si no completa, se usarán las credenciales configuradas del sistema.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Datos del Título</legend>
+      <div class="row3">
+        <div>
+          <label>Tipo DNI</label>
+          <select name="tipo_dni">
+            <option value="DNI">DNI</option>
+            <option value="LE">LE</option>
+            <option value="LC">LC</option>
+          </select>
+        </div>
+        <div>
+          <label>DNI</label>
+          <input name="dni" required placeholder="8205853" />
+        </div>
+        <div>
+          <label>Título</label>
+          <input name="titulo" placeholder="Abogado" />
+        </div>
+      </div>
+
+      <label>Lugar</label>
+      <input name="lugar" placeholder="DELEGACION S S DE JUJUY - JUJUY (10)" />
+
+      <label>Facultad</label>
+      <input name="facultad" placeholder="CIENCIAS JURÍDICAS (3)" />
+
+      <div class="row3">
+        <div>
+          <label>Carrera</label>
+          <input name="carrera" placeholder="Abogacia (16)" />
+        </div>
+        <div>
+          <label>Modalidad</label>
+          <input name="modalidad" placeholder="NO PRESENCIAL (2)" />
+        </div>
+        <div>
+          <label>Plan</label>
+          <input name="plan" placeholder="8707" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Doctype</label>
+          <input name="doctype" value="títulos" />
+          <p class="hint">Se respeta el valor que ingrese (no se modifica).</p>
+        </div>
+        <div>
+          <label>Serie</label>
+          <input name="serie" placeholder="2320305d-3169-464f-a7ea-76a2c62d79c0" />
+        </div>
+      </div>
+
+      <label>Archivo PDF</label>
+      <input name="file" type="file" accept="application/pdf" required />
+
+      <input type="hidden" name="filename" id="filename" />
+      <div class="actions">
+        <label><input type="checkbox" id="remember" checked /> Recordar estos valores</label>
+        <button type="button" id="clearStored" title="Eliminar valores recordados">Limpiar recordados</button>
+      </div>
+      <p class="hint">El nombre se construirá automáticamente al enviar.</p>
+    </fieldset>
+
+    <button type="submit">Subir</button>
+    <div id="msg" class="hint"></div>
+  </form>
+
+  <script>
+    const f = document.getElementById('f');
+    const msg = document.getElementById('msg');
+    const remember = document.getElementById('remember');
+    const clearBtn = document.getElementById('clearStored');
+
+    // Campos a persistir (excluye contraseñas)
+    const fields = ['tipo_dni','dni','titulo','lugar','facultad','carrera','modalidad','plan','doctype','serie','auth_user'];
+    const storageKey = 'ucasal_titulos_form_v1';
+
+    function loadStored() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        fields.forEach(k => {
+          if (data[k] != null && f[k]) {
+            if (f[k].tagName === 'SELECT') {
+              [...f[k].options].forEach(opt => { if (opt.value === data[k]) opt.selected = true; });
+            } else {
+              f[k].value = data[k];
+            }
+          }
+        });
+      } catch (e) { /* ignore */ }
+    }
+
+    function saveStored() {
+      try {
+        const data = {};
+        fields.forEach(k => { if (f[k]) data[k] = f[k].value; });
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      } catch (e) { /* ignore */ }
+    }
+
+    function clearStored() {
+      try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
+    }
+
+    function digitsFrom(value) {
+      if (!value) return '';
+      const m = String(value).match(/\((\d+)\)/);
+      if (m) return m[1];
+      return String(value).replace(/\D+/g, '');
+    }
+
+    // Prefill al cargar
+    loadStored();
+
+    // Guardar/limpiar según checkbox
+    f.addEventListener('change', () => { if (remember.checked) saveStored(); });
+    clearBtn.addEventListener('click', () => { clearStored(); msg.textContent = 'Valores recordados eliminados.'; });
+
+    f.addEventListener('submit', (e) => {
+      const dni = digitsFrom(f.dni.value);
+      const lugar = digitsFrom(f.lugar.value);
+      const facultad = digitsFrom(f.facultad.value);
+      const carrera = digitsFrom(f.carrera.value);
+      const modalidad = digitsFrom(f.modalidad.value);
+      const plan = digitsFrom(f.plan.value);
+      const parts = [dni, lugar, facultad, carrera, modalidad, plan];
+      if (parts.some(p => !p)) {
+        e.preventDefault();
+        msg.className = 'err';
+        msg.textContent = 'Complete DNI/Lugar/Facultad/Carrera/Modalidad/Plan (deben ser numéricos o incluir el código entre paréntesis).';
+        return;
+      }
+      document.getElementById('filename').value = parts.join('/');
+      if (remember.checked) saveStored();
+      msg.className = 'ok';
+      msg.textContent = 'Enviando...';
+    });
+  </script>
+  </body>
+</html>'''.replace('{base_url}', base_url)
+
+@default_permissions
+@traceback_ret
+@csrf_exempt
+def form_subir_titulo(request):
+    try:
+        logger = SpLogger("athentose", "titulos.form_subir_titulo")
+        logger.entry()
+        if request.method != 'GET':
+            return logger.exit(METHOD_NOT_ALLOWED)
+        base_url = ''
+        try:
+            from django.conf import settings as djsettings
+            base_url = djsettings.BASE_URL if hasattr(djsettings, 'BASE_URL') else ''
+        except Exception:
+            base_url = ''
+        html = _form_html(base_url)
+        return logger.exit(HttpResponse(html, content_type='text/html'))
+    except Exception as e:
         return logger.exit(HttpResponse(str(e), status=500), exc_info=True)
 
-
 routes = [
+    url(r'^titulos/form/{0,1}$', form_subir_titulo),
     url(r'^titulos/recibir/{0,1}$', recibir_titulo),
     url(r'^titulos/qr/{0,1}$', qr),
     url(r'^titulos/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/estado/{0,1}$', informar_estado),

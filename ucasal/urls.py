@@ -6,6 +6,14 @@ from django.http import JsonResponse
 from endpoints.actas.actas import routes as actas_routes
 from endpoints.titulos.titulos import routes as titulos_routes
 from core.health import health_check
+from ucasal.views_ui import (
+    login_view,
+    logout_view,
+    titles_list_view,
+    upload_title_view,
+    title_detail_view,
+    delete_title_view,
+)
 
 app_name = 'ucasal'
 
@@ -80,10 +88,19 @@ def docs_view(request):
 urlpatterns = [
     path('', home_view, name='home'),
     path('docs/', docs_view, name='docs'),
+    path('docs', docs_view),
     path('health/', health_check, name='health'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('endpoints.auth.urls')),
+    path('athento/', include('endpoints.files.urls')),
     path('actas/', include('endpoints.actas.urls')),
+    # UI simple para gestionar títulos
+    path('ui/login/', login_view, name='ui_login'),
+    path('ui/logout/', logout_view, name='ui_logout'),
+    path('ui/titulos/', titles_list_view, name='ui_titles_list'),
+    path('ui/titulos/nuevo/', upload_title_view, name='ui_upload_title'),
+    path('ui/titulos/<uuid:uuid>/', title_detail_view, name='ui_title_detail'),
+    path('ui/titulos/<uuid:uuid>/delete/', delete_title_view, name='ui_title_delete'),
     # Prometheus metrics endpoint
     path('', include('django_prometheus.urls')),
     # Incluir las rutas definidas en actas.py y titulos.py
