@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.shortcuts import redirect
 from endpoints.actas.actas import routes as actas_routes
 from endpoints.titulos.titulos import routes as titulos_routes
 from core.health import health_check
@@ -85,6 +87,12 @@ def docs_view(request):
         }
     })
 
+def ui_root(request):
+    if request.user.is_authenticated:
+        return redirect('ui_titles_list')
+    else:
+        return redirect('ui_login')
+
 urlpatterns = [
     path('', home_view, name='home'),
     path('docs/', docs_view, name='docs'),
@@ -95,6 +103,8 @@ urlpatterns = [
     path('athento/', include('endpoints.files.urls')),
     path('actas/', include('endpoints.actas.urls')),
     # UI simple para gestionar títulos
+    path('ui/', ui_root, name='ui_root'),
+    path('ui', ui_root),
     path('ui/login/', login_view, name='ui_login'),
     path('ui/logout/', logout_view, name='ui_logout'),
     path('ui/titulos/', titles_list_view, name='ui_titles_list'),
@@ -108,5 +118,9 @@ urlpatterns = [
 
 # Servir archivos estáticos y media en desarrollo
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Servir estáticos descubiertos por los finders (incluye admin y app static)
+    urlpatterns += staticfiles_urlpatterns()
+    # Servir también desde STATIC_ROOT (tras collectstatic)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # Servir media desde MEDIA_ROOT
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

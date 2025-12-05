@@ -114,7 +114,14 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
     
     def process_response(self, request, response):
         """Agrega headers de seguridad"""
-        
+        from django.conf import settings
+
+        # No aplicar headers estrictos a archivos estáticos o media (evita bloquear fuentes e imágenes)
+        static_url = getattr(settings, 'STATIC_URL', '/static/')
+        media_url = getattr(settings, 'MEDIA_URL', '/media/')
+        if request.path.startswith(static_url) or request.path.startswith(media_url):
+            return response
+
         # Headers de seguridad
         response['X-Content-Type-Options'] = 'nosniff'
         response['X-Frame-Options'] = 'DENY'
@@ -122,17 +129,19 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response['Cross-Origin-Opener-Policy'] = 'same-origin'
         
-        # CSP básico
+        # CSP básico (prioriza estáticos locales)
         csp = [
             "default-src 'self'",
-            # Permitir Bootstrap (JS) desde jsdelivr
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-            # Permitir CSS de Bootstrap y Bootstrap Icons desde jsdelivr
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            # Permitir JS local (y en línea si fuese necesario para bootstrap)
+            "script-src 'self' 'unsafe-inline'",
+            "script-src-elem 'self' 'unsafe-inline'",
+            # Permitir CSS local
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'unsafe-inline'",
             # Imágenes locales y data URIs
             "img-src 'self' data:",
-            # Permitir fuentes desde self y jsdelivr
-            "font-src 'self' https://cdn.jsdelivr.net data:",
+            # Permitir fuentes locales y data/blob
+            "font-src 'self' data: blob:",
             # Conexiones XHR/fetch
             "connect-src 'self'",
         ]
