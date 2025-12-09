@@ -7,6 +7,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 from endpoints.actas.actas import routes as actas_routes
 from endpoints.titulos.titulos import routes as titulos_routes
+from endpoints.titulos.titulos import informar_estado, validar_otp, firmar_titulo
+from endpoints.titulos.api_views import titles_collection, title_detail, title_download
 from core.health import health_check
 from ucasal.views_ui import (
     login_view,
@@ -15,7 +17,11 @@ from ucasal.views_ui import (
     upload_title_view,
     title_detail_view,
     delete_title_view,
+    titles_console_view,
+    titles_search_api,
+    titles_bulk_delete_api,
 )
+from ucasal.views_api import titulos_command
 
 app_name = 'ucasal'
 
@@ -100,6 +106,14 @@ urlpatterns = [
     path('health/', health_check, name='health'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('endpoints.auth.urls')),
+    # Nueva API REST para títulos
+    path('api/titulos/', titles_collection, name='api_titulos_collection'),
+    path('api/titulos/<uuid:uuid>/', title_detail, name='api_titulos_detail'),
+    path('api/titulos/<uuid:uuid>/download/', title_download, name='api_titulos_download'),
+    path('api/titulos/<uuid:uuid>/estado/', informar_estado, name='api_titulos_estado'),
+    path('api/titulos/<uuid:uuid>/validar-otp/', validar_otp, name='api_titulos_validar_otp'),
+    path('api/titulos/<uuid:uuid>/firmar/', firmar_titulo, name='api_titulos_firmar'),
+    path('api/titulos/command', titulos_command, name='api_titulos_command'),
     path('athento/', include('endpoints.files.urls')),
     path('actas/', include('endpoints.actas.urls')),
     # UI simple para gestionar títulos
@@ -108,6 +122,9 @@ urlpatterns = [
     path('ui/login/', login_view, name='ui_login'),
     path('ui/logout/', logout_view, name='ui_logout'),
     path('ui/titulos/', titles_list_view, name='ui_titles_list'),
+    path('ui/titulos/console/', titles_console_view, name='ui_titles_console'),
+    path('ui/api/titulos/', titles_search_api, name='ui_titles_search_api'),
+    path('ui/api/titulos/bulk-delete/', titles_bulk_delete_api, name='ui_titles_bulk_delete_api'),
     path('ui/titulos/nuevo/', upload_title_view, name='ui_upload_title'),
     path('ui/titulos/<uuid:uuid>/', title_detail_view, name='ui_title_detail'),
     path('ui/titulos/<uuid:uuid>/delete/', delete_title_view, name='ui_title_delete'),

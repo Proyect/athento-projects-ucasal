@@ -259,6 +259,149 @@ def test_recibir_titulo():
         print_status(False, f"Error: {e}")
         return None
 
+
+def test_api_titulos_list_no_auth():
+    """Probar que /api/titulos/ sin token devuelve 401"""
+    print_section("API TITULOS - LIST SIN AUTENTICACION")
+    try:
+        response = requests.get(
+            f"{BASE_URL}/api/titulos/",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if response.status_code == 401:
+            print_status(True, "Acceso sin token correctamente rechazado (401)")
+            return True
+        else:
+            print_status(False, f"Se esperaba 401 y se recibió {response.status_code}")
+            print(f"   Respuesta: {response.text[:200]}")
+            return False
+    except Exception as e:
+        print_status(False, f"Error: {e}")
+        return False
+
+
+def test_api_titulos_crud_with_auth(token):
+    """Probar ciclo CRUD básico de /api/titulos/ con JWT."""
+    print_section("API TITULOS - CRUD CON AUTENTICACION")
+
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+
+    if not token:
+        print("[WARN] Sin token JWT, se espera que estas pruebas fallen con 401")
+
+    created_uuid = None
+
+    # 1) LIST
+    try:
+        resp_list = requests.get(
+            f"{BASE_URL}/api/titulos/",
+            headers=headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if token and resp_list.status_code != 200:
+            print_status(False, f"LIST con token devolvió {resp_list.status_code}")
+            print(f"   Respuesta: {resp_list.text[:200]}")
+            return False
+        elif not token and resp_list.status_code != 401:
+            print_status(False, f"LIST sin token debería devolver 401 y devolvió {resp_list.status_code}")
+            return False
+        else:
+            print_status(True, f"LIST status {resp_list.status_code}")
+    except Exception as e:
+        print_status(False, f"Error en LIST: {e}")
+        return False
+
+    if not token:
+        # Sin token no tiene sentido seguir con las siguientes pruebas
+        return True
+
+    # 2) CREATE (usa un PDF tiny embebido en base64)
+    import base64 as _b64
+    pdf_bytes = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF"
+    pdf_b64 = _b64.b64encode(pdf_bytes).decode("ascii")
+
+    payload_create = {
+        "filename": "titulo_api_test.pdf",
+        "doctype": "titulos",
+        "serie": "titulos",
+        "metadatas": {"metadata.titulo_dni": "12345678"},
+        "file_base64": pdf_b64,
+    }
+
+    try:
+        resp_create = requests.post(
+            f"{BASE_URL}/api/titulos/",
+            headers={**headers, "Content-Type": "application/json"},
+            data=json.dumps(payload_create),
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if resp_create.status_code not in (200, 201):
+            print_status(False, f"CREATE devolvió {resp_create.status_code}")
+            print(f"   Respuesta: {resp_create.text[:300]}")
+            return False
+        data_create = resp_create.json()
+        created_uuid = data_create.get("result", {}).get("uuid") or data_create.get("uuid")
+        print_status(True, f"CREATE OK - uuid={created_uuid}")
+    except Exception as e:
+        print_status(False, f"Error en CREATE: {e}")
+        return False
+
+    if not created_uuid:
+        print_status(False, "No se obtuvo uuid del título creado")
+        return False
+
+    # 3) DETAIL (GET)
+    try:
+        resp_detail = requests.get(
+            f"{BASE_URL}/api/titulos/{created_uuid}/",
+            headers=headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if resp_detail.status_code != 200:
+            print_status(False, f"DETAIL devolvió {resp_detail.status_code}")
+            print(f"   Respuesta: {resp_detail.text[:300]}")
+            return False
+        print_status(True, "DETAIL OK")
+    except Exception as e:
+        print_status(False, f"Error en DETAIL: {e}")
+        return False
+
+    # 4) UPDATE (PUT)
+    payload_update = {"metadatas": {"metadata.titulo_plan": "2020"}}
+    try:
+        resp_update = requests.put(
+            f"{BASE_URL}/api/titulos/{created_uuid}/",
+            headers={**headers, "Content-Type": "application/json"},
+            data=json.dumps(payload_update),
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if resp_update.status_code != 200:
+            print_status(False, f"UPDATE devolvió {resp_update.status_code}")
+            print(f"   Respuesta: {resp_update.text[:300]}")
+            return False
+        print_status(True, "UPDATE OK")
+    except Exception as e:
+        print_status(False, f"Error en UPDATE: {e}")
+        return False
+
+    # 5) DELETE
+    try:
+        resp_delete = requests.delete(
+            f"{BASE_URL}/api/titulos/{created_uuid}/",
+            headers=headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if resp_delete.status_code != 200:
+            print_status(False, f"DELETE devolvió {resp_delete.status_code}")
+            print(f"   Respuesta: {resp_delete.text[:300]}")
+            return False
+        print_status(True, "DELETE OK")
+    except Exception as e:
+        print_status(False, f"Error en DELETE: {e}")
+        return False
+
+    return True
+
 def main():
     print("\n" + "PRUEBAS DE ENDPOINTS DE TÍTULOS".center(70))
     print("=" * 70)
@@ -323,6 +466,10 @@ def main():
         titulo_blockchain = next((t for t in titulos if 'blockchain' in t['estado'].lower()), None)
         if titulo_blockchain:
             resultados.append(("bfaresponse", test_bfaresponse(titulo_blockchain['uuid'], "success")))
+
+    # 4. Probar nueva API REST /api/titulos/
+    resultados.append(("api_titulos_list_no_auth", test_api_titulos_list_no_auth()))
+    resultados.append(("api_titulos_crud_with_auth", test_api_titulos_crud_with_auth(token)))
     
     # Resumen
     print_section("RESUMEN DE PRUEBAS")

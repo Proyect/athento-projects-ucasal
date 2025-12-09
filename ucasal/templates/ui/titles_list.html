@@ -3,7 +3,7 @@
 <div class="card shadow-sm mb-3">
   <div class="card-header"><i class="bi bi-search me-2"></i><strong>Búsqueda</strong></div>
   <div class="card-body">
-    <form method="post">
+    <form id="searchForm" method="post">
       {% csrf_token %}
       <div class="row g-2 align-items-center">
         <div class="col-md-10">
@@ -23,30 +23,83 @@
   <div class="card-header d-flex align-items-center"><i class="bi bi-list-ul me-2"></i><strong>Resultados</strong></div>
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table id="titlesTable" class="table table-hover align-middle mb-0">
         <thead class="table-light">
-          <tr><th style="width:40%">UUID</th><th>Filename</th><th style="width:220px">Acciones</th></tr>
+          <tr>
+            <th style="width:28%">UUID</th>
+            <th style="width:28%">Filename</th>
+            <th style="width:14%">Estado</th>
+            <th style="width:14%">Creación</th>
+            <th style="width:16%">Autor</th>
+            <th style="width:220px">Acciones</th>
+          </tr>
         </thead>
         <tbody>
         {% for item in items %}
           <tr>
             <td><code class="small">{{ item.uuid }}</code></td>
             <td>{{ item.filename }}</td>
+            <td class="text-nowrap"><span class="badge bg-secondary">{{ item.estado }}</span></td>
+            <td class="text-nowrap">{{ item.created }}</td>
+            <td class="text-truncate" style="max-width:200px">{{ item.author }}</td>
             <td>
               <a class="btn btn-sm btn-outline-primary" href="/ui/titulos/{{ item.uuid }}/"><i class="bi bi-eye"></i> Ver</a>
               <a class="btn btn-sm btn-outline-secondary" href="/athento/files/{{ item.uuid }}/download"><i class="bi bi-download"></i> Descargar</a>
-              <form method="post" action="/ui/titulos/{{ item.uuid }}/delete/" class="d-inline">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar el documento?');"><i class="bi bi-trash"></i> Borrar</button>
-              </form>
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="3" class="text-muted p-3">Sin resultados</td></tr>
+          <tr><td colspan="6" class="text-muted p-3">Sin resultados</td></tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if (window.jQuery && $('#titlesTable').length) {
+      const initialQuery = encodeURIComponent('{{ query|default:"" }}');
+      const table = $('#titlesTable').DataTable({
+        pageLength: 20,
+        lengthMenu: [10,20,50,100],
+        order: [],
+        columnDefs: [ { targets: -1, orderable: false, searchable: false } ],
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+        dom: 'Bfrtip',
+        buttons: [
+          { extend: 'copy', text: 'Copiar' },
+          { extend: 'csv', text: 'CSV' },
+          { extend: 'excel', text: 'Excel' },
+          { extend: 'pdf', text: 'PDF' },
+          { extend: 'print', text: 'Imprimir' },
+          { extend: 'colvis', text: 'Columnas' }
+        ],
+        ajax: {
+          url: '/ui/api/titulos/' + (initialQuery ? ('?query=' + initialQuery) : ''),
+          dataSrc: 'data'
+        },
+        columns: [
+          { data: 'uuid', render: function(data){ return '<code class="small">'+(data||'')+'</code>'; } },
+          { data: 'filename' },
+          { data: 'estado', render: function(d){ return d ? '<span class="badge bg-secondary">'+d+'</span>' : ''; } },
+          { data: 'created' },
+          { data: 'author' },
+          { data: 'acciones', orderable:false, searchable:false }
+        ]
+      });
+
+      // Interceptar submit del formulario para recargar por AJAX
+      const form = document.getElementById('searchForm');
+      form.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        const q = (form.query && form.query.value) ? encodeURIComponent(form.query.value) : '';
+        const url = '/ui/api/titulos/' + (q ? ('?query=' + q) : '');
+        table.ajax.url(url).load();
+      });
+    }
+  });
+</script>
 {% endblock %}

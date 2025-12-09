@@ -140,6 +140,109 @@ def qr(request):
     )
     #return FileResponse(open("/var/www/athentose/media/tmp/ucasal_qr_673c253a-d851-4c10-9f85-69ca3e3bd39a.png", "rb"))
 
+class RemoteFileAdapter:
+    class _DocType:
+        def __init__(self, name):
+            self.name = name or ''
+            self.label = (name or '').replace('_', ' ').title()
+
+    class _LifeCycle:
+        def __init__(self, name):
+            self.name = name or ''
+
+    class _FileRef:
+        def __init__(self, path):
+            self.path = path
+
+    def __init__(self, data):
+        self._raw = data or {}
+        self.uuid = str(self._raw.get('uuid') or self._raw.get('id') or '')
+        self.filename = self._raw.get('filename') or 'documento.pdf'
+        md = {}
+        if isinstance(self._raw.get('metadata'), dict):
+            for k, v in self._raw['metadata'].items():
+                mk = k if str(k).startswith('metadata.') else f'metadata.{k}'
+                md[mk] = v
+        for k, v in list(self._raw.items()):
+            if isinstance(k, str) and k.startswith('metadata.'):
+                md[k] = v
+        self._metadata = md
+        self._features = {}
+        for k, v in list(self._metadata.items()):
+            if k.startswith('metadata.feature.'):
+                self._features[k.replace('metadata.feature.', '')] = v
+        dt_name = None
+        lc_name = None
+        dt = self._raw.get('doctype')
+        if isinstance(dt, dict):
+            dt_name = dt.get('name') or dt.get('id')
+        elif isinstance(dt, str):
+            dt_name = dt
+        lc = self._raw.get('life_cycle_state') or self._raw.get('lifecycle')
+        if isinstance(lc, dict):
+            lc_name = lc.get('name')
+        elif isinstance(lc, str):
+            lc_name = lc
+        if not dt_name:
+            dt_name = self._metadata.get('metadata.doctype')
+        if not lc_name:
+            lc_name = self._metadata.get('metadata.lifecycle_state')
+        self.doctype = RemoteFileAdapter._DocType(dt_name or '')
+        self.life_cycle_state = RemoteFileAdapter._LifeCycle(lc_name or '')
+        self.file = None
+        self.removed = False
+
+    def gmv(self, key):
+        return self._metadata.get(key)
+
+    def gfv(self, key):
+        return self._features.get(key)
+
+    def set_metadata(self, key, value, overwrite=False):
+        UcasalServices.update_file(self.uuid, data={'metadatas': {key: value}})
+        self._metadata[key] = value
+
+    def set_feature(self, key, value):
+        meta_key = f'metadata.feature.{key}'
+        UcasalServices.update_file(self.uuid, data={'metadatas': {meta_key: value}})
+        self._features[key] = value
+        self._metadata[meta_key] = value
+
+    def change_life_cycle_state(self, new_state):
+        name = new_state if isinstance(new_state, str) else getattr(new_state, 'name', str(new_state))
+        UcasalServices.update_file(self.uuid, data={'metadatas': {'metadata.lifecycle_state': name}})
+        self.life_cycle_state = RemoteFileAdapter._LifeCycle(name)
+
+    def update_binary(self, file_obj, filename):
+        content = file_obj.read()
+        UcasalServices.update_file(self.uuid, file_tuple=(filename, content, 'application/pdf'))
+        self.filename = filename
+        tmp_dir = getattr(settings, 'MEDIA_TMP', '/tmp')
+        os.makedirs(tmp_dir, exist_ok=True)
+        local_path = os.path.join(tmp_dir, f'{self.uuid}.pdf')
+        with open(local_path, 'wb') as f:
+            f.write(content)
+        self.file = RemoteFileAdapter._FileRef(local_path)
+
+    def save(self):
+        return
+
+    def ensure_local_file(self):
+        if self.file and self.file.path and os.path.exists(self.file.path):
+            return self.file
+        stream, filename, content_type = UcasalServices.download_file(self.uuid)
+        tmp_dir = getattr(settings, 'MEDIA_TMP', '/tmp')
+        os.makedirs(tmp_dir, exist_ok=True)
+        local_path = os.path.join(tmp_dir, f'{self.uuid}.pdf')
+        with open(local_path, 'wb') as f:
+            for chunk in stream:
+                if chunk:
+                    f.write(chunk)
+        self.file = RemoteFileAdapter._FileRef(local_path)
+        if filename:
+            self.filename = filename
+        return self.file
+
 @default_permissions
 @traceback_ret
 def getconfig(request):
@@ -576,13 +679,12 @@ def reject(request, uuid):
         uuid_acta_previa = str(fil.gmv(uuid_previo_metadata_name)).replace('None', '')
         UcasalServices.notify_rejection(auth_token=auth_token, uuid=fil.uuid, previous_uuid = uuid_acta_previa, reason=motivo)
 
-        # Cambiar estado a Rechazada (aunque la borremos luego, si hay error invocando a UCASAL, al menos que rechazada en Athento)
+        # Cambiar estado a Rechazada en Athento
         #TODO: forzar transición?
-        fil.change_life_cycle_state(ActaStates.rechazada) #, force_transition=True)
+        fil.change_life_cycle_state(ActaStates.rechazada)
         
-        # Borrar el acta
-        fil.removed = True
-        fil.save()
+        # Borrar el acta en Athento
+        UcasalServices.delete_file(str(fil.uuid))
 
         # Mover el acta al espacio Papelera
         #fil.move_to_serie(name='papelera')
@@ -599,6 +701,7 @@ def reject(request, uuid):
 
 
 def _get_pdf_hash(fil):
+    fil.ensure_local_file()
     path = fil.file.path
     byte_content = None
     with open(path, mode='rb') as f:
@@ -608,8 +711,13 @@ def _get_pdf_hash(fil):
 def _get_acta(uuid:str):
     """Helper para obtener acta por UUID con optimización."""
     try:
-        return File.objects.select_related('doctype_obj', 'life_cycle_state_obj', 'serie').get(uuid=uuid) 
-    except File.DoesNotExist:
+        data = UcasalServices.get_file(str(uuid), fetch_mode='default')
+        if not data:
+            return None
+        rf = RemoteFileAdapter(data)
+        rf.ensure_local_file()
+        return rf
+    except Exception:
         return None
     
 def _get_arg_time():

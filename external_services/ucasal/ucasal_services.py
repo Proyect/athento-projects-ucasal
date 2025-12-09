@@ -14,7 +14,7 @@ class UcasalServices:
     logger = SpLogger("athentose", "UcasalServices")
 
     #TODO: setear "VERIFY_CERTIFICATE = True" cuando quede productivo 
-    VERIFY_CERTIFICATE = False
+    VERIFY_CERTIFICATE = True
 
     # Habilitar mocks locales si UCASAL_USE_MOCKS=true en entorno
     USE_MOCKS = os.environ.get('UCASAL_USE_MOCKS', 'false').lower() == 'true'

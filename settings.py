@@ -16,6 +16,12 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# CSRF trusted origins (allow dev UI on localhost:8010)
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'http://localhost:8010,http://127.0.0.1:8010'
+).split(',')
+
 # Application definition
 INSTALLED_APPS = [
     'django_prometheus',  # Debe ir antes de otras apps

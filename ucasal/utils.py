@@ -90,6 +90,34 @@ class TituloStates:
     titulo_emitido = 'Título Emitido'
     rechazado = 'Rechazado'
 
+TITULO_TRANSITIONS_ALLOWED = {
+    TituloStates.recibido: [TituloStates.pendiente_aprobacion_ua, TituloStates.rechazado],
+    TituloStates.pendiente_aprobacion_ua: [TituloStates.aprobado_ua, TituloStates.rechazado],
+    TituloStates.aprobado_ua: [TituloStates.pendiente_aprobacion_r, TituloStates.rechazado],
+    TituloStates.pendiente_aprobacion_r: [TituloStates.aprobado_r, TituloStates.rechazado],
+    TituloStates.aprobado_r: [TituloStates.pendiente_firma_sg, TituloStates.rechazado],
+    TituloStates.pendiente_firma_sg: [TituloStates.firmado_sg, TituloStates.rechazado],
+    TituloStates.firmado_sg: [TituloStates.titulo_emitido],
+    TituloStates.titulo_emitido: [],
+    TituloStates.rechazado: [],
+}
+
+TITULO_ESTADO_CODIGO = {
+    TituloStates.recibido: 0,
+    TituloStates.pendiente_aprobacion_ua: 1,
+    TituloStates.aprobado_ua: 2,
+    TituloStates.pendiente_aprobacion_r: 3,
+    TituloStates.aprobado_r: 4,
+    TituloStates.pendiente_firma_sg: 5,
+    TituloStates.firmado_sg: 6,
+    TituloStates.titulo_emitido: 7,
+    TituloStates.rechazado: 99,
+}
+
+def can_transition(from_state: str, to_state: str) -> bool:
+    options = TITULO_TRANSITIONS_ALLOWED.get(from_state) or []
+    return to_state in options
+
 class AthentoseError(Exception):
     pass
 
