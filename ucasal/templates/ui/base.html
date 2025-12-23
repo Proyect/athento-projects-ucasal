@@ -7,10 +7,8 @@
   {% load static %}
   <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'vendor/bootstrap-icons/font/bootstrap-icons.min.css' %}" rel="stylesheet">
-  <!-- DataTables CSS (local) -->
-  <link rel="stylesheet" href="{% static 'vendor/datatables/css/dataTables.bootstrap5.min.css' %}" />
-  <!-- DataTables Buttons CSS (export/colvis, local) -->
-  <link rel="stylesheet" href="{% static 'vendor/datatables/css/buttons.bootstrap5.min.css' %}" />
+  <!-- DataTables CSS (CDN, incluye Bootstrap 5 + Buttons) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.6/b-2.4.1/b-colvis-2.4.1/b-html5-2.4.1/b-print-2.4.1/datatables.min.css" />
   <style>
     body { background: #f6f8fa; }
     .navbar-brand { font-weight: 600; letter-spacing: .2px; }
@@ -48,20 +46,10 @@
   <small>UCASAL · Gestión de Títulos · {{ now|date:'Y' }}</small>
 </footer>
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
-<!-- jQuery (requerido por DataTables, local) -->
-<script src="{% static 'vendor/jquery/jquery-3.7.1.min.js' %}"></script>
-<!-- DataTables JS (local) -->
-<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'vendor/datatables/dataTables.bootstrap5.min.js' %}"></script>
-<!-- DataTables Buttons and deps (local) -->
-<script src="{% static 'vendor/datatables/buttons/dataTables.buttons.min.js' %}"></script>
-<script src="{% static 'vendor/datatables/buttons/buttons.bootstrap5.min.js' %}"></script>
-<script src="{% static 'vendor/jszip/jszip.min.js' %}"></script>
-<script src="{% static 'vendor/pdfmake/pdfmake.min.js' %}"></script>
-<script src="{% static 'vendor/pdfmake/vfs_fonts.js' %}"></script>
-<script src="{% static 'vendor/datatables/buttons/buttons.html5.min.js' %}"></script>
-<script src="{% static 'vendor/datatables/buttons/buttons.print.min.js' %}"></script>
-<script src="{% static 'vendor/datatables/buttons/buttons.colVis.min.js' %}"></script>
+<!-- jQuery (CDN, requerido por DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- DataTables JS + Buttons + JSZip + PDFMake (CDN, bundle) -->
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/b-2.4.1/b-colvis-2.4.1/b-html5-2.4.1/b-print-2.4.1/datatables.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

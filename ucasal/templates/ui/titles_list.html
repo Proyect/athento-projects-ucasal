@@ -8,14 +8,17 @@
       <div class="row g-2 align-items-center">
         <div class="col-md-10">
           <input class="form-control" name="query" placeholder="Consulta SELECT..." value="{{ query }}" />
-          <div class="form-text">Ej.: SELECT uuid, filename FROM Document WHERE filename LIKE '%document%'</div>
+          <div class="form-text">Ej.: SELECT uuid, filename FROM form_titulo</div>
         </div>
         <div class="col-md-2 d-grid">
           <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
         </div>
       </div>
     </form>
-    {% if error %}<div class="alert alert-danger mt-3"><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>{% endif %}
+    <div id="search-error" class="alert alert-danger mt-3 d-none">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      <span id="search-error-text"></span>
+    </div>
   </div>
 </div>
 
@@ -43,8 +46,8 @@
             <td class="text-nowrap">{{ item.created }}</td>
             <td class="text-truncate" style="max-width:200px">{{ item.author }}</td>
             <td>
-              <a class="btn btn-sm btn-outline-primary" href="/ui/titulos/{{ item.uuid }}/"><i class="bi bi-eye"></i> Ver</a>
-              <a class="btn btn-sm btn-outline-secondary" href="/athento/files/{{ item.uuid }}/download"><i class="bi bi-download"></i> Descargar</a>
+              <a class="btn btn-sm btn-outline-primary" href="/ui/titulos/{{ item.uuid }}/"><i class="bi bi-eye" data-label="Ver"></i> </a>
+              <a class="btn btn-sm btn-outline-secondary" href="/athento/files/{{ item.uuid }}/download"><i class="bi bi-download" data-label="Descargar"></i> </a>
             </td>
           </tr>
         {% empty %}
@@ -61,8 +64,25 @@
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     if (window.jQuery && $('#titlesTable').length) {
+      const $table = $('#titlesTable');
       const initialQuery = encodeURIComponent('{{ query|default:"" }}');
-      const table = $('#titlesTable').DataTable({
+      const errorBox = document.getElementById('search-error');
+      const errorText = document.getElementById('search-error-text');
+
+      function setSearchError(message) {
+        if (!errorBox || !errorText) {
+          return;
+        }
+        if (message) {
+          errorText.textContent = message;
+          errorBox.classList.remove('d-none');
+        } else {
+          errorText.textContent = '';
+          errorBox.classList.add('d-none');
+        }
+      }
+
+      const table = $table.DataTable({
         pageLength: 20,
         lengthMenu: [10,20,50,100],
         order: [],
@@ -79,7 +99,28 @@
         ],
         ajax: {
           url: '/ui/api/titulos/' + (initialQuery ? ('?query=' + initialQuery) : ''),
-          dataSrc: 'data'
+          dataSrc: function(json) {
+            if (json && json.error) {
+              setSearchError(json.error);
+            } else {
+              setSearchError(null);
+            }
+            return (json && json.data) ? json.data : [];
+          },
+          error: function(xhr) {
+            var message = 'Error inesperado consultando títulos';
+            if (xhr && xhr.responseText) {
+              try {
+                var parsed = JSON.parse(xhr.responseText);
+                if (parsed && parsed.error) {
+                  message = parsed.error;
+                }
+              } catch (e) {
+                // ignorar error de parseo y usar mensaje genérico
+              }
+            }
+            setSearchError(message);
+          }
         },
         columns: [
           { data: 'uuid', render: function(data){ return '<code class="small">'+(data||'')+'</code>'; } },

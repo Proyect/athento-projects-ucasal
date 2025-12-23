@@ -4,8 +4,13 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.conf import settings
 from external_services.ucasal.ucasal_services import UcasalServices
 import json
+
+DEFAULT_PAGE = getattr(settings, "UCASAL_DEFAULT_PAGE", 1)
+DEFAULT_PAGE_SIZE_LIST = getattr(settings, "UCASAL_DEFAULT_PAGE_SIZE_LIST", 20)
+DEFAULT_PAGE_SIZE_API = getattr(settings, "UCASAL_DEFAULT_PAGE_SIZE_API", 200)
 
 @require_http_methods(["GET", "POST"]) 
 def login_view(request):
@@ -29,13 +34,25 @@ def logout_view(request):
 def titles_list_view(request):
     items = []
     error = None
+    page_param = request.GET.get("page") or request.POST.get("page")
+    page_size_param = request.GET.get("page_size") or request.POST.get("page_size")
+    try:
+        page = int(page_param) if page_param is not None else DEFAULT_PAGE
+    except ValueError:
+        page = DEFAULT_PAGE
+    try:
+        page_size = int(page_size_param) if page_size_param is not None else DEFAULT_PAGE_SIZE_LIST
+    except ValueError:
+        page_size = DEFAULT_PAGE_SIZE_LIST
+    if page < 1:
+        page = DEFAULT_PAGE
+    if page_size < 1:
+        page_size = DEFAULT_PAGE_SIZE_LIST
     # Permitir consulta por GET (?query=...) y por POST (form)
     if request.method == "POST":
         query = request.POST.get("query")
         if query:
             try:
-                page = 1
-                page_size = 20
                 res = UcasalServices.search_query(query, page=page, page_size=page_size)
                 # Normalizar posibles formatos de respuesta de Athento
                 raw_items = (
@@ -49,9 +66,7 @@ def titles_list_view(request):
             return render(request, "ui/titles_list.html", {"items": items, "error": error, "query": query or ""})
         # Si no hay query en POST, comportarse como GET por defecto para mostrar resultados
         try:
-            default_query = "SELECT uuid, filename, created, author, life_cycle_state FROM Document ORDER BY created DESC LIMIT 20"
-            page = 1
-            page_size = 20
+            default_query = "SELECT uuid, filename, created, author, life_cycle_state FROM form_titulo"
             res = UcasalServices.search_query(default_query, page=page, page_size=page_size)
             raw_items = (
                 res.get("results")
@@ -68,10 +83,8 @@ def titles_list_view(request):
     query = request.GET.get("query")
     if not query:
         # Consulta por defecto sobre form_titulo (últimos 20 por fecha de creación)
-        default_query = "SELECT uuid, filename, creation_date FROM form_titulo ORDER BY creation_date DESC LIMIT 20"
+        default_query = "SELECT * FROM form_titulo "
         try:
-            page = 1
-            page_size = 20
             res = UcasalServices.search_query(default_query, page=page, page_size=page_size)
             raw_items = (
                 res.get("results")
@@ -94,8 +107,6 @@ def titles_list_view(request):
             error = str(e)
     else:
         try:
-            page = 1
-            page_size = 20
             res = UcasalServices.search_query(query, page=page, page_size=page_size)
             raw_items = (
                 res.get("results")
@@ -122,7 +133,7 @@ def upload_title_view(request):
     if request.method == "POST":
         file_obj = request.FILES.get("file")
         filename = request.POST.get("filename")
-        doctype = request.POST.get("doctype")
+        doctype = request.POST.get("doctype") or "form_titulo"
         serie = request.POST.get("serie")
         metadatas_raw = request.POST.get("metadatas")
         metadatas = None
@@ -132,18 +143,21 @@ def upload_title_view(request):
             except Exception:
                 ctx["error"] = "metadatas debe ser JSON válido"
                 return render(request, "ui/upload_title.html", ctx)
-        if not file_obj or not filename or not doctype or not serie:
-            ctx["error"] = "file, filename, doctype y serie son obligatorios"
+        # serie es opcional: Athento puede generarla automáticamente
+        if not file_obj or not filename or not doctype:
+            ctx["error"] = "file, filename y doctype son obligatorios"
             return render(request, "ui/upload_title.html", ctx)
         try:
+            data = {
+                'filename': filename,
+                'doctype': doctype,
+                'metadatas': metadatas or {}
+            }
+            if serie:
+                data['serie'] = serie
             result = UcasalServices.create_file(
                 file_tuple=(file_obj.name or filename, file_obj.read(), file_obj.content_type or 'application/pdf'),
-                data={
-                    'filename': filename,
-                    'doctype': doctype,
-                    'serie': serie,
-                    'metadatas': metadatas or {}
-                }
+                data=data
             )
             ctx["ok"] = True
             ctx["result"] = result
@@ -185,24 +199,37 @@ def titles_search_api(request):
     """
     try:
         query = request.GET.get("query")
+        page_param = request.GET.get("page")
+        page_size_param = request.GET.get("page_size")
+        try:
+            page = int(page_param) if page_param is not None else DEFAULT_PAGE
+        except ValueError:
+            page = DEFAULT_PAGE
+        try:
+            page_size = int(page_size_param) if page_size_param is not None else DEFAULT_PAGE_SIZE_API
+        except ValueError:
+            page_size = DEFAULT_PAGE_SIZE_API
+        if page < 1:
+            page = DEFAULT_PAGE
+        if page_size < 1:
+            page_size = DEFAULT_PAGE_SIZE_API
         if not query:
             # Preferir form_titulo (modelo específico de títulos) y dejar Document como fallback
             queries = [
                 (
-                    "SELECT uuid, filename, creation_date "
+                    "SELECT uuid, filename, estado, created, author "
                     "FROM form_titulo "
-                    "ORDER BY creation_date DESC LIMIT 200"
                 ),
                 (
                     "SELECT uuid, filename, created, author, life_cycle_state "
-                    "FROM Document ORDER BY created DESC LIMIT 200"
+                    "FROM Document "
                 ),
             ]
             items = []
             last_err = None
             for q in queries:
                 try:
-                    res = UcasalServices.search_query(q, page=1, page_size=200)
+                    res = UcasalServices.search_query(q, page=page, page_size=page_size)
                     raw_items = (
                         res.get("results")
                         or res.get("result", {}).get("entries")
@@ -216,7 +243,7 @@ def titles_search_api(request):
             if not items and last_err:
                 raise last_err
         else:
-            res = UcasalServices.search_query(query, page=1, page_size=200)
+            res = UcasalServices.search_query(query, page=page, page_size=page_size)
             raw_items = (
                 res.get("results")
                 or res.get("result", {}).get("entries")
@@ -232,8 +259,8 @@ def titles_search_api(request):
             created = it.get("created") or it.get("creation_date") or it.get("fecha_creacion") or ""
             author = it.get("author") or it.get("autor") or ""
             acciones = (
-                f"<a class='btn btn-sm btn-outline-primary me-1' href='/ui/titulos/{uid}/'><i class='bi bi-eye'></i> Ver</a>"
-                f"<a class='btn btn-sm btn-outline-secondary' href='/athento/files/{uid}/download'><i class='bi bi-download'></i> Descargar</a>"
+                f"<a class='btn btn-sm btn-outline-primary me-1' href='/ui/titulos/{uid}/'><i class='bi bi-eye' title='Ver'></i></a>"
+                f"<a class='btn btn-sm btn-outline-secondary' href='/athento/files/{uid}/download'><i class='bi bi-download' title='Descargar'></i></a>"
             )
             data.append({
                 "uuid": uid,

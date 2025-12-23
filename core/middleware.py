@@ -129,20 +129,20 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response['Cross-Origin-Opener-Policy'] = 'same-origin'
         
-        # CSP básico (prioriza estáticos locales)
+        # CSP básico (prioriza estáticos locales y habilita los CDNs usados)
         csp = [
             "default-src 'self'",
-            # Permitir JS local (y en línea si fuese necesario para bootstrap)
-            "script-src 'self' 'unsafe-inline'",
-            "script-src-elem 'self' 'unsafe-inline'",
-            # Permitir CSS local
-            "style-src 'self' 'unsafe-inline'",
-            "style-src-elem 'self' 'unsafe-inline'",
+            # Permitir JS local y desde CDNs específicos (jQuery/DataTables)
+            "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.datatables.net",
+            "script-src-elem 'self' 'unsafe-inline' https://code.jquery.com https://cdn.datatables.net",
+            # Permitir CSS local y desde CDN de DataTables
+            "style-src 'self' 'unsafe-inline' https://cdn.datatables.net",
+            "style-src-elem 'self' 'unsafe-inline' https://cdn.datatables.net",
             # Imágenes locales y data URIs
             "img-src 'self' data:",
             # Permitir fuentes locales y data/blob
             "font-src 'self' data: blob:",
-            # Conexiones XHR/fetch
+            # Conexiones XHR/fetch (solo mismo origen)
             "connect-src 'self'",
         ]
         response['Content-Security-Policy'] = '; '.join(csp)

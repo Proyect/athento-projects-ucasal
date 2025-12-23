@@ -325,8 +325,10 @@ class UcasalServices:
         form = {
             'filename': data.get('filename'),
             'doctype': data.get('doctype'),
-            'serie': data.get('serie')
         }
+        # serie es opcional en creación: solo se envía si viene informada
+        if data.get('serie'):
+            form['serie'] = data.get('serie')
         metadatas = data.get('metadatas') or {}
         for k, v in metadatas.items():
             form[k] = str(v)
@@ -342,9 +344,9 @@ class UcasalServices:
                     return logger.exit({
                         'success': True,
                         'uuid': j.get('uuid') or j.get('id') or j.get('result', {}).get('uuid'),
-                        'filename': form['filename'],
-                        'doctype': form['doctype'],
-                        'serie': form['serie']
+                        'filename': form.get('filename'),
+                        'doctype': form.get('doctype'),
+                        'serie': form.get('serie')
                     })
                 raise AthentoseError(f"Athento create error: HTTP {resp.status_code}: {resp.text}")
             except Exception as e:
