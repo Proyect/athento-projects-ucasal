@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.conf import settings
@@ -11,6 +11,15 @@ import json
 DEFAULT_PAGE = getattr(settings, "UCASAL_DEFAULT_PAGE", 1)
 DEFAULT_PAGE_SIZE_LIST = getattr(settings, "UCASAL_DEFAULT_PAGE_SIZE_LIST", 20)
 DEFAULT_PAGE_SIZE_API = getattr(settings, "UCASAL_DEFAULT_PAGE_SIZE_API", 200)
+
+
+def group_required(group_name: str):
+    """Restringe acceso a usuarios autenticados que pertenezcan al grupo dado."""
+
+    def in_group(user):
+        return user.is_authenticated and user.groups.filter(name=group_name).exists()
+
+    return user_passes_test(in_group, login_url="ui_login")
 
 @require_http_methods(["GET", "POST"]) 
 def login_view(request):
@@ -29,6 +38,7 @@ def logout_view(request):
     auth_logout(request)
     return redirect("ui_login")
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["GET", "POST"]) 
 def titles_list_view(request):
@@ -126,6 +136,7 @@ def titles_list_view(request):
             error = str(e)
     return render(request, "ui/titles_list.html", {"items": items, "error": error, "query": query or ""})
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["GET", "POST"]) 
 def upload_title_view(request):
@@ -165,6 +176,7 @@ def upload_title_view(request):
             ctx["error"] = str(e)
     return render(request, "ui/upload_title.html", ctx)
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["GET"]) 
 def title_detail_view(request, uuid):
@@ -175,6 +187,7 @@ def title_detail_view(request, uuid):
     except Exception as e:
         return render(request, "ui/title_detail.html", {"uuid": uuid, "error": str(e), "data": None})
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["POST"]) 
 def delete_title_view(request, uuid):
@@ -184,11 +197,13 @@ def delete_title_view(request, uuid):
     except Exception as e:
         return HttpResponse(str(e), status=400)
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["GET"]) 
 def titles_console_view(request):
     return render(request, "ui/titles_console.html")
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["GET"]) 
 def titles_search_api(request):
@@ -274,6 +289,7 @@ def titles_search_api(request):
     except Exception as e:
         return JsonResponse({"error": str(e), "data": []}, status=400)
 
+@group_required("Titulos")
 @login_required
 @require_http_methods(["POST"]) 
 def titles_bulk_delete_api(request):
