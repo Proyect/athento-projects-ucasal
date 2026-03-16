@@ -74,5 +74,5 @@ ucasal.code-workspace
 *.webp
 *.sql
 
-.aux
-.env
+*.aux
+*.env
