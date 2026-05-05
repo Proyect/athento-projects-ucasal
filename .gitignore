@@ -76,3 +76,4 @@ ucasal.code-workspace
 
 *.aux
 *.env
+./otros/*
