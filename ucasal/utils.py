@@ -112,7 +112,7 @@ TITULO_TRANSITIONS_ALLOWED = {
     # Firma OTP y blockchain
     TituloStates.pendiente_firma_otp: [
         TituloStates.pendiente_blockchain,
-        TituloStates.firmado,
+        #TituloStates.firmado,
         TituloStates.rechazado,
     ],
     TituloStates.pendiente_blockchain: [
@@ -121,7 +121,7 @@ TITULO_TRANSITIONS_ALLOWED = {
     ],
     TituloStates.fallo_blockchain: [],
     TituloStates.firmado: [],
-    TituloStates.rechazado: [],
+    TituloStates.pendiente_blockchain: [],
 }
 
 TITULO_ESTADO_CODIGO = {
