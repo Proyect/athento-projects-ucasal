@@ -46,8 +46,18 @@
             <td class="text-nowrap">{{ item.created }}</td>
             <td class="text-truncate" style="max-width:200px">{{ item.author }}</td>
             <td>
-              <a class="btn btn-sm btn-outline-primary" href="/ui/titulos/{{ item.uuid }}/"><i class="bi bi-eye" data-label="Ver"></i> </a>
-              <a class="btn btn-sm btn-outline-secondary" href="/athento/files/{{ item.uuid }}/download"><i class="bi bi-download" data-label="Descargar"></i> </a>
+              <a class="btn btn-sm btn-outline-primary me-1" href="/ui/titulos/{{ item.uuid }}/"><i class="bi bi-eye" data-label="Ver"></i></a>
+              <a class="btn btn-sm btn-outline-secondary me-1" href="/athento/files/{{ item.uuid }}/download"><i class="bi bi-download" data-label="Descargar"></i></a>
+              <a class="btn btn-sm btn-outline-warning me-1" href="/ui/titulos/{{ item.uuid }}/edit/"><i class="bi bi-pencil-square" data-label="Editar metadatos"></i></a>
+              <a class="btn btn-sm btn-outline-info me-1" href="/ui/titulos/{{ item.uuid }}/replace/"><i class="bi bi-file-earmark-arrow-up" data-label="Reemplazar archivo"></i></a>
+              <a class="btn btn-sm btn-outline-info me-1" href="/ui/titulos/{{ item.uuid }}/attach/"><i class="bi bi-paperclip" data-label="Adjuntar doc."></i></a>
+              <a class="btn btn-sm btn-outline-success me-1" href="/ui/titulos/{{ item.uuid }}/firm/"><i class="bi bi-check2-circle" data-label="Firmar"></i></a>
+              <a class="btn btn-sm btn-outline-warning me-1" href="/ui/titulos/{{ item.uuid }}/reject/"><i class="bi bi-x-circle" data-label="Rechazar"></i></a>
+              <a class="btn btn-sm btn-outline-secondary me-1" href="/ui/titulos/{{ item.uuid }}/state/"><i class="bi bi-arrow-repeat" data-label="Cambiar estado"></i></a>
+              <button type="button" class="btn btn-sm btn-outline-danger me-1 btn-delete-title" data-uuid="{{ item.uuid }}">
+                <i class="bi bi-trash" data-label="Eliminar"></i>
+              </button>
+              <a class="btn btn-sm btn-outline-dark" href="/ui/titulos/{{ item.uuid }}/status/"><i class="bi bi-clipboard-data" data-label="Estado"></i></a>
             </td>
           </tr>
         {% empty %}
@@ -140,7 +150,49 @@
         const url = '/ui/api/titulos/' + (q ? ('?query=' + q) : '');
         table.ajax.url(url).load();
       });
+
+      // Manejo de modal de confirmación para eliminar
+      const deleteModalEl = document.getElementById('deleteTitleModal');
+      if (deleteModalEl) {
+        const deleteForm = document.getElementById('deleteTitleForm');
+        const deleteUuidSpan = document.getElementById('delete-title-uuid');
+
+        $table.on('click', '.btn-delete-title', function(){
+          const uuid = this.getAttribute('data-uuid');
+          if (!uuid || !deleteForm) {
+            return;
+          }
+          deleteForm.action = '/ui/titulos/' + encodeURIComponent(uuid) + '/delete/';
+          if (deleteUuidSpan) {
+            deleteUuidSpan.textContent = uuid;
+          }
+          const modal = new bootstrap.Modal(deleteModalEl);
+          modal.show();
+        });
+      }
     }
   });
 </script>
+<div class="modal fade" id="deleteTitleModal" tabindex="-1" aria-labelledby="deleteTitleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteTitleModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar el título con UUID:</p>
+        <p><code id="delete-title-uuid"></code>?</p>
+        <p class="mb-0 text-danger small">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteTitleForm" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

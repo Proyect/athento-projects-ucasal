@@ -1,0 +1,21 @@
+{% extends "ui/base.html" %}
+{% block content %}
+<div class="card shadow-sm mb-3">
+  <div class="card-header"><strong>Marcar título como firmado</strong></div>
+  <div class="card-body">
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% elif ok %}
+      <div class="alert alert-success">El título fue marcado como firmado.</div>
+    {% else %}
+      <p>Esta acción actualizará los metadatos del título en Athento para dejarlo como firmado.</p>
+    {% endif %}
+    <p><strong>UUID:</strong> {{ uuid }}</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Confirmar firma lógica</button>
+      <a href="/ui/titulos/" class="btn btn-secondary">Volver al listado</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

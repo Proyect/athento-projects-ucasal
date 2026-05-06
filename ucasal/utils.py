@@ -76,41 +76,64 @@ class ActaStates:
     rechazada = 'Rechazada'
 
 class TituloStates:
-    recibido = 'Recibido'
-    pendiente_aprobacion_ua = 'Pendiente Aprobación UA'
-    aprobado_ua = 'Aprobado por UA'
-    pendiente_aprobacion_r = 'Pendiente Aprobación R'
-    aprobado_r = 'Aprobado por R'
-    pendiente_firma_sg = 'Pendiente Firma SG'
-    firmado_sg = 'Firmado por SG'
-    # Estados de blockchain SUSPENDIDOS temporalmente - se implementará firma digital
-    # TODO: Revisar cuando se implemente la firma digital
-    pendiente_blockchain = 'Pendiente Blockchain'  # DEPRECATED: suspendido temporalmente
-    registrado_blockchain = 'Registrado en Blockchain'  # DEPRECATED: suspendido temporalmente
-    titulo_emitido = 'Título Emitido'
-    rechazado = 'Rechazado'
+    pendiente_validacion_da = 'Pendiente de validacion DA (direccion de alumnos)'
+    pendiente_validacion_fd = 'Pendiente de validacion FD (firma del decano)'
+    pendiente_validacion_fr = 'Pendiente de validacion FR (firma del rector)'
+    pendiente_validacion_tit = 'Pendiente de Validacion TIT (titulo)'
+    pendiente_validacion_fsg = 'Pendiente de validacion FSG (secretaria general)'
+    pendiente_firma_otp = 'Pendiente de Firma OTP'
+    pendiente_blockchain = 'Pendiente Blockchain'
+    fallo_blockchain = 'Fallo en Blockchain'
+    firmado = 'Firmado'
+    rechazado = 'RECHAZADO'
 
 TITULO_TRANSITIONS_ALLOWED = {
-    TituloStates.recibido: [TituloStates.pendiente_aprobacion_ua, TituloStates.rechazado],
-    TituloStates.pendiente_aprobacion_ua: [TituloStates.aprobado_ua, TituloStates.rechazado],
-    TituloStates.aprobado_ua: [TituloStates.pendiente_aprobacion_r, TituloStates.rechazado],
-    TituloStates.pendiente_aprobacion_r: [TituloStates.aprobado_r, TituloStates.rechazado],
-    TituloStates.aprobado_r: [TituloStates.pendiente_firma_sg, TituloStates.rechazado],
-    TituloStates.pendiente_firma_sg: [TituloStates.firmado_sg, TituloStates.rechazado],
-    TituloStates.firmado_sg: [TituloStates.titulo_emitido],
-    TituloStates.titulo_emitido: [],
+    # Flujo normal de aprobación
+    TituloStates.pendiente_validacion_da: [
+        TituloStates.pendiente_validacion_fd,
+        TituloStates.rechazado,
+    ],
+    TituloStates.pendiente_validacion_fd: [
+        TituloStates.pendiente_validacion_fr,
+        TituloStates.rechazado,
+    ],
+    TituloStates.pendiente_validacion_fr: [
+        TituloStates.pendiente_validacion_tit,
+        TituloStates.rechazado,
+    ],
+    TituloStates.pendiente_validacion_tit: [
+        TituloStates.pendiente_validacion_fsg,
+        TituloStates.rechazado,
+    ],
+    TituloStates.pendiente_validacion_fsg: [
+        TituloStates.pendiente_firma_otp,
+        TituloStates.rechazado,
+    ],
+    # Firma OTP y blockchain
+    TituloStates.pendiente_firma_otp: [
+        TituloStates.pendiente_blockchain,
+        TituloStates.firmado,
+        TituloStates.rechazado,
+    ],
+    TituloStates.pendiente_blockchain: [
+        TituloStates.fallo_blockchain,
+        TituloStates.firmado,
+    ],
+    TituloStates.fallo_blockchain: [],
+    TituloStates.firmado: [],
     TituloStates.rechazado: [],
 }
 
 TITULO_ESTADO_CODIGO = {
-    TituloStates.recibido: 0,
-    TituloStates.pendiente_aprobacion_ua: 1,
-    TituloStates.aprobado_ua: 2,
-    TituloStates.pendiente_aprobacion_r: 3,
-    TituloStates.aprobado_r: 4,
-    TituloStates.pendiente_firma_sg: 5,
-    TituloStates.firmado_sg: 6,
-    TituloStates.titulo_emitido: 7,
+    TituloStates.pendiente_validacion_da: 0,
+    TituloStates.pendiente_validacion_fd: 1,
+    TituloStates.pendiente_validacion_fr: 2,
+    TituloStates.pendiente_validacion_tit: 3,
+    TituloStates.pendiente_validacion_fsg: 4,
+    TituloStates.pendiente_firma_otp: 5,
+    TituloStates.pendiente_blockchain: 6,
+    TituloStates.fallo_blockchain: 7,
+    TituloStates.firmado: 8,
     TituloStates.rechazado: 99,
 }
 
@@ -171,10 +194,10 @@ class UcasalConfig:
         env = SAC.get_str('ucasal.endpoint.acortar_url.env', default='produccion')
         if env == 'desarrollo':
             return SAC.get_str('ucasal.titulo.validation_url_template', 
-                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&e=testing&uuid={{uuid}}')
+                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&e=testing&uuid={uuid}')
         else:
             return SAC.get_str('ucasal.titulo.validation_url_template',
-                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&uuid={{uuid}}')
+                             default='https://www.ucasal.edu.ar/validar/index.php?d=titulo&uuid={uuid}')
     
     @staticmethod
     def base_url()->str:

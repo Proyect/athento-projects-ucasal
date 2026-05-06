@@ -789,13 +789,13 @@ def firmar_titulo(request, uuid):
                 f"en lugar de 'Títulos'"
             )
 
-        # Validar que el título está en estado "Pendiente Firma SG"
+        # Validar que el título está en estado "Pendiente de Firma OTP"
         lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else fil.life_cycle_state_legacy
-        if lifecycle_state != TituloStates.pendiente_firma_sg:
+        if lifecycle_state != TituloStates.pendiente_firma_otp:
             endpoint_duration.labels(endpoint='firmar_titulo', method='POST').observe(time.time() - start_time)
             errors_total.labels(error_type='AthentoseError', endpoint='firmar_titulo').inc()
             raise AthentoseError(
-                f"Sólo se puede firmar el título si se encuentra en estado '{TituloStates.pendiente_firma_sg}', "
+                f"Sólo se puede firmar el título si se encuentra en estado '{TituloStates.pendiente_firma_otp}', "
                 f"pero el estado actual es '{lifecycle_state}'."
             )
 
@@ -940,8 +940,10 @@ DNI: {dni}"""
         if ip:
             fil.set_metadata('metadata.firma.ip', ip)
 
-        # Cambiar estado a "Firmado por SG"
-        fil.change_life_cycle_state(TituloStates.firmado_sg)
+        # Cambiar estado a "Firmado" (ciclo de vida UCASAL)
+        fil.change_life_cycle_state(TituloStates.firmado)
+        # Sincronizar metadato de ciclo de vida utilizado por integraciones externas
+        fil.set_metadata('metadata.lifecycle_state', TituloStates.firmado)
 
         # Guardar fecha de firma
         tz = pytz.timezone('America/Argentina/Buenos_Aires')
@@ -950,14 +952,14 @@ DNI: {dni}"""
 
         # Métricas
         titulos_cambios_estado.labels(
-            estado_anterior=TituloStates.pendiente_firma_sg,
-            estado_nuevo=TituloStates.firmado_sg
+            estado_anterior=TituloStates.pendiente_firma_otp,
+            estado_nuevo=TituloStates.firmado
         ).inc()
         endpoint_duration.labels(endpoint='firmar_titulo', method='POST').observe(time.time() - start_time)
 
-        # Notificar a UCASAL el nuevo estado (Firmado por SG)
+        # Notificar a UCASAL el nuevo estado (Firmado)
         try:
-            estado_codigo_firmado = TITULO_ESTADO_CODIGO.get(TituloStates.firmado_sg, 6)
+            estado_codigo_firmado = TITULO_ESTADO_CODIGO.get(TituloStates.firmado, 8)
             UcasalServices.notify_titulo_estado(
                 auth_token=auth_token,
                 uuid=str(uuid),
@@ -970,9 +972,9 @@ DNI: {dni}"""
         # Enviar notificación de firma
         try:
             _notificar_cambio_estado_titulo(
-                fil, 
-                TituloStates.pendiente_firma_sg, 
-                TituloStates.firmado_sg, 
+                fil,
+                TituloStates.pendiente_firma_otp,
+                TituloStates.firmado,
                 f'Título firmado digitalmente el {fecha_firma}. URL de validación: {short_url}',
                 logger
             )

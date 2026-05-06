@@ -20,6 +20,13 @@ from ucasal.views_ui import (
     titles_console_view,
     titles_search_api,
     titles_bulk_delete_api,
+    edit_title_metadata_view,
+    replace_title_file_view,
+    title_status_view,
+    firm_title_view,
+    reject_title_view,
+    change_title_state_view,
+    add_title_attachment_view,
 )
 from ucasal.views_api import titulos_command
 
@@ -128,6 +135,13 @@ urlpatterns = [
     path('ui/titulos/nuevo/', upload_title_view, name='ui_upload_title'),
     path('ui/titulos/<uuid:uuid>/', title_detail_view, name='ui_title_detail'),
     path('ui/titulos/<uuid:uuid>/delete/', delete_title_view, name='ui_title_delete'),
+    path('ui/titulos/<uuid:uuid>/edit/', edit_title_metadata_view, name='ui_title_edit_metadata'),
+    path('ui/titulos/<uuid:uuid>/replace/', replace_title_file_view, name='ui_title_replace_file'),
+    path('ui/titulos/<uuid:uuid>/status/', title_status_view, name='ui_title_status'),
+    path('ui/titulos/<uuid:uuid>/firm/', firm_title_view, name='ui_title_firm'),
+    path('ui/titulos/<uuid:uuid>/reject/', reject_title_view, name='ui_title_reject'),
+    path('ui/titulos/<uuid:uuid>/state/', change_title_state_view, name='ui_title_change_state'),
+    path('ui/titulos/<uuid:uuid>/attach/', add_title_attachment_view, name='ui_title_add_attachment'),
     # Prometheus metrics endpoint
     path('', include('django_prometheus.urls')),
     # Incluir las rutas definidas en actas.py y titulos.py

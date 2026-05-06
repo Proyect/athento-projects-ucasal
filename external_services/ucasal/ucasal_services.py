@@ -372,7 +372,28 @@ class UcasalServices:
         last_exc = None
         for _ in range(retries + 1):
             try:
-                resp = requests.put(url, files=files, data=form, headers=headers, timeout=timeout, verify=cls.VERIFY_CERTIFICATE)
+                # Si hay archivo, usamos multipart/form-data como hasta ahora.
+                if files is not None:
+                    resp = requests.put(
+                        url,
+                        files=files,
+                        data=form,
+                        headers=headers,
+                        timeout=timeout,
+                        verify=cls.VERIFY_CERTIFICATE,
+                    )
+                else:
+                    # Cuando solo actualizamos metadatos/nombre, Athento espera JSON;
+                    # evitamos application/x-www-form-urlencoded que provoca HTTP 415.
+                    json_body = form or {}
+                    json_headers = {**headers, 'Content-Type': 'application/json'}
+                    resp = requests.put(
+                        url,
+                        headers=json_headers,
+                        json=json_body,
+                        timeout=timeout,
+                        verify=cls.VERIFY_CERTIFICATE,
+                    )
                 if resp.status_code in (200, 201):
                     return logger.exit({'success': True, 'uuid': uuid, 'updated': list(form.keys()) + (['file'] if files else [])})
                 raise AthentoseError(f"Athento update error: HTTP {resp.status_code}: {resp.text}")
