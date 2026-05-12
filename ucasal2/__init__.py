@@ -1,0 +1,1 @@
+default_app_config = 'ucasal2.apps.Ucasal2AppConfig'
