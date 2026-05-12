@@ -47,5 +47,6 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+*.pyc
 
 ucasal2.code-workspace
