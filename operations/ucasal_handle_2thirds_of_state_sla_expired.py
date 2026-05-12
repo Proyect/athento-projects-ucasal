@@ -8,10 +8,7 @@ from datetime import datetime
 import math
 from sp_public_link_sender import PublicLinkSender
 
-try:
-    from sp_logger import SpLogger
-except ImportError:
-    from ucasal.mocks.sp_logger import SpLogger
+from sp_logger import SpLogger
 
 
 

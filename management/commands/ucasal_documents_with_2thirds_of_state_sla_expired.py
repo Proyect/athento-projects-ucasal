@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from datetime import datetime
 from core.exceptions import AthentoseError
 import importlib
-from ucasal.utils import dumper, encodeJSON, decodeJSON
+from ucasal2.utils import dumper, encodeJSON, decodeJSON
 
 class Command(BaseCommand):
     help = "Runs custom operations once 2/3 of state SLA (or max_minutes) fot the speciefied life cycle state have elapsed."
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         from django.contrib.auth.models import User
         from doctypes.models import DocumentType
         from series.models import Serie
-        from ucasal.utils import automation_user
+        from ucasal2.utils import automation_user
         import math
         from sp_logger import SpLogger
 

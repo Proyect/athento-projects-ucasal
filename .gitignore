@@ -6,10 +6,6 @@
 # Node artifact files
 node_modules/
 dist/
-_pycache_/
-.github/
-.venv/
-.vscode/
 
 # Compiled Java class files
 *.class
@@ -52,28 +48,4 @@ Thumbs.db
 *.mov
 *.wmv
 
-ucasal.code-workspace
-
-*.aux #datas 
-.env
-.env.local
-.env.remote
-*.env.*
-*.env
-*.ps1
-*.xlsx
-*.xls
-*.pdf
-*.doc
-*.docx
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-*.webp
-*.sql
-
-*.aux
-*.env
-otros/
+ucasal2.code-workspace

@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+  ],
+  "settings": {
+    "terminal.integrated.env.windows": {
+      "PYTHONPATH": "D:/SocialPath/git/ucasal/branches/prod;D:/SocialPath/Athento/www/athentose/athentose;D:/SocialPath/git/SpLibs"
+    },
+    "python.autoComplete.extraPaths": [
+      "D:/SocialPath/git/ucasal/branches/prod",
+      "D:/SocialPath/Athento/www/athentose/athentose",
+      "D:/SocialPath/git/SpLibs"
+    ],
+    "python.analysis.extraPaths": [
+      "D:/SocialPath/git/ucasal/branches/prod",
+      "D:/SocialPath/Athento/www/athentose/athentose",
+      "D:/SocialPath/git/SpLibs"
+    ],  
+  }
+}
