@@ -47,5 +47,15 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyzwz
+*.pyzwzw
+*.pyzwzwz   
 
 ucasal2.code-workspace
