@@ -10,7 +10,7 @@ from ucasal.utils import TituloStates
 from file.models import File, DocumentRelation
 
 
-class ApruebaTitulo(DocumentOperation):
+class FirmaTitulo(DocumentOperation):
     version = "1.0"
     name = _("AprobacionTitulo")
     description = _("Aprueba un título y lo avanza de estado")
