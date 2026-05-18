@@ -5,7 +5,6 @@ from operations.classes.document_operation import DocumentOperation
 from django.utils.translation import gettext as _
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from core.exceptions import AthentoseError
-from ucasal.utils import TituloStates, can_transition
 
 from file.models import File, DocumentRelation
 
@@ -21,6 +20,10 @@ class FirmaTitulo(DocumentOperation):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
         logger = self._logger
         logger.entry()
+
+        # Import diferido para evitar fallos de instalación si ucasal.utils
+        # aún no está disponible en el entorno donde se importa la operación.
+        from ucasal.utils import TituloStates, can_transition
 
         fil = self.document
         uuid = str(fil.uuid)

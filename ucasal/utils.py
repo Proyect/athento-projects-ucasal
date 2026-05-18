@@ -1,14 +1,5 @@
 from json import loads as decodeJSON, dumps as encodeJSON
 import traceback
-from django.http import HttpResponse
-
-
-# Errores HTTP comunes reutilizables
-NOT_FOUND = HttpResponse('Provider not found.', status=404)
-BAD_REQUEST = HttpResponse('Bad request', status=400)
-UNAUTHORIZED = HttpResponse('Unauthorized access.', status=401)
-FORBIDDEN = HttpResponse('Forbidden access.', status=403)
-METHOD_NOT_ALLOWED = HttpResponse('Method not allowed.', status=405)
 
 
 NoneType = type(None)
@@ -101,18 +92,26 @@ def getJsonOrStr(something):
 
 
 def traceback_ret(func):
+    """Wrapper simple que captura excepciones y devuelve JSON.
+
+    Se define sin depender directamente de HttpResponse para que este módulo
+    pueda importarse incluso fuera de Django (por ejemplo en scripts de prueba).
+    Las vistas que quieran usar este decorador deberían redefinir una versión
+    específica que utilice HttpResponse dentro de un entorno Django configurado.
+    """
+
     def f(request, *args, **kargs):
         try:
             return func(request, *args, **kargs)
         except Exception:
-            content = encodeJSON({
+            # Retorna un dict con información del error; la vista puede
+            # transformarlo en HttpResponse según corresponda.
+            return {
                 'request': {
-                    'method': request.method,
-                    'meta': {k: v for k, v in request.META.items() if type(v) in serializableJsonTypes},
-                    'params': {k: v for k, v in request.GET.items()} if request.method == 'GET' else {},
-                    'body': getJsonOrStr(getattr(request, 'data', '')),
+                    'method': getattr(request, 'method', ''),
+                    'params': getattr(request, 'GET', {}),
                 },
                 'error': traceback.format_exc(),
-            })
-            return HttpResponse(content=content, content_type='application/json', status=500)
+            }
+
     return f
