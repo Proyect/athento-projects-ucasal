@@ -12,10 +12,10 @@ from file.models import File, DocumentRelation
 
 class FirmaTitulo(DocumentOperation):
     version = "1.0"
-    name = _("AprobacionTitulo")
-    description = _("Aprueba un título y lo avanza de estado")
+    name = _("FirmaTitulo")
+    description = _("Firma un título y lo avanza de estado")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger.getLogger("athentose")
+    _logger: SpLogger = SpLogger("athentose","FirmaTitulo")
 
     def execute(self, *args, **kwargs):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
