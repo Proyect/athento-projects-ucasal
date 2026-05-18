@@ -24,9 +24,9 @@ class FirmaTitulo(DocumentOperation):
 
         fil = self.document
         uuid = str(fil.uuid)
-
-        relaciones = DocumentRelation.objects.filter(parent=fil) 
+        
         try:
+            relaciones = DocumentRelation.objects.filter(parent=fil) 
             for rel in relaciones:
                 hijo = rel.child
                 tipo_relacion = rel.relation_type
@@ -116,17 +116,17 @@ class FirmaTitulo(DocumentOperation):
             )
 
 
-VERSION = ApruebaTitulo.version
-NAME = ApruebaTitulo.name
-DESCRIPTION = ApruebaTitulo.description
+VERSION = FirmaTitulo.version
+NAME = FirmaTitulo.name
+DESCRIPTION = FirmaTitulo.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = ApruebaTitulo.configuration_parameters
+CONFIGURATION_PARAMETERS = FirmaTitulo.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return ApruebaTitulo(uuid, **params).run()
+    return FirmaTitulo(uuid, **params).run()
