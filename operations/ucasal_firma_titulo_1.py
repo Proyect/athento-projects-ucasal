@@ -10,11 +10,17 @@ from file.models import File, DocumentRelation
 
 
 class FirmaTitulo(DocumentOperation):
+    """Operación que avanza el estado de un título en el workflow UCASAL.
+
+    Flujo esperado (padre):
+      DA -> FD -> FR -> TIT -> FSG
+    """
+
     version = "1.0"
     name = _("FirmaTitulo")
     description = _("Firma un título y lo avanza de estado")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose","FirmaTitulo")
+    _logger: SpLogger = SpLogger("athentose", "FirmaTitulo")
 
     def execute(self, *args, **kwargs):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
@@ -23,13 +29,14 @@ class FirmaTitulo(DocumentOperation):
 
         # Import diferido para evitar fallos de instalación si ucasal.utils
         # aún no está disponible en el entorno donde se importa la operación.
-        from ucasal.utils import TituloStates, can_transition
+        from ucasal.utils import TituloStates
 
         fil = self.document
         uuid = str(fil.uuid)
+
+        # Relación padre-hijo (por ahora solo la listamos; se puede
+        # extender para propagar cambios de estado a los hijos).
         try:
-            # Se podrían usar las relaciones padre-hijo en el futuro si se desea
-            # propagar el cambio de estado a documentos relacionados.
             relaciones = DocumentRelation.objects.filter(parent=fil)
             for rel in relaciones:
                 hijo = rel.child
@@ -44,25 +51,58 @@ class FirmaTitulo(DocumentOperation):
             lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else ""
             estado_meta = fil.gfv("estado") or lifecycle_state
 
-            if not can_transition(estado_meta, TituloStates.firmado):
-                raise AthentoseError(
-                    _(
-                        "Transición no permitida: '%(estado_actual)s' → '%(estado_nuevo)s'"
-                    )
-                    % {"estado_actual": estado_meta or "", "estado_nuevo": TituloStates.firmado}
+            # Avanzar en la cadena DA -> FD -> FR -> TIT -> FSG
+            if estado_meta == TituloStates.pendiente_validacion_da:
+                nuevo_estado = TituloStates.pendiente_validacion_fd
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado)
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
                 )
 
-            # Cambiar ciclo de vida al estado 'Firmado'
-            fil.change_life_cycle_state(TituloStates.firmado)
-            # Sincronizar metadata utilizada por integraciones externas
-            fil.set_metadata("metadata.lifecycle_state", TituloStates.firmado)
-            fil.save()
+            if estado_meta == TituloStates.pendiente_validacion_fd:
+                nuevo_estado = TituloStates.pendiente_validacion_fr
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado)
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
 
-            return logger.exit(
-                {
-                    "msg": f"El título {uuid} avanzó a '{TituloStates.firmado}'",
-                    "msg_type": "success",
-                }
+            if estado_meta == TituloStates.pendiente_validacion_fr:
+                nuevo_estado = TituloStates.pendiente_validacion_tit
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado)
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
+
+            if estado_meta == TituloStates.pendiente_validacion_tit:
+                nuevo_estado = TituloStates.pendiente_validacion_fsg
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado)
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
+
+            # Si el estado actual no está en ninguno de los anteriores,
+            # consideramos que no puede avanzar con esta operación.
+            raise AthentoseError(
+                _(
+                    "El estado actual del título (%(estado)s) no permite la aprobación."
+                )
+                % {"estado": estado_meta}
             )
 
         except FileNotFoundError as e:
@@ -72,13 +112,13 @@ class FirmaTitulo(DocumentOperation):
                 exc_info=True,
             )
         except AthentoseError as e:
-            flogger.error(f"Error en la operación de firma de título: {e}")
+            flogger.error(f"Error en la operación de aprobación de título: {e}")
             return logger.exit(
                 HttpResponse(str(e), status=400),
                 exc_info=True,
             )
         except Exception as e:
-            flogger.error(f"Error inesperado al firmar el título: {e}")
+            flogger.error(f"Error inesperado al aprobar el título: {e}")
             return logger.exit(
                 HttpResponse(str(e), status=500),
                 exc_info=True,
