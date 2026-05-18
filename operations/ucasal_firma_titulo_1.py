@@ -3,7 +3,8 @@
 from django.http import HttpResponse
 from operations.classes.document_operation import DocumentOperation
 from django.utils.translation import gettext as _
-from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
+from custom.sp_libs.python.logging import SpLogger 
+from custom.sp_libs.python.logging import SpFeatureLogger, NullSpFeatureLogger
 from core.exceptions import AthentoseError
 
 from file.models import File, DocumentRelation
@@ -11,7 +12,6 @@ from file.models import File, DocumentRelation
 
 class FirmaTitulo(DocumentOperation):
     """Operación que avanza el estado de un título en el workflow UCASAL.
-
     Flujo esperado (padre):
       DA -> FD -> FR -> TIT -> FSG
     """
