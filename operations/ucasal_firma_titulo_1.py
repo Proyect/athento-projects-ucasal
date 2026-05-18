@@ -24,11 +24,10 @@ class FirmaTitulo(DocumentOperation):
 
         fil = self.document
         uuid = str(fil.uuid)
-
-        # Se podrían usar las relaciones padre-hijo en el futuro si se desea
-        # propagar el cambio de estado a documentos relacionados.
-        relaciones = DocumentRelation.objects.filter(parent=fil)
         try:
+            # Se podrían usar las relaciones padre-hijo en el futuro si se desea
+            # propagar el cambio de estado a documentos relacionados.
+            relaciones = DocumentRelation.objects.filter(parent=fil)
             for rel in relaciones:
                 hijo = rel.child
                 tipo_relacion = rel.relation_type
