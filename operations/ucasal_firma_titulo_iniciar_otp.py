@@ -5,7 +5,7 @@ from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
-
+from file.models import File, DocumentRelation
 
 class IniciaFirmaTituloOTP(DocumentOperation):
     version = "1.0"
@@ -23,6 +23,21 @@ class IniciaFirmaTituloOTP(DocumentOperation):
 
         fil = self.document
         uuid = str(fil.uuid)
+
+        try:
+            relaciones = DocumentRelation.objects.filter(parent=fil) 
+            for rel in relaciones:
+                hijo = rel.child
+                tipo_relacion = rel.relation_type
+                print(f"Hijo: {hijo.uuid}, Tipo: {tipo_relacion}")
+        except Exception as e:
+            logger.error(f"Error al obtener relaciones: {e}")
+            return logger.exit(
+                {
+                    "msg": f"Error al obtener relaciones para el título {uuid}",
+                    "msg_type": "error",
+                }
+            )
 
         try:
             flogger = SpFeatureLogger.getLogger(fil)
