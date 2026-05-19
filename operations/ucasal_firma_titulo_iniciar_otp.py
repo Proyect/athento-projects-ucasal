@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from file.models import File, DocumentRelation
+from ..utils import TituloStates
 
 class IniciaFirmaTituloOTP(DocumentOperation):
     version = "1.0"
@@ -44,16 +45,18 @@ class IniciaFirmaTituloOTP(DocumentOperation):
             flogger.entry("Iniciando proceso de firma OTP para el título...")
 
             # Leer estado actual
-            lifecycle_state = fil.life_cycle_state.name
+            lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else ""
             estado_meta = fil.gfv("estado") or lifecycle_state
 
             # Verificar que el estado permita iniciar OTP.
-            # Según el ciclo de vida, debe estar en "Pendiente de validacion FSG (secretaria general)".
-            if estado_meta != "Pendiente de validacion FSG (secretaria general)":
+            # Según el ciclo de vida, debe estar en pendiente_validacion_fsg.
+            if estado_meta != TituloStates.pendiente_validacion_fsg:
                 raise AthentoseError(
                     _(
-                        f"El título está en estado '{estado_meta}' y no puede iniciar el proceso de firma OTP."
+                        "El título está en estado '%(estado)s' y no puede iniciar el "
+                        "proceso de firma OTP."
                     )
+                    % {"estado": estado_meta}
                 )
 
             # Limpiar cualquier rechazo previo
@@ -67,18 +70,18 @@ class IniciaFirmaTituloOTP(DocumentOperation):
             )
 
             # Cambiar estado lógico y de lifecycle a 'Pendiente de Firma OTP'
-            nuevo_estado = "Pendiente de Firma OTP"
+            nuevo_estado = TituloStates.pendiente_firma_otp
             fil.set_metadata("estado", nuevo_estado, overwrite=True)
             fil.change_life_cycle_state(nuevo_estado)
 
             flogger.debug("Título pasado a estado 'Pendiente de Firma OTP'")
             return logger.exit(
-                HttpResponse(
-                    _(
+                {
+                    "msg": _(
                         "Título preparado para firma OTP (estado 'Pendiente de Firma OTP')"
                     ),
-                    status=200,
-                )
+                    "msg_type": "success",
+                }
             )
 
         except AthentoseError as e:

@@ -29,7 +29,7 @@ class FirmaTitulo(DocumentOperation):
 
         # Import diferido para evitar fallos de instalación si ucasal.utils
         # aún no está disponible en el entorno donde se importa la operación.
-        from ucasal.utils import TituloStates
+        from utils import TituloStates
 
         fil = self.document
         uuid = str(fil.uuid)

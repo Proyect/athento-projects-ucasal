@@ -66,6 +66,18 @@ class ActaStates:
     fallo_blockchain = 'Fallo en Blockchain'
     rechazada = 'Rechazada'
 
+class TituloStates:
+    pendiente_validacion_da = 'Pendiente de validacion DA (direccion de alumnos)'
+    pendiente_validacion_fd = 'Pendiente de validacion FD (firma del decano)'
+    pendiente_validacion_fr = 'Pendiente de validacion FR (firma del rector)'
+    pendiente_validacion_tit = 'Pendiente de Validacion TIT (titulo)'
+    pendiente_validacion_fsg = 'Pendiente de validacion FSG (secretaria general)'
+    pendiente_firma_otp = 'Pendiente de Firma OTP'
+    pendiente_blockchain = 'Pendiente Blockchain'
+    fallo_blockchain = 'Fallo en Blockchain'
+    firmado = 'Firmado'
+    rechazado = 'RECHAZADO'
+
 class UcasalConfig:
     @staticmethod
     def token_svc_url()->str:
