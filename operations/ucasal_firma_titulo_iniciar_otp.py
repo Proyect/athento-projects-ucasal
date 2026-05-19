@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from file.models import File, DocumentRelation
-from ucasal.utils import TituloStates
+from ..utils import TituloStates
 
 class IniciaFirmaTituloOTP(DocumentOperation):
     version = "1.0"
