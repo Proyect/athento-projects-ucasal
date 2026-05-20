@@ -8,7 +8,7 @@ from custom.sp_libs.python.logging import SpFeatureLogger, NullSpFeatureLogger
 from core.exceptions import AthentoseError
 
 from file.models import File, DocumentRelation
-
+from utils import TituloStates
 
 class FirmaTitulo(DocumentOperation):
     """Operación que avanza el estado de un título en el workflow UCASAL.
@@ -29,7 +29,7 @@ class FirmaTitulo(DocumentOperation):
 
         # Import diferido para evitar fallos de instalación si ucasal.utils
         # aún no está disponible en el entorno donde se importa la operación.
-        from utils import TituloStates
+        
 
         fil = self.document
         uuid = str(fil.uuid)

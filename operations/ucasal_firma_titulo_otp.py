@@ -12,8 +12,8 @@ from django_currentuser.middleware import get_current_user
 
 from ..utils import TituloStates
 from external_services.ucasal.ucasal_services import UcasalServices
-from ..utils import UcasalConfig
-from ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
+from utils import UcasalConfig
+from utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
     SpPdfSimpleSigner,
     QRInfo,
