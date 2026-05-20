@@ -3,11 +3,11 @@ from django.apps import AppConfig
 from django.urls import re_path as url, include
 
 
-class Ucasal2AppConfig(AppConfig):
-    name = 'ucasal2'
+class UcasalAppConfig(AppConfig):
+    name = 'ucasal'
 
     def ready(self):
         pass
 
     def get_urlpatterns(self):
-        return [url(r'^ucasal2/api/', include('ucasal2.urls', namespace='ucasal2'))]
+        return [url(r'^ucasal/api/', include('ucasal.urls', namespace='ucasal'))]
