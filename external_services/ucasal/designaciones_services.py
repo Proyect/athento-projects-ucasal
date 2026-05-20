@@ -2,8 +2,8 @@ from file.models import File
 import requests
 from core.exceptions import AthentoseError
 from custom.sp_libs.python.sp_logger.sp_logger import SpLogger
-from ucasal2.utils import UcasalConfig
-from ucasal2.model.ucasal.exceptions import UcasalServiceError
+from utils import UcasalConfig
+from model.ucasal.exceptions import UcasalServiceError
 
 class DesignacionesServices:
     @classmethod    
@@ -44,7 +44,7 @@ class DesignacionesServices:
         """
         Notifica al backend UCASAL el cambio de estado de una Designación.
         Usa PATCH con Authorization Bearer, contra el endpoint configurado en
-        ucasal2.endpoint.change_designaciones.url
+        endpoint.change_designaciones.url
         """
         logger = SpLogger.getLogger("athentose")
         logger.entry()

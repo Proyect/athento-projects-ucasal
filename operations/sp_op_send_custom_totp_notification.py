@@ -7,7 +7,7 @@ from notifications.models import NotificationTemplate
 from sp_totp_generator import TOTPGenerator
 from django.utils.translation import gettext as _
 from sp_logger import SpLogger
-from ucasal2.utils import get_totp_key
+from utils import get_totp_key
 
 
 class SpSendCustopTotpNotification(DocumentOperation):

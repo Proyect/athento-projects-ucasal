@@ -6,11 +6,11 @@ from file.foperations import op_send_by_email
 from file.models import File
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
-from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import UcasalConfig
-from ucasal2.utils import ActaStates 
+from external_services.ucasal.ucasal_services import UcasalServices
+from utils import UcasalConfig
+from utils import ActaStates 
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger 
-from ucasal2.model.ucasal.exceptions import UcasalServiceError
+from model.ucasal.exceptions import UcasalServiceError
 
 uuid_previo_metadata_name =  'metadata.acta_id_acta_previa'
 class RechazaActaDeExamen(DocumentOperation):

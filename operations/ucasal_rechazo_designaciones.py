@@ -4,10 +4,10 @@ from django.http import HttpResponse
 from operations.classes.document_operation import DocumentOperation
 from django.utils.translation import gettext as _
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
-from ucasal2.utils import DesignacionesStates
-from ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
-from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import UcasalConfig
+from utils import DesignacionesStates
+from external_services.ucasal.designaciones_services import DesignacionesServices
+from external_services.ucasal.ucasal_services import UcasalServices
+from utils import UcasalConfig
 from core.exceptions import AthentoseError
 from datetime import datetime
 import pytz

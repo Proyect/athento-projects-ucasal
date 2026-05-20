@@ -4,12 +4,12 @@ from operations.classes.document_operation import DocumentOperation
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
-from ucasal2.utils import DesignacionesStates
-from ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
-from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import is_digit, is_non_empty_string, get_mail_for_otp, get_arg_time, get_pdf_hash
+from utils import DesignacionesStates
+from external_services.ucasal.designaciones_services import DesignacionesServices
+from external_services.ucasal.ucasal_services import UcasalServices
+from utils import is_digit, is_non_empty_string, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import SpPdfSimpleSigner, QRInfo, OTPInfo
-from ucasal2.utils import UcasalConfig
+from utils import UcasalConfig
 from file.models import File
 from django.core.files import File as DjangoFile
 from core.exceptions import AthentoseError
@@ -220,7 +220,7 @@ class FirmaDesignacionesVR(DocumentOperation):
                 file_uuid=str(fil.uuid),
                 callback_url=callback_url
             )
-            fil.set_feature('ucasal2.svc.ok_response', ok_response_text)
+            fil.set_feature('svc.ok_response', ok_response_text)
             fil.set_feature('registro_blockchain', 'pending')
             response = DesignacionesServices.change_state_integration(uuid=uuid, state=4, auth_token=auth_token)
             fil.set_feature('Response estado 4', response.text)

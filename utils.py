@@ -81,79 +81,79 @@ class TituloStates:
 class UcasalConfig:
     @staticmethod
     def token_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.gettoken.url')     
+        return SAC.get_str('endpoint.gettoken.url')     
 
     @staticmethod
     def token_svc_user()->str:
-        return SAC.get_str('ucasal2.endpoint.gettoken.usuario')     
+        return SAC.get_str('endpoint.gettoken.usuario')     
 
     @staticmethod
     def token_svc_password()->str:
-        return SAC.get_str('ucasal2.endpoint.gettoken.clave', is_secret=True)     
+        return SAC.get_str('endpoint.gettoken.clave', is_secret=True)     
     
     @staticmethod
     def otp_validity_seconds()->int:
-        return SAC.get_int('ucasal2.otp_validity_seconds')         
+        return SAC.get_int('otp_validity_seconds')         
 
     @staticmethod
     def qr_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.qr.url')         
+        return SAC.get_str('endpoint.qr.url')         
 
     @staticmethod
     def qr_svc_param_verify()->bool:
-        return SAC.get_bool('ucasal2.endpoint.qr.param.verify')         
+        return SAC.get_bool('endpoint.qr.param.verify')         
 
     @staticmethod
     def stamps_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.stamps.url')    
+        return SAC.get_str('endpoint.stamps.url')    
 
     @staticmethod
     def change_acta_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.change_acta.url')
+        return SAC.get_str('endpoint.change_acta.url')
     
     @staticmethod
     def change_equivalencia_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.change_equivalencia.url')
+        return SAC.get_str('endpoint.change_equivalencia.url')
     
     @staticmethod
     def change_designaciones_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.change_designaciones.url')
+        return SAC.get_str('endpoint.change_designaciones.url')
 
     @staticmethod
     def shorten_url_svc_url()->str:
-        return SAC.get_str('ucasal2.endpoint.acortar_url.url')    
+        return SAC.get_str('endpoint.acortar_url.url')    
 
     @staticmethod
     def shorten_url_svc_env()->str:
-        return SAC.get_str('ucasal2.endpoint.acortar_url.env')
+        return SAC.get_str('endpoint.acortar_url.env')
 
     @staticmethod
     def acta_validation_url_template()->str:
-        return SAC.get_str('ucasal2.acta.validation_url_template')
+        return SAC.get_str('acta.validation_url_template')
     
     @staticmethod
     def otp_validation_url_template()->str:
-        return SAC.get_str('ucasal2.endopint.otp.validation_url_template')
+        return SAC.get_str('endopint.otp.validation_url_template')
     
     @staticmethod
     def equivalencia_validation_url_template()->str:
-        return SAC.get_str('ucasal2.equivalencia.validation_url_template')
+        return SAC.get_str('equivalencia.validation_url_template')
     
     @staticmethod
     def equivalencia_bfaresponse_endpoint()->str:
-        return SAC.get_str('ucasal2.equivalencia.bfaresponse_endpoint')
+        return SAC.get_str('equivalencia.bfaresponse_endpoint')
     
     @staticmethod
     def equivalencia_nro_resolucion_endpoint()->str:
-        return SAC.get_str('ucasal2.equivalencia.nro_resolucion_endpoint')
+        return SAC.get_str('equivalencia.nro_resolucion_endpoint')
     
     @staticmethod
     def designaciones_bfaresponse_endpoint()->str:
-        return SAC.get_str('ucasal2.designaciones.bfaresponse_endpoint')
+        return SAC.get_str('designaciones.bfaresponse_endpoint')
     
     @staticmethod
     def designaciones_validation_url_template()->str:
-        return SAC.get_str('ucasal2.designaciones.validation_url_template')
+        return SAC.get_str('designaciones.validation_url_template')
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])

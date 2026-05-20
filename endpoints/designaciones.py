@@ -2,7 +2,7 @@ from django.urls import re_path as url
 from django.http import HttpResponse
 from file.models import File
 from core.exceptions import AthentoseError
-from ucasal2.utils import (
+from utils import (
     default_permissions,
     traceback_ret,
     encodeJSON,
@@ -12,10 +12,10 @@ from ucasal2.utils import (
     UcasalConfig
 )
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
-from ucasal2.model.ucasal.exceptions import UcasalServiceError
+from model.ucasal.exceptions import UcasalServiceError
 from file.foperations import op_send_by_email
-from ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
-from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from external_services.ucasal.designaciones_services import DesignacionesServices
+from external_services.ucasal.ucasal_services import UcasalServices
 from datetime import datetime
 
 @default_permissions

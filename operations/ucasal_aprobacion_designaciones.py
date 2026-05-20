@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from operations.classes.document_operation import DocumentOperation
 from django.utils.translation import gettext as _
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
-from ucasal2.utils import DesignacionesStates
+from utils import DesignacionesStates
 from core.exceptions import AthentoseError
 from file.foperations import op_send_by_email
 

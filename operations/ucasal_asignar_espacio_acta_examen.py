@@ -8,7 +8,7 @@ from file.models import File
 from series.models import Serie
 from sp_logger import SpLogger
 
-from ucasal2.utils import sector_metadata_name, nro_revision_metadata_name, uuid_previo_metadata_name, serie_actas_revisadas_name, acta_examen_doctype_name
+from utils import sector_metadata_name, nro_revision_metadata_name, uuid_previo_metadata_name, serie_actas_revisadas_name, acta_examen_doctype_name
 
 class GdeAsignarEspacioActaExamen(DocumentOperation):
     version = "1.0"

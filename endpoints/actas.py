@@ -1,21 +1,21 @@
 from django.urls import re_path as url
-from ucasal2.utils import default_permissions, traceback_ret, encodeJSON, getJsonBody, decodeUTF8
-from ucasal2.utils import METHOD_NOT_ALLOWED
-from ucasal2.utils import ActaStates 
+from utils import default_permissions, traceback_ret, encodeJSON, getJsonBody, decodeUTF8
+from utils import METHOD_NOT_ALLOWED
+from utils import ActaStates 
 from sp_logger import SpLogger
 from sp_totp_generator import TOTPGenerator
 from sp_form_totp_notifier import SpFormTotpNotifier
 from sp_athento_config import SpAthentoConfig as AC
-from ucasal2.utils import UcasalConfig
-from ucasal2.utils import get_totp_key
+from utils import UcasalConfig
+from utils import get_totp_key
 from django.http import HttpResponse
 from file.models import File
 from core.exceptions import AthentoseError
 from django.core.files import File as FileObject
 from sp_pdf_otp_simple_signer import SpPdfSimpleSigner, QRInfo, OTPInfo
-from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import uuid_previo_metadata_name
-from ucasal2.model.exceptions.invalid_otp_error import InvalidOtpError
+from external_services.ucasal.ucasal_services import UcasalServices
+from utils import uuid_previo_metadata_name
+from model.exceptions.invalid_otp_error import InvalidOtpError
 
 from datetime import datetime
 import pytz
@@ -329,7 +329,7 @@ def registerotp(request, uuid):
             _delete_file(qr_image_tmp_path)        
 
             # actualizar binario del acta
-            with NamedTemporaryFile(dir=settings.MEDIA_TMP, suffix='.ucasal2.tmp') as pdf_temp:
+            with NamedTemporaryFile(dir=settings.MEDIA_TMP, suffix='.tmp') as pdf_temp:
                 pdf_temp.write(pdf_out_stream.getbuffer())
                 fil.update_binary(FileObject(pdf_temp), fil.filename + ".pdf")
                 fil.set_feature('firmada.con.OTP', "1")
@@ -352,7 +352,7 @@ def registerotp(request, uuid):
         pdf_hash = _get_pdf_hash(fil)
         callback_url = urljoin(request.build_absolute_uri('/'), 'ucasal2/api/actas/', str(fil.uuid), 'bfaresponse')
         ok_response_text = UcasalServices.register_in_blockchain(auth_token=auth_token, hash=pdf_hash, file_uuid=str(fil.uuid), callback_url=callback_url)
-        fil.set_feature('ucasal2.svc.ok_response', ok_response_text)
+        fil.set_feature('svc.ok_response', ok_response_text)
         # Cambiar estado a Pendiente Blockchain
         #TODO: forzar transición?
         fil.change_life_cycle_state(ActaStates.pendiente_blockchain) #, force_transition=True)
