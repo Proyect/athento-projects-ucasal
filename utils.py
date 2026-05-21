@@ -248,4 +248,7 @@ def dumper(obj):
         except:
             return str(obj)
 
+def get_url():
+    return "http://localhost:8000" # TODO: cambiar por la url de produccion
+
 
