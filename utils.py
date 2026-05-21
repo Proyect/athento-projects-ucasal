@@ -4,8 +4,8 @@ from core.exceptions import AthentoseError
 from json import loads as decodeJSON, dumps as encodeJSON
 import traceback
 import requests
-from sp_athento_config import SpAthentoConfig as SAC
-from sp_logger import SpLogger
+from custom.sp_libs.python.sp_athento_config import SpAthentoConfig as SAC
+from custom.sp_libs.python.logging import SpLogger
 from datetime import datetime
 import pytz
 import hashlib
