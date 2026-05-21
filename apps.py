@@ -4,7 +4,7 @@ from django.urls import re_path as url, include
 
 
 class UcasalAppConfig(AppConfig):
-    name = 'ucasalTitulo'
+    name = 'ucasal'
 
     def ready(self):
         pass
