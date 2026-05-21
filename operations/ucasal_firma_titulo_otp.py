@@ -10,7 +10,7 @@ from file.models import DocumentRelation
 from django.core.files import File as DjangoFile
 from django_currentuser.middleware import get_current_user
 
-from ..utils import TituloStates
+from utils import TituloStates
 from external_services.ucasal.ucasal_services import UcasalServices
 from utils import UcasalConfig
 from utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
