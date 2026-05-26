@@ -4,8 +4,8 @@ import requests
 from core.exceptions import AthentoseError
 from custom.sp_libs.python.logging import SpLogger
 from base64 import b64encode
-from ucasal2.utils import UcasalConfig
-from ucasal2.model.exceptions.invalid_otp_error import InvalidOtpError
+from utils import UcasalConfig
+from model.exceptions.invalid_otp_error import InvalidOtpError
 class UcasalServices:
     logger = SpLogger("athentose", "UcasalServices")
 
