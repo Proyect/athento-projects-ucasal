@@ -6,7 +6,7 @@ from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
 from file.models import File
 from series.models import Serie
-from sp_logger import SpLogger
+from custom.sp_libs.python.logging import SpLogger
 
 from ucasal2.utils import sector_metadata_name, nro_revision_metadata_name, uuid_previo_metadata_name, serie_actas_revisadas_name, acta_examen_doctype_name
 

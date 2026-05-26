@@ -2,17 +2,17 @@ from django.urls import re_path as url
 from ucasal2.utils import default_permissions, traceback_ret, encodeJSON, getJsonBody, decodeUTF8
 from ucasal2.utils import METHOD_NOT_ALLOWED
 from ucasal2.utils import ActaStates 
-from sp_logger import SpLogger
-from sp_totp_generator import TOTPGenerator
-from sp_form_totp_notifier import SpFormTotpNotifier
-from sp_athento_config import SpAthentoConfig as AC
+from custom.sp_libs.python.logging import SpLogger
+from custom.sp_libs.python.sp_totp_generator import TOTPGenerator
+from custom.sp_libs.python.sp_form_totp_notifier import SpFormTotpNotifier
+from custom.sp_libs.python.sp_athento_config import SpAthentoConfig as AC
 from ucasal2.utils import UcasalConfig
 from ucasal2.utils import get_totp_key
 from django.http import HttpResponse
 from file.models import File
 from core.exceptions import AthentoseError
 from django.core.files import File as FileObject
-from sp_pdf_otp_simple_signer import SpPdfSimpleSigner, QRInfo, OTPInfo
+from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import SpPdfSimpleSigner, QRInfo, OTPInfo
 from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from ucasal2.utils import uuid_previo_metadata_name
 from ucasal2.model.exceptions.invalid_otp_error import InvalidOtpError

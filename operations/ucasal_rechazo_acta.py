@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from ucasal2.utils import UcasalConfig
 from ucasal2.utils import ActaStates 
-from sp_logger import SpLogger
+from custom.sp_libs.python.logging import SpLogger
 uuid_previo_metadata_name =  'metadata.acta_id_acta_previa'
 class RechazaActaDeExamen(DocumentOperation):
     version = "1.0"

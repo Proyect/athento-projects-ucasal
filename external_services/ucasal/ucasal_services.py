@@ -2,7 +2,7 @@ from file.models import File
 import io
 import requests
 from core.exceptions import AthentoseError
-from sp_logger import SpLogger
+from custom.sp_libs.python.logging import SpLogger
 from base64 import b64encode
 from ucasal2.utils import UcasalConfig
 from ucasal2.model.exceptions.invalid_otp_error import InvalidOtpError

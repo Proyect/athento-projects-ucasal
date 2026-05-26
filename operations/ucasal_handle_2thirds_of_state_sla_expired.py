@@ -6,9 +6,9 @@ from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
 from datetime import datetime
 import math
-from sp_public_link_sender import PublicLinkSender
+from custom.sp_libs.python.sp_public_link_sender import PublicLinkSender
 
-from sp_logger import SpLogger
+from custom.sp_libs.python.logging import SpLogger
 
 
 
