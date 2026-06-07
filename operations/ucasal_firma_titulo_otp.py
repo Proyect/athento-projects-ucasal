@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 
 from core.exceptions import AthentoseError
-from file.models import File, DocumentRelation
+from file.models import File
 from django.core.files import File as DjangoFile
 from django_currentuser.middleware import get_current_user
 
@@ -150,16 +150,15 @@ class FirmaTituloOTP(DocumentOperation):
             )
 
             # 3) Encontrar hijos del folder (analítico y diploma)
-            relaciones = DocumentRelation.objects.filter(parent=fil_padre)
+            hijos = fil_padre.get_children()
             hijo_analitico = None
             hijo_diploma = None
 
-            for rel in relaciones:
-                hijo = rel.child
+            for hijo in hijos:
                 # TODO: ajusta estos criterios a tus doctypes/metadata reales
-                if hijo.doctype.name == "titulo_analitico":
+                if hijo.doctype.name == "analitico":
                     hijo_analitico = hijo
-                elif hijo.doctype.name == "titulo_diploma":
+                elif hijo.doctype.name == "titulo":
                     hijo_diploma = hijo
 
             if not hijo_analitico or not hijo_diploma:
