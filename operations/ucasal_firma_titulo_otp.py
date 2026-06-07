@@ -120,7 +120,8 @@ class FirmaTituloOTP(DocumentOperation):
                     password=UcasalConfig.token_svc_password(),
                 )
             except Exception as token_err:
-                flogger.entry(f"Error al obtener auth_token: {str(token_err)}")
+                import traceback
+                flogger.entry(f"Error al obtener auth_token: {str(token_err)} - Traceback: {traceback.format_exc()}")
                 raise
             fil_padre.set_feature("obtuve_auth_token", "1")
 
