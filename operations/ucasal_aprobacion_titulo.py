@@ -12,7 +12,7 @@ class ApruebaTitulo(DocumentOperation):
     name = _("AprobacionTitulo")
     description = _("Aprueba un título y lo avanza de estado")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger.getLogger("athentose")
+    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo")
 
     def execute(self, *args, **kwargs):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
@@ -37,6 +37,13 @@ class ApruebaTitulo(DocumentOperation):
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
 
+                op_send_by_email.run(
+                    uuid,
+                    notifications_template='titulos_notificacion_validacion',
+                    send_to_groups='DECANO',
+                    area='DEPARTAMENTO DE ALUMNOS'
+                )    
+
                 return logger.exit(
                     {
                         "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
@@ -48,6 +55,13 @@ class ApruebaTitulo(DocumentOperation):
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
+
+                op_send_by_email.run(
+                    uuid,
+                    notifications_template='titulos_notificacion_validacion',
+                    send_to_groups='RECTOR',
+                    area='DECANO'
+                )   
 
                 return logger.exit(
                     {
@@ -61,6 +75,13 @@ class ApruebaTitulo(DocumentOperation):
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
 
+                op_send_by_email.run(
+                    uuid,
+                    notifications_template='titulos_notificacion_validacion',
+                    send_to_groups='TITULOS',
+                    area='RECTOR'
+                ) 
+
                 return logger.exit(
                     {
                         "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
@@ -69,9 +90,16 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
-                nuevo_estado = "Pendiente de validacion FSG (secretaria general)"
+                nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
+
+                op_send_by_email.run(
+                    uuid,
+                    notifications_template='titulos_notificacion_pendiente_firma',
+                    send_to_groups='SECRETARIA GRAL',
+                    area='TITULOS'
+                ) 
 
                 return logger.exit(
                     {

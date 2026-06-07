@@ -6,14 +6,14 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 
 from core.exceptions import AthentoseError
-from file.models import DocumentRelation
+from file.models import File, DocumentRelation
 from django.core.files import File as DjangoFile
 from django_currentuser.middleware import get_current_user
 
-from utils import TituloStates
-from external_services.ucasal.ucasal_services import UcasalServices
-from utils import UcasalConfig
-from utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
+from custom.ucasal2.utils import TituloStates
+from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from custom.ucasal2.utils import UcasalConfig
+from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
     SpPdfSimpleSigner,
     QRInfo,

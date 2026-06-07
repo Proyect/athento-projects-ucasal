@@ -5,6 +5,7 @@ from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
+from file.foperations import op_send_by_email
 
 
 class RechazaTitulo(DocumentOperation):
@@ -12,7 +13,7 @@ class RechazaTitulo(DocumentOperation):
     name = _("Rechaza Título")
     description = _("Rechaza un título si aún no está firmado")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger.getLogger("athentose")
+    _logger: SpLogger = SpLogger("athentose", "RechazaTitulo")
 
     def execute(self, *args, **kwargs):
         logger = self._logger
@@ -53,6 +54,13 @@ class RechazaTitulo(DocumentOperation):
             fil.change_life_cycle_state("RECHAZADO")
 
             flogger.debug("Título rechazado exitosamente")
+
+            op_send_by_email.run(
+                    uuid,
+                    notifications_template="titulos_notificacion_rechazo",
+                    send_to_groups="TITULOS",
+                    area="",
+                )    
             return logger.exit(HttpResponse("Título rechazado exitosamente"))
 
         except AthentoseError as e:

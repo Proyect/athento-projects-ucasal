@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from file.models import File, DocumentRelation
-from utils import TituloStates
+from custom.ucasal2.utils import TituloStates
 
 class IniciaFirmaTituloOTP(DocumentOperation):
     version = "1.0"
@@ -15,7 +15,7 @@ class IniciaFirmaTituloOTP(DocumentOperation):
         "Pasa el título al estado pendiente_firma_otp para iniciar firma digital"
     )
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger.getLogger("athentose")
+    _logger: SpLogger = SpLogger("athentose", "IniciaFirmaTituloOTP")
 
     def execute(self, *args, **kwargs):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
