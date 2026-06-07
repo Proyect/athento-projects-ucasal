@@ -29,7 +29,8 @@ class UcasalServices:
         else:
             body_text = response.text[:500] if response.text else 'N/A'
             error_msg = "Error obteniendo token - Status: " + str(response.status_code) + ", Reason: " + str(response.reason) + ", Body: " + body_text
-            raise logger.exit(AthentoseError(error_msg), exc_info=True)  
+            logger.error(error_msg)
+            raise AthentoseError(error_msg)  
             
     @classmethod
     def get_qr_image(cls, url:str)->io.BytesIO:
