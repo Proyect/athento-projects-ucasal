@@ -60,6 +60,10 @@ class FirmaTituloOTP(DocumentOperation):
             # 1) Validar estado del título padre
             lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
             if lifecycle_state != TituloStates.pendiente_firma_otp:
+                flogger.entry(
+                    f"Sólo se puede firmar el título si está en estado '{TituloStates.pendiente_firma_otp}', "
+                    f"pero el estado actual es '{lifecycle_state or ''}'."
+                )
                 raise AthentoseError(
                     _(
                         "Sólo se puede firmar el título si está en estado '%(esperado)s', "
@@ -74,8 +78,10 @@ class FirmaTituloOTP(DocumentOperation):
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
             if otp_str == "":
+                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                 raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
             if not is_digit(otp_str):
+                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
                 raise AthentoseError(
                     _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                     % {"otp": otp_str}
@@ -85,9 +91,11 @@ class FirmaTituloOTP(DocumentOperation):
             # 1.c) Usuario firmante (Secretaría General)
             usuario = get_current_user()
             if not usuario or not getattr(usuario, "is_authenticated", False):
+                flogger.entry("No hay un usuario autenticado para firmar el título")
                 raise AthentoseError("No hay un usuario autenticado para firmar el título")
 
             if not usuario.groups.filter(name="Secretaría General").exists():
+                flogger.entry("El usuario logueado no pertenece al grupo 'Secretaría General'")
                 raise AthentoseError(
                     "El usuario logueado no pertenece al grupo 'Secretaría General'"
                 )
@@ -95,6 +103,7 @@ class FirmaTituloOTP(DocumentOperation):
             mail_sg = usuario.email or ""
             nombre_sg = f"{usuario.first_name or ''} {usuario.last_name or ''}".strip()
             if not mail_sg:
+                flogger.entry("El mail del usuario de Secretaría General no se pudo obtener")
                 raise AthentoseError(
                     "El mail del usuario de Secretaría General no se pudo obtener"
                 )
@@ -162,6 +171,10 @@ class FirmaTituloOTP(DocumentOperation):
                     hijo_diploma = hijo
 
             if not hijo_analitico or not hijo_diploma:
+                flogger.entry(
+                    "No se encontraron ambos documentos (Analítico y Diploma) relacionados "
+                    "al título para firmar."
+                )
                 raise AthentoseError(
                     _(
                         "No se encontraron ambos documentos (Analítico y Diploma) relacionados "
@@ -177,6 +190,7 @@ class FirmaTituloOTP(DocumentOperation):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
                 if not current_bytes:
+                    flogger.entry(f"El documento {hijo.uuid} no tiene binario para firmar")
                     raise AthentoseError(
                         _("El documento %(uuid)s no tiene binario para firmar")
                         % {"uuid": hijo.uuid}
@@ -221,6 +235,10 @@ class FirmaTituloOTP(DocumentOperation):
             # 5) Registrar hashes de analítico y diploma en blockchain
             registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
             if registrada_en_blockchain == "pending":
+                flogger.entry(
+                    "El título ya había sido enviado a blockchain y su resultado aún "
+                    "está pendiente."
+                )
                 raise AthentoseError(
                     _(
                         "El título ya había sido enviado a blockchain y su resultado aún "
@@ -228,6 +246,7 @@ class FirmaTituloOTP(DocumentOperation):
                     )
                 )
             if registrada_en_blockchain == "success":
+                flogger.entry("El título ya está registrado en blockchain.")
                 raise AthentoseError(_("El título ya está registrado en blockchain."))
 
             hash_analitico = get_pdf_hash(hijo_analitico)
@@ -288,13 +307,17 @@ class FirmaTituloOTP(DocumentOperation):
             )
 
         except AthentoseError as e:
-            flogger.error(f"Error en la operación de firma de título OTP: {e}")
+            error_msg = f"Error en la operación de firma de título OTP: {str(e)}"
+            flogger.error(error_msg)
+            logger.error(error_msg)
             return logger.exit(
                 HttpResponse(str(e), status=400),
                 exc_info=True,
             )
         except Exception as e:  # noqa: BLE001
-            flogger.error(f"Error inesperado en la operación de firma de título OTP: {e}")
+            error_msg = f"Error inesperado en la operación de firma de título OTP: {str(e)}"
+            flogger.error(error_msg)
+            logger.error(error_msg)
             return logger.exit(
                 HttpResponse(str(e), status=500),
                 exc_info=True,
