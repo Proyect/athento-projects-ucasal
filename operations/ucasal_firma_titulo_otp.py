@@ -121,7 +121,9 @@ class FirmaTituloOTP(DocumentOperation):
                 )
             except Exception as token_err:
                 import traceback
-                flogger.entry(f"Error al obtener auth_token: {str(token_err)} - Traceback: {traceback.format_exc()}")
+                err_msg = getattr(token_err, 'message', None) or getattr(token_err, 'args', [None])[0] or str(token_err)
+                flogger.entry("Error al obtener auth_token: " + str(err_msg))
+                flogger.entry("Traceback: " + traceback.format_exc())
                 raise
             fil_padre.set_feature("obtuve_auth_token", "1")
 
