@@ -30,7 +30,7 @@ class IniciaFirmaTituloOTP(DocumentOperation):
         try:
             hijos = fil.get_children() 
             for hijo in hijos:                
-                flogger.entry(f"Hijo: {hijo.uuid}, Doctype: {hijo.doctype.name}")
+                flogger.entry(f"Hijo: {hijo.uuid}, Doctype1: {hijo.doctype.name}")
         except Exception as e:
              flogger.entry(f"Error al obtener relaciones: {e}")
              return logger.exit(
