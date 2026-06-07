@@ -24,12 +24,15 @@ class IniciaFirmaTituloOTP(DocumentOperation):
         fil = self.document
         uuid = str(fil.uuid)
 
+        flogger = SpFeatureLogger.getLogger(fil)
+        flogger.entry("Iniciando proceso de firma OTP para el título...")
+
         try:
             hijos = fil.get_children() 
-            for hijo in hijos:
-                print(f"Hijo: {hijo.uuid}, Doctype: {hijo.doctype.name}")
+            for hijo in hijos:                
+                flogger.entry(f"Hijo: {hijo.uuid}, Doctype: {hijo.doctype.name}")
         except Exception as e:
-             logger.error(f"Error al obtener relaciones: {e}")
+             flogger.entry(f"Error al obtener relaciones: {e}")
              return logger.exit(
                  {
                      "msg": f"Error al obtener relaciones para el título {uuid}",
@@ -37,10 +40,8 @@ class IniciaFirmaTituloOTP(DocumentOperation):
                  }
              )
 
-        try:
-            flogger = SpFeatureLogger.getLogger(fil)
-            flogger.entry("Iniciando proceso de firma OTP para el título...")
-
+        try:         
+            
             # Leer estado actual
             lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else ""
             estado_meta = fil.gfv("estado") or lifecycle_state
