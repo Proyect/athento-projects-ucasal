@@ -113,20 +113,35 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("valide_otp", "1")
 
             # 2) Token, URL de validación del título y QR
-            auth_token = UcasalServices.get_auth_token(
-                user=UcasalConfig.token_svc_user(),
-                password=UcasalConfig.token_svc_password(),
-            )
+            flogger.entry("Obteniendo auth_token...")
+            try:
+                auth_token = UcasalServices.get_auth_token(
+                    user=UcasalConfig.token_svc_user(),
+                    password=UcasalConfig.token_svc_password(),
+                )
+            except Exception as token_err:
+                flogger.entry(f"Error al obtener auth_token: {str(token_err)}")
+                raise
             fil_padre.set_feature("obtuve_auth_token", "1")
 
             url_to_shorten = UcasalConfig.titulo_validation_url_template().replace(
                 "{{uuid}}", uuid_padre
             )
-            short_url = UcasalServices.get_short_url(
-                auth_token=auth_token, url=url_to_shorten
-            )
+            flogger.entry(f"Obteniendo short_url para: {url_to_shorten}")
+            try:
+                short_url = UcasalServices.get_short_url(
+                    auth_token=auth_token, url=url_to_shorten
+                )
+            except Exception as url_err:
+                flogger.entry(f"Error al obtener short_url: {str(url_err)}")
+                raise
 
-            qr_stream = UcasalServices.get_qr_image(url=short_url)
+            flogger.entry(f"Obteniendo QR para: {short_url}")
+            try:
+                qr_stream = UcasalServices.get_qr_image(url=short_url)
+            except Exception as qr_err:
+                flogger.entry(f"Error al obtener QR: {str(qr_err)}")
+                raise
             b64_qr = base64.b64encode(qr_stream).decode("utf-8")
 
             # 2.b) Datos textuales de la firma
@@ -307,7 +322,7 @@ class FirmaTituloOTP(DocumentOperation):
             )
 
         except AthentoseError as e:
-            error_msg = f"Error en la operación de firma de título OTP: {str(e)}"
+            error_msg = f"Error en la operación de firma de título OTP222: {str(e)}"
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
