@@ -94,7 +94,7 @@ class FirmaTituloOTP(DocumentOperation):
                 flogger.entry("No hay un usuario autenticado para firmar el título")
                 raise AthentoseError("No hay un usuario autenticado para firmar el título")
 
-            if not usuario.groups.filter(name="Secretaría General").exists():
+            if not usuario.groups.filter(name="SECRETARIA GRAL").exists():
                 flogger.entry("El usuario logueado no pertenece al grupo 'Secretaría General'")
                 raise AthentoseError(
                     "El usuario logueado no pertenece al grupo 'Secretaría General'"
