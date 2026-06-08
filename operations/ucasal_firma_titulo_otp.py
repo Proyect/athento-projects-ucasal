@@ -41,7 +41,7 @@ class FirmaTituloOTP(DocumentOperation):
     version = "1.0"
     name = _("FirmaTituloOTP")
     description = _(
-        "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain"
+        "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain  sdpruebasffds"
     )
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
