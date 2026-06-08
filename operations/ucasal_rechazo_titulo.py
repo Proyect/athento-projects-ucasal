@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
 from file.foperations import op_send_by_email
+from custom.ucasal2.utils  import TituloStates
 
 
 class RechazaTitulo(DocumentOperation):
@@ -24,14 +25,19 @@ class RechazaTitulo(DocumentOperation):
         flogger: SpFeatureLogger = SpFeatureLogger.getLogger(fil)
         flogger.entry("Rechazando el título...")
 
-        try:
-            # 1. Verificar que el título no esté ya marcado como firmado
-            firmada = fil.gfv("metadata.form_titulo_firmar")
-            if firmada == "ok":
-                raise AthentoseError(
-                    _("El título ya fue firmado y no puede ser rechazado.")
-                )
+        lifecycle_state = fil.life_cycle_state.name
+        estado_meta = lifecycle_state
 
+        AREA_BY_STATE = {
+            TituloStates.pendiente_validacion_da:  "DEPARTAMENTO DE ALUMNOS",
+            TituloStates.pendiente_validacion_fd:  "DECANO",
+            TituloStates.pendiente_validacion_fr:  "RECTOR",
+            TituloStates.pendiente_validacion_tit: "TITULOS",
+            TituloStates.pendiente_validacion_fsg: "SECRETARIA GRAL",
+        }#pendiente a completar con los estados faltantes
+
+        try:
+            
             # 2. Obtener motivo de rechazo (si viene por parámetros) o usar '-'
             motivo = kwargs.get("reason") or kwargs.get("motivo") or "-"
             motivo = str(motivo)
@@ -55,11 +61,20 @@ class RechazaTitulo(DocumentOperation):
 
             flogger.debug("Título rechazado exitosamente")
 
+            if estado_meta not in AREA_BY_STATE:
+                return logger.exit(
+                {
+                    "msg_type": "warning",
+                    "msg": f"El estado actual del título ({estado_meta}) no permite el rechazo.",
+                }
+            )
+
+            area = AREA_BY_STATE[estado_meta]
             op_send_by_email.run(
                     uuid,
                     notifications_template="titulos_notificacion_rechazo",
                     send_to_groups="TITULOS",
-                    area="",
+                    area=area,
                 )    
             return logger.exit(HttpResponse("Título rechazado exitosamente"))
 
