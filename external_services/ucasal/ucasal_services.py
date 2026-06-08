@@ -62,16 +62,19 @@ class UcasalServices:
         response = requests.post(url=endpoint, headers=headers, json=json, verify=cls.VERIFY_CERTIFICATE)
 
         logger.debug(f'response.status_code: {response.status_code}')
-        logger.debug(f'response.status_code type: { type(response.status_code)}')
-        logger.debug(f'requests.codes.ok: {requests.codes.ok}')
-        logger.debug(f'requests.codes.ok type: {type(requests.codes.ok)}')
         logger.debug(f'response.text: {response.text}')
-        logger.debug(f'response.json(): {response.json()}')
 
         if response.status_code in [200, 201]:
-            return logger.exit(response.json()['url_corta'])
+            try:
+                return logger.exit(response.json()['url_corta'])
+            except Exception as json_err:
+                error_msg = "Error parseando respuesta JSON de short_url: " + str(json_err) + " - Response: " + response.text[:500]
+                logger.error(error_msg)
+                raise AthentoseError(error_msg)
         else:
-            raise logger.exit(AthentoseError('Error inesperado obteniendo url corta: ' + response.reason), exc_info=True)   
+            error_msg = "Error obteniendo url corta - Status: " + str(response.status_code) + ", Reason: " + str(response.reason) + ", Body: " + (response.text[:500] if response.text else 'N/A')
+            logger.error(error_msg)
+            raise AthentoseError(error_msg)   
 
 
     @classmethod
