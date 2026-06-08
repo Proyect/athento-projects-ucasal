@@ -127,7 +127,7 @@ class FirmaTituloOTP(DocumentOperation):
                 raise
             fil_padre.set_feature("obtuve_auth_token", "1")
 
-            url_to_shorten = UcasalConfig.titulo_validation_url_template().replace(
+            url_to_shorten = UcasalConfig.designaciones_validation_url_template().replace(
                 "{{uuid}}", uuid_padre
             )
             flogger.entry(f"Obteniendo short_url para: {url_to_shorten}")
