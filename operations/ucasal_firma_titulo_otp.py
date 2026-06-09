@@ -56,7 +56,7 @@ class FirmaTituloOTP(DocumentOperation):
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
-
+            """
             # 1) Validar estado del título padre
             lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
             if lifecycle_state != TituloStates.pendiente_firma_otp:
@@ -73,7 +73,7 @@ class FirmaTituloOTP(DocumentOperation):
                         "esperado": TituloStates.pendiente_firma_otp,
                         "actual": lifecycle_state or "",
                     }
-                )
+                ) """
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
