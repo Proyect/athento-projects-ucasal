@@ -41,7 +41,7 @@ class FirmaTituloOTP(DocumentOperation):
     version = "1.0"
     name = _("FirmaTituloOTP")
     description = _(
-        "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain  sdpruebasffds"
+        "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain  pruebas"
     )
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
@@ -325,7 +325,7 @@ class FirmaTituloOTP(DocumentOperation):
             )
 
         except AthentoseError as e:
-            error_msg = f"Error en la operación de firma de título OTP222: {str(e)}"
+            error_msg = f"Error en la operación de firma de título OTP: {str(e)}"
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(

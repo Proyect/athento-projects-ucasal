@@ -133,7 +133,7 @@ class UcasalConfig:
     
     @staticmethod
     def otp_validation_url_template()->str:
-        return SAC.get_str('ucasal.endopint.otp.validation_url_template')
+        return SAC.get_str('ucasal.endpoint.otp.validation_url_template')
     
     @staticmethod
     def equivalencia_validation_url_template()->str:
