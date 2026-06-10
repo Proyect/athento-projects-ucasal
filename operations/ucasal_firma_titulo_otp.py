@@ -269,7 +269,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             hash_analitico = get_pdf_hash(hijo_analitico)
             # TODO: ajusta si tienes una plantilla específica de callback para títulos
-            callback_url = UcasalConfig.base_url()  # placeholder genérico
+            callback_url = "" #UcasalConfig.base_url()  # placeholder genérico
 
             ok_response_analitico = UcasalServices.register_in_blockchain(
                 auth_token=auth_token,
