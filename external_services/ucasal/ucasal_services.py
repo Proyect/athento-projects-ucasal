@@ -35,7 +35,7 @@ class UcasalServices:
     @classmethod
     def get_qr_image(cls, url:str)->io.BytesIO:
         logger = cls.logger
-        logger.entry()
+        logger.entry(f"Generando QR para URL: {url}")
         endpoint = f"{UcasalConfig.qr_svc_url()}?b64={b64encode(url.encode('utf-8')).decode('utf-8')}"
         headers = {}
         logger.debug("Llamando a requests.get con estos parámetros: %s" % str({'url':endpoint, 'headers':headers}))
