@@ -7,6 +7,8 @@ from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
 from file.foperations import op_send_by_email
 from custom.ucasal2.utils  import TituloStates
+from datetime import datetime
+import pytz
 
 
 class RechazaTitulo(DocumentOperation):
@@ -58,6 +60,11 @@ class RechazaTitulo(DocumentOperation):
             # Debe coincidir exactamente con el nombre configurado en el ciclo de vida
             fil.set_metadata("estado", "RECHAZADO", overwrite=True)
             fil.change_life_cycle_state("RECHAZADO")
+
+            # Guardar fecha de rechazo del título
+            tz = pytz.timezone("America/Argentina/Buenos_Aires")
+            date_str = datetime.now(tz=tz).strftime("%Y-%m-%d")  # o "%d/%m/%Y" si prefieres 
+            fil.set_metadata("metadata.form_titulo_fecha_rechazo", date_str, overwrite=True)
 
             flogger.debug("Título rechazado exitosamente")
 
