@@ -177,7 +177,9 @@ class FirmaTituloOTP(DocumentOperation):
             )
 
             # 3) Encontrar hijos del folder (analítico y diploma)
+            flogger.entry(f"Buscando expediente titulo y analitico")
             hijos = fil_padre.get_children()
+            flogger.entry(f"Hijos encontrados: {len(hijos)}")
             hijo_analitico = None
             hijo_diploma = None
 
