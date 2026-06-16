@@ -56,8 +56,28 @@ class FirmaTituloOTP(DocumentOperation):
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
-            """
+
+            if estado_meta == "Pendiente  de validacion FSG (secretaria general)":
+                nuevo_estado = "Pendiente de Firma OTP"
+                fil_padre.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil_padre.change_life_cycle_state(nuevo_estado)
+
+                op_send_by_email.run(
+                    uuid_padre,
+                    notifications_template='titulos_notificacion_pendiente_firma',
+                    send_to_groups='SECRETARIA GRAL',
+                    area='TITULOS'
+                ) 
+
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid_padre} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
+            """            
             # 1) Validar estado del título padre
+            
             lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
             if lifecycle_state != TituloStates.pendiente_firma_otp:
                 flogger.entry(
