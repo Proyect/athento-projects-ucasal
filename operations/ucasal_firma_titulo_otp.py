@@ -26,6 +26,7 @@ import os
 from datetime import datetime
 import locale
 
+from file.foperations import op_send_by_email
 
 class FirmaTituloOTP(DocumentOperation):
     """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain.
@@ -53,6 +54,8 @@ class FirmaTituloOTP(DocumentOperation):
 
         fil_padre = self.document
         uuid_padre = str(fil_padre.uuid)
+        lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
+        estado_meta = fil_padre.gfv("estado") or lifecycle_state
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
