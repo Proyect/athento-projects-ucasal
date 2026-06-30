@@ -12,6 +12,7 @@ from django_currentuser.middleware import get_current_user
 
 from custom.ucasal2.utils import TituloStates
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from custom.ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
 from custom.ucasal2.utils import UcasalConfig
 from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
@@ -294,7 +295,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             hash_analitico = get_pdf_hash(hijo_analitico)
             # TODO: ajusta si tienes una plantilla específica de callback para títulos
-            callback_url = "" #UcasalConfig.base_url()  # placeholder genérico
+            callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)   # placeholder genérico
 
             ok_response_analitico = UcasalServices.register_in_blockchain(
                 auth_token=auth_token,
