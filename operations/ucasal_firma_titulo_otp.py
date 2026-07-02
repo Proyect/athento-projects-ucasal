@@ -60,7 +60,7 @@ class FirmaTituloOTP(DocumentOperation):
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
-
+            """
             if estado_meta == "Pendiente de validacion FSG (secretaria general)":
                 nuevo_estado = "Pendiente de Firma OTP"
                 fil_padre.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -73,13 +73,12 @@ class FirmaTituloOTP(DocumentOperation):
                     area='TITULOS'
                 ) 
 
-                return logger.entry(
+                return logger.exit(
                     {
                         "msg": f"El título {uuid_padre} avanzó a '{nuevo_estado}'",
                         "msg_type": "success",
                     }
-                )
-            """            
+                )"""
             # 1) Validar estado del título padre
             
             lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
@@ -97,7 +96,7 @@ class FirmaTituloOTP(DocumentOperation):
                         "esperado": TituloStates.pendiente_firma_otp,
                         "actual": lifecycle_state or "",
                     }
-                ) """
+                ) 
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
