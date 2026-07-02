@@ -91,7 +91,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
-                nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
+                nuevo_estado = "Pendiente de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
 

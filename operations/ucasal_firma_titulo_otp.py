@@ -61,7 +61,7 @@ class FirmaTituloOTP(DocumentOperation):
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
 
-            if estado_meta == "Pendiente  de validacion FSG (secretaria general)":
+            if estado_meta == "Pendiente de validacion FSG (secretaria general)":
                 nuevo_estado = "Pendiente de Firma OTP"
                 fil_padre.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil_padre.change_life_cycle_state(nuevo_estado)
@@ -73,7 +73,7 @@ class FirmaTituloOTP(DocumentOperation):
                     area='TITULOS'
                 ) 
 
-                return logger.exit(
+                return logger.entry(
                     {
                         "msg": f"El título {uuid_padre} avanzó a '{nuevo_estado}'",
                         "msg_type": "success",
