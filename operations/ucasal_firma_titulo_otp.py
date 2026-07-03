@@ -80,7 +80,7 @@ class FirmaTituloOTP(DocumentOperation):
                     }
                 )"""
             # 1) Validar estado del título padre
-            
+            """
             lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
             if lifecycle_state != TituloStates.pendiente_firma_otp:
                 flogger.entry(
@@ -96,7 +96,7 @@ class FirmaTituloOTP(DocumentOperation):
                         "esperado": TituloStates.pendiente_firma_otp,
                         "actual": lifecycle_state or "",
                     }
-                ) 
+                ) """
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
@@ -112,6 +112,7 @@ class FirmaTituloOTP(DocumentOperation):
             otp = int(otp_str)
 
             # 1.c) Usuario firmante (Secretaría General)
+            flogger.entry("Validando usuario firmante...")
             usuario = get_current_user()
             if not usuario or not getattr(usuario, "is_authenticated", False):
                 flogger.entry("No hay un usuario autenticado para firmar el título")
