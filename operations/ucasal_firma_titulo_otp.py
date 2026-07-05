@@ -325,6 +325,12 @@ class FirmaTituloOTP(DocumentOperation):
 
             # Verificar que ambos documentos fueron firmados
             if len(documentos_firmados) == 2:
+                fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
+                fil_padre.set_metadata(
+                    "estado",
+                    TituloStates.pendiente_firma_otp,
+                    overwrite=True,
+                )
                 fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
                 fil_padre.set_metadata(
                     "estado",
