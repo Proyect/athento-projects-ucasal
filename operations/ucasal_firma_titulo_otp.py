@@ -322,11 +322,24 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("registro_blockchain", "pending")
             fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
 
+
+            # Verificar que ambos documentos fueron firmados
+            if len(documentos_firmados) == 2:
+                fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
+                fil_padre.set_metadata(
+                    "estado",
+                    TituloStates.pendiente_blockchain,
+                    overwrite=True,
+                )
+                fil_padre.change_life_cycle_state(TituloStates.firmado)
+                fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
+                flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
+
             # 6) Cambiar estado del padre a pendiente_blockchain
             if fil_padre.life_cycle_state.name == TituloStates.pendiente_firma_otp:
                 fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
                 fil_padre.set_metadata(
-                    "metadata.lifecycle_state",
+                    "estado",
                     TituloStates.pendiente_blockchain,
                     overwrite=True,
                 )
