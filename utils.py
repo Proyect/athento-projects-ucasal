@@ -235,7 +235,8 @@ def get_pdf_hash(fil):
     byte_content = None
     with open(path, mode='rb') as f:
         byte_content = f.read()
-    return hashlib.sha256(byte_content).hexdigest()
+    hash = hashlib.sha256(byte_content).hexdigest()
+    return hash
 
 
 
