@@ -322,6 +322,9 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("registro_blockchain", "pending")
             fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
 
+            fil_padre.set_feature("hash_diploma", hash_diploma)
+            fil_padre.set_feature("hash_analitico", hash_diploma)
+
 
             # Verificar que ambos documentos fueron firmados
             if len(documentos_firmados) == 2:
