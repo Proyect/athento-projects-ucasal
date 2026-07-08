@@ -356,7 +356,7 @@ class FirmaTituloOTP(DocumentOperation):
             try:
                 response = requests.post(
                     "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
-                    json={"status": "5", "uuid": uuid},
+                    json={"status": "5", "uuid": uuid_padre},
                     verify=False,
                 )
                 flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
