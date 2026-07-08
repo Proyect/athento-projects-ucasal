@@ -9,7 +9,7 @@ from file.foperations import op_send_by_email
 from custom.ucasal2.utils  import TituloStates
 from datetime import datetime
 import pytz
-
+import requests
 
 class RechazaTitulo(DocumentOperation):
     version = "1.0"
@@ -50,16 +50,26 @@ class RechazaTitulo(DocumentOperation):
                 motivo,
                 overwrite=True,
             )
-            fil.set_metadata(
-                "metadata.form_titulo_firmar",
-                "",
-                overwrite=True,
-            )
+            # fil.set_metadata(
+            #     "metadata.form_titulo_firmar",
+            #     "",
+            #     overwrite=True,
+            # )
 
             # 4. Cambiar estado lógico (metadato) y ciclo de vida al estado final RECHAZADO
             # Debe coincidir exactamente con el nombre configurado en el ciclo de vida
             fil.set_metadata("estado", "RECHAZADO", overwrite=True)
             fil.change_life_cycle_state("RECHAZADO")
+
+            try:
+                response = requests.post(
+                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-rejected",
+                    json={"status": "4", "uuid": uuid},
+                    verify=False,
+                )
+                flogger.entry(f"Notificación rechazo enviada a UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
+            except Exception as notif_err:
+                flogger.entry(f"Error al notificar rechazo a UCASAL: {str(notif_err)}")
 
             # Guardar fecha de rechazo del título
             tz = pytz.timezone("America/Argentina/Buenos_Aires")
