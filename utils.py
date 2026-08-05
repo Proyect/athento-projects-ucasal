@@ -71,7 +71,7 @@ class TituloStates:
     pendiente_validacion_fd = 'Pendiente de validacion FD (firma del decano)'
     pendiente_validacion_fr = 'Pendiente de validacion FR (firma del rector)'
     pendiente_validacion_tit = 'Pendiente de Validacion TIT (titulo)'
-    pendiente_validacion_fsg = 'Pendiente  de validacion FSG (secretaria general)'
+    pendiente_validacion_fsg = 'Pendiente de validacion FSG (secretaria general)'
     pendiente_firma_otp = 'Pendiente de Firma OTP'
     pendiente_blockchain = 'Pendiente de Blockchain'
     fallo_blockchain = 'Fallo en Blockchain'
@@ -154,6 +154,22 @@ class UcasalConfig:
     @staticmethod
     def designaciones_validation_url_template()->str:
         return SAC.get_str('ucasal.designaciones.validation_url_template')
+
+    @staticmethod
+    def titulo_validation_url_template()->str:
+        return SAC.get_str('ucasal.titulo.validation_url_template')
+
+    @staticmethod
+    def titulos_bfaresponse_endpoint()->str:
+        return SAC.get_str('ucasal.titulos.bfaresponse_endpoint')
+
+    @staticmethod
+    def titulo_update_finalize_url()->str:
+        return SAC.get_str('ucasal.titulo.update_finalize_url')
+
+    @staticmethod
+    def titulo_update_rejected_url()->str:
+        return SAC.get_str('ucasal.titulo.update_rejected_url')
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])

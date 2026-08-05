@@ -6,7 +6,8 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
 from file.foperations import op_send_by_email
-from custom.ucasal2.utils  import TituloStates
+from custom.ucasal2.utils import TituloStates, UcasalConfig
+from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from datetime import datetime
 import pytz
 import requests
@@ -63,9 +64,9 @@ class RechazaTitulo(DocumentOperation):
 
             try:
                 response = requests.post(
-                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-rejected",
+                    UcasalConfig.titulo_update_rejected_url(),
                     json={"status": "4", "uuid": uuid},
-                    verify=False,
+                    verify=UcasalServices.VERIFY_CERTIFICATE,
                 )
                 flogger.entry(f"Notificación rechazo enviada a UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
             except Exception as notif_err:

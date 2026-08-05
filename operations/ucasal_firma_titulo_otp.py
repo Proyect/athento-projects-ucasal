@@ -12,7 +12,6 @@ from django_currentuser.middleware import get_current_user
 
 from custom.ucasal2.utils import TituloStates
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from custom.ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
 from custom.ucasal2.utils import UcasalConfig
 from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
@@ -154,7 +153,7 @@ class FirmaTituloOTP(DocumentOperation):
                 raise
             fil_padre.set_feature("obtuve_auth_token", "1")
 
-            url_to_shorten = UcasalConfig.designaciones_validation_url_template().replace(
+            url_to_shorten = UcasalConfig.titulo_validation_url_template().replace(
                 "{{uuid}}", uuid_padre
             )
             flogger.entry(f"Obteniendo short_url para: {url_to_shorten}")
@@ -297,8 +296,7 @@ class FirmaTituloOTP(DocumentOperation):
                 raise AthentoseError(_("El título ya está registrado en blockchain."))
 
             hash_analitico = get_pdf_hash(hijo_analitico)
-            # TODO: ajusta si tienes una plantilla específica de callback para títulos
-            callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)   # placeholder genérico
+            callback_url = f"{UcasalConfig.titulos_bfaresponse_endpoint()}{uuid_padre}/bfaresponse"
 
             ok_response_analitico = UcasalServices.register_in_blockchain(
                 auth_token=auth_token,
@@ -323,7 +321,7 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
 
             fil_padre.set_feature("hash_diploma", hash_diploma)
-            fil_padre.set_feature("hash_analitico", hash_diploma)
+            fil_padre.set_feature("hash_analitico", hash_analitico)
 
 
             # Verificar que ambos documentos fueron firmados
@@ -355,9 +353,9 @@ class FirmaTituloOTP(DocumentOperation):
 
             try:
                 response = requests.post(
-                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
+                    UcasalConfig.titulo_update_finalize_url(),
                     json={"status": "5", "uuid": uuid_padre},
-                    verify=False,
+                    verify=UcasalServices.VERIFY_CERTIFICATE,
                 )
                 flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
             except Exception as notif_err:
