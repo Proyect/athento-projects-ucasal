@@ -353,15 +353,15 @@ class FirmaTituloOTP(DocumentOperation):
                     overwrite=True,
                 )
 
-            try:
-                response = requests.post(
-                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
-                    json={"status": "5", "uuid": uuid_padre},
-                    verify=False,
-                )
-                flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
-            except Exception as notif_err:
-                flogger.entry(f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}")
+            # try:
+                # response = requests.post(
+                 #    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
+                 #    json={"status": "5", "uuid": uuid_padre},
+                 #    verify=False,
+                 #)
+                 #flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
+             #except Exception as notif_err:
+             #    flogger.entry(f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}")
     
 
             body_to_save = {
