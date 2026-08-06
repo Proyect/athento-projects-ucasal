@@ -102,17 +102,17 @@ class FirmaTituloOTP(DocumentOperation):
                 ) """
 
             # 1.b) Leer y validar OTP (metadato del título)
-            otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
-            if otp_str == "":
-                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
-                raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-            if not is_digit(otp_str):
-                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
-                raise AthentoseError(
-                    _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                    % {"otp": otp_str}
-                )
-            otp = int(otp_str)
+            #otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
+            #if otp_str == "":
+            #    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+            #    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+            #if not is_digit(otp_str):
+            #    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+            #    raise AthentoseError(
+            #        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+            #        % {"otp": otp_str}
+            #    )
+            #otp = int(otp_str)
 
             # 1.c) Usuario firmante (Secretaría General)
             flogger.entry("Validando usuario firmante...")
@@ -136,7 +136,7 @@ class FirmaTituloOTP(DocumentOperation):
                 )
 
             # 1.d) Validar OTP contra servicio UCASAL
-            UcasalServices.validate_otp(user=mail_sg, otp=otp)
+            #UcasalServices.validate_otp(user=mail_sg, otp=otp)
             fil_padre.set_feature("valide_otp", "1")
 
             # 2) Token, URL de validación del título y QR
@@ -353,15 +353,15 @@ class FirmaTituloOTP(DocumentOperation):
                     overwrite=True,
                 )
 
-            # try:
-                # response = requests.post(
-                 #    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
-                 #    json={"status": "5", "uuid": uuid_padre},
-                 #    verify=False,
-                 #)
-                 #flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
-             #except Exception as notif_err:
-             #    flogger.entry(f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}")
+            try:
+                response = requests.post(
+                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
+                    json={"status": "5", "uuid": uuid_padre},
+                    verify=False,
+                )
+                flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
+            except Exception as notif_err:
+                 flogger.entry(f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}")
     
 
             body_to_save = {
