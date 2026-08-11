@@ -58,8 +58,8 @@ class FirmaTituloOTP(DocumentOperation):
         lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
         estado_meta = fil_padre.gfv("estado") or lifecycle_state
         flogger.entry(f"UUID padre: {uuid_padre}")
-        flogger.entry(f"Estado lifecycle: {lifecycle_state}")
-        flogger.entry(f"Estado metadata: {estado_meta}")
+        #flogger.entry(f"Estado lifecycle: {lifecycle_state}")
+        #flogger.entry(f"Estado metadata: {estado_meta}")
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
