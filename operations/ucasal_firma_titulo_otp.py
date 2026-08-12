@@ -30,7 +30,7 @@ import requests
 from file.foperations import op_send_by_email
 
 class FirmaTituloOTP(DocumentOperation):
-    """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain.
+    """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain .
 
     Flujo esperado:
       - El documento padre (título) debe estar en estado TituloStates.pendiente_firma_otp
