@@ -10,7 +10,15 @@ from custom.ucasal2.utils import TituloStates
 
 
 class FirmaTituloOTP(DocumentOperation):
-    """Avanza el título por los estados de firma hasta 'Firmado'."""
+    """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain .
+
+    Flujo esperado:
+      - El documento padre (título) debe estar en estado TituloStates.pendiente_firma_otp
+      - El OTP se ingresa en un metadato del título (metadata.titulo_otp)
+      - Se firman los PDFs hijos (analítico y diploma) usando el mismo QR/OTP
+      - Se registran ambos hashes en blockchain
+      - El título pasa a estado TituloStates.pendiente_blockchain
+    """
 
     version = "1.0"
     name = _("FirmaTituloOTP")
@@ -25,14 +33,13 @@ class FirmaTituloOTP(DocumentOperation):
 
         fil_padre = self.document
         uuid_padre = str(fil_padre.uuid)
-<<<<<<< HEAD
-=======
         lifecycle_state = fil_padre.life_cycle_state.name if fil_padre.life_cycle_state else ""
         estado_meta = fil_padre.gfv("estado") or lifecycle_state
         flogger.entry(f"UUID padre: {uuid_padre}")
         #flogger.entry(f"Estado lifecycle: {lifecycle_state}")
         #flogger.entry(f"Estado metadata: {estado_meta}")
->>>>>>> 44bc5bf5179e5d1e34b279ddf1257ea5e9478872
+        flogger.debug(f"Estado lifecycle: {lifecycle_state}")
+        flogger.debug(f"Estado metadata: {estado_meta}")
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
