@@ -153,7 +153,7 @@ class UcasalConfig:
     
     @staticmethod
     def designaciones_validation_url_template()->str:
-        return SAC.get_str('ucasal.designaciones.validation_url_template')
+        return SAC.get_str('ucasal.titulo.validation_url_template')
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])

@@ -7,10 +7,12 @@ app_name = 'ucasal2'
 #from ucasal2.endpoints import auth, docs, provider, dictionaries, invitation, upload, state, signup
 from ucasal2.endpoints import( 
   actas,
-  designaciones
+  designaciones,
+  resoluciones
 )
 
 urlpatterns = [
-    *actas.routes,
-    *designaciones.routes
+    #*actas.routes,
+    *designaciones.routes,
+    #*resoluciones.routes
 ]
