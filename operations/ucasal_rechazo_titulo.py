@@ -40,9 +40,19 @@ class RechazaTitulo(DocumentOperation):
 
         try:
             
-            # 2. Obtener motivo de rechazo (si viene por parámetros) o usar '-'
-            motivo = kwargs.get("reason") or kwargs.get("motivo") or "-"
-            motivo = str(motivo)
+            # 2. Obtener motivo de rechazo
+            motivo = (
+                kwargs.get("reason")
+                or kwargs.get("motivo")
+                or fil.gfv("metadata.form_titulo_rechazar")
+                or ""
+            )
+            motivo = str(motivo).strip()
+
+            if not motivo:
+                raise AthentoseError(
+                    "Debe ingresar un motivo de rechazo para continuar."
+                )
 
             # 3. Actualizar metadatos de rechazo / firma
             fil.set_metadata(
