@@ -35,7 +35,7 @@ class ApruebaTitulo(DocumentOperation):
             def _validar_otp():
                 otp_raw = str(fil.gfv("metadata.form_titulo_otp") or "").strip()
                 if not otp_raw:
-                    raise AthentoseError("Debe ingresar el OTP para continuar.")
+                    raise AthentoseError("Debe ingresar el OTP para continuar." +  otp_raw )
                 if not otp_raw.isdigit():
                     raise AthentoseError("El OTP debe ser un número entero.")
                 otp = int(otp_raw)
