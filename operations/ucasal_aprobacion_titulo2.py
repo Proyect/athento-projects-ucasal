@@ -31,13 +31,34 @@ class ApruebaTitulo(DocumentOperation):
             # Leer estado actual (lifecycle + metadato 'estado' si lo usas)
             lifecycle_state = fil.life_cycle_state.name
             estado_meta = fil.gfv("estado") or lifecycle_state
-            
+
+            def _validar_otp():
+                otp_raw = str(fil.gfv("metadata.form_titulo_otp") or "").strip()
+                if not otp_raw:
+                    raise AthentoseError("Debe ingresar el OTP para continuar." +  otp_raw )
+                if not otp_raw.isdigit():
+                    raise AthentoseError("El OTP debe ser un número entero.")
+                otp = int(otp_raw)
+
+                usuario = fil.gfv("metadata.form_titulo_usuario_ucasal") or ""
+                if not usuario:
+                    current = get_current_user()
+                    if current and getattr(current, "is_authenticated", False):
+                        usuario = current.email or ""
+
+                if not usuario:
+                    raise AthentoseError(
+                        "No se pudo determinar el usuario de UCASAL para validar el OTP."
+                    )
+
+                UcasalServices.validate_otp(user=usuario, otp=otp)
+                fil.set_metadata("metadata.form_titulo_otp", "", overwrite=True)
 
             # Flujo real de validaciones de títulos:
             # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
-                
+                _validar_otp()
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
@@ -57,7 +78,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FD (firma del decano)":
-                
+                _validar_otp()
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
@@ -77,7 +98,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FR (firma del rector)":
-                
+                _validar_otp()
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
@@ -97,7 +118,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
-               
+                _validar_otp()
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
