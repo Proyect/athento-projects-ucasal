@@ -8,6 +8,7 @@ from core.exceptions import AthentoseError
 from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from ucasal2.utils import is_digit
 
 
 class ApruebaTitulo(DocumentOperation):
