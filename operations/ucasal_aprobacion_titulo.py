@@ -8,7 +8,6 @@ from core.exceptions import AthentoseError
 from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from custom.ucasal2.utils import is_digit
 
 
 class ApruebaTitulo(DocumentOperation):
@@ -43,7 +42,7 @@ class ApruebaTitulo(DocumentOperation):
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                     raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-                if not is_digit(otp_str):
+                if not UcasalServices.is_digit(otp_str):
                     flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
                     raise AthentoseError(
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
