@@ -38,7 +38,7 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
 
-                otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
+                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                     raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
