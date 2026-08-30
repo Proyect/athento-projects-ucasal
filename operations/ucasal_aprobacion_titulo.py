@@ -51,6 +51,12 @@ class ApruebaTitulo(DocumentOperation):
                         % {"otp": otp_str}
                     )
                 otp_str = int(otp_str)
+
+                response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Estado: "+estado_meta},
+                    verify=False,
+                )
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -83,6 +89,12 @@ class ApruebaTitulo(DocumentOperation):
                         % {"otp": otp_str}
                     )
                 otp_str = int(otp_str)
+
+                response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Estado: "+estado_meta},
+                    verify=False,
+                )
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -115,6 +127,12 @@ class ApruebaTitulo(DocumentOperation):
                         % {"otp": otp_str}
                     )
                 otp_str = int(otp_str)
+
+                response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Estado: "+estado_meta},
+                    verify=False,
+                )
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -147,6 +165,12 @@ class ApruebaTitulo(DocumentOperation):
                         % {"otp": otp_str}
                     )
                 otp_str = int(otp_str)
+                
+                response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Estado: "+estado_meta},
+                    verify=False,
+                )
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
