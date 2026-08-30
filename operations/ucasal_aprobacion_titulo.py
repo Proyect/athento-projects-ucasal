@@ -42,7 +42,7 @@ class ApruebaTitulo(DocumentOperation):
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                     raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-                if not UcasalServices.is_digit(otp_str):
+                if not is_digit(otp_str):
                     flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
                     raise AthentoseError(
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
