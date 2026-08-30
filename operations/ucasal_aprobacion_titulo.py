@@ -48,7 +48,7 @@ class ApruebaTitulo(DocumentOperation):
             flogger.entry(f"Response: {response.text}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
-
+                """
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -59,7 +59,7 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str)
+                otp_str = int(otp_str)"""
 
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -87,7 +87,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FD (firma del decano)":
-
+                """
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -98,7 +98,7 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str)
+                otp_str = int(otp_str) """
 
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -126,7 +126,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FR (firma del rector)":
-                
+                """
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -137,7 +137,7 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str)
+                otp_str = int(otp_str) """
 
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -165,7 +165,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
-                
+                """
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -176,7 +176,7 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str)
+                otp_str = int(otp_str) """
                 
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
