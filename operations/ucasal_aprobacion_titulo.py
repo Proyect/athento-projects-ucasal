@@ -16,20 +16,8 @@ class ApruebaTitulo(DocumentOperation):
     name = _("AprobacionTitulo")
     description = _("Aprueba un título y lo avanza de estado")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo")
-
-    def _get_otp(self, fil):
-        otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
-        if otp_str == "":
-            flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
-            raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-        if not is_digit(otp_str):
-            flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
-            raise AthentoseError(
-                _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                % {"otp": otp_str}
-            )
-        return int(otp_str)
+    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo")    
+        
 
     def execute(self, *args, **kwargs):
         flogger: SpFeatureLogger = NullSpFeatureLogger()
@@ -52,7 +40,17 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
 
-                self._get_otp(fil)
+                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+                otp_str = int(otp_str)
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -74,7 +72,17 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion FD (firma del decano)":
 
-                self._get_otp(fil)
+                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+                otp_str = int(otp_str)
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -96,7 +104,17 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion FR (firma del rector)":
                 
-                self._get_otp(fil)
+                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+                otp_str = int(otp_str)
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -118,7 +136,17 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
                 
-                self._get_otp(fil)
+                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+                otp_str = int(otp_str)
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
