@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Operation properties
+from contextlib import nullcontext
 from operations.classes.document_operation import DocumentOperation
 from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
@@ -43,6 +44,9 @@ class RechazaTitulo(DocumentOperation):
             # 2. Obtener motivo de rechazo
             motivo = kwargs.get("reason") or kwargs.get("motivo") or "-"
             motivo = str(motivo)
+
+            if motivo == nullcontext:
+                raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
 
             # 3. Actualizar metadatos de rechazo / firma
             fil.set_metadata(

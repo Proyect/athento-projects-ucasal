@@ -9,7 +9,7 @@ from core.exceptions import AthentoseError
 from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-#from ucasal2.utils import is_digit
+from ucasal2.utils import is_digit
 
 
 
@@ -48,7 +48,7 @@ class ApruebaTitulo(DocumentOperation):
             flogger.entry(f"Response: {response.text}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
-                """
+                
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -59,13 +59,13 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str)"""
-
+                otp_str = int(otp_str)
+                """
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )
+                )"""
                 flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
@@ -87,7 +87,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FD (firma del decano)":
-                """
+                
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -98,13 +98,13 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) """
-
+                otp_str = int(otp_str) 
+                """
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )
+                )"""
                 flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
@@ -126,7 +126,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de validacion FR (firma del rector)":
-                """
+                
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -137,13 +137,13 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) """
-
+                otp_str = int(otp_str) 
+                """                
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )
+                )"""
                 flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
@@ -165,7 +165,7 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
-                """
+                
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
                 if otp_str == "":
                     flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
@@ -176,13 +176,13 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) """
-                
+                otp_str = int(otp_str) 
+                """                
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )
+                )"""
                 flogger.entry(f"Response: {response.text}")
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
