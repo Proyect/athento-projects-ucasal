@@ -45,6 +45,7 @@ class ApruebaTitulo(DocumentOperation):
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
                 )
+            flogger.entry(f"Response: {response.text}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
 
@@ -65,6 +66,7 @@ class ApruebaTitulo(DocumentOperation):
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
                 )
+                flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -103,6 +105,7 @@ class ApruebaTitulo(DocumentOperation):
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
                 )
+                flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -141,6 +144,7 @@ class ApruebaTitulo(DocumentOperation):
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
                 )
+                flogger.entry(f"Response: {response.text}")
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -179,6 +183,7 @@ class ApruebaTitulo(DocumentOperation):
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
                 )
+                flogger.entry(f"Response: {response.text}")
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
