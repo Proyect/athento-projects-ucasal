@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Operation properties
-import requests
+#import requests
 from operations.classes.document_operation import DocumentOperation
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -9,7 +9,7 @@ from core.exceptions import AthentoseError
 from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import is_digit
+#from ucasal2.utils import is_digit
 
 
 
