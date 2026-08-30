@@ -52,7 +52,7 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
 
-                otp = self._get_otp(fil)
+                self._get_otp(fil)
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -74,7 +74,7 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion FD (firma del decano)":
 
-                otp = self._get_otp(fil)
+                self._get_otp(fil)
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -96,6 +96,8 @@ class ApruebaTitulo(DocumentOperation):
 
             if estado_meta == "Pendiente de validacion FR (firma del rector)":
                 
+                self._get_otp(fil)
+                
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
@@ -115,6 +117,8 @@ class ApruebaTitulo(DocumentOperation):
                 )
 
             if estado_meta == "Pendiente de Validacion TIT (titulo)":
+                
+                self._get_otp(fil)
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
