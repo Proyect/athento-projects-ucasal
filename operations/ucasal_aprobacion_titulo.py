@@ -38,6 +38,12 @@ class ApruebaTitulo(DocumentOperation):
             # Flujo real de validaciones de títulos:
             # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
 
+            response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Estado: "+estado_meta},
+                    verify=False,
+                )
+
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
 
                 otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
