@@ -52,6 +52,8 @@ class RechazaTitulo(DocumentOperation):
                 )
             if (motivo == ""):                
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
+            else:
+                flogger.entry(f"Motivo de rechazo: {motivo}")
 
             # 3. Actualizar metadatos de rechazo / firma
             fil.set_metadata(
