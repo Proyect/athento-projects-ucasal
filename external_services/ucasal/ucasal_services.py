@@ -160,7 +160,7 @@ class UcasalServices:
                 json={"mensaje": "Endpoint: "+str(endpoint)},
                 verify=False,
             )
-        response = requests.get(url=endpoint, headers=headers, timeout=60)
+        response = requests.post(url=endpoint, headers=headers, timeout=60)
 
         if response.status_code == requests.codes.ok:
             return logger.exit() #OK
