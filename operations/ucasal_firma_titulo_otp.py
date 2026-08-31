@@ -69,10 +69,11 @@ class FirmaTituloOTP(DocumentOperation):
             # 1) Validar estado del título padre.
             # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP;
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.
+
             lifecycle_state = fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
-            if lifecycle_state != TituloStates.pendiente_validacion_fsg:
+            if lifecycle_state != TituloStates.pendiente_firma_otp:
                 flogger.entry(
-                    f"Sólo se puede firmar el título si está en estado '{TituloStates.pendiente_validacion_fsg}', "
+                    f"Sólo se puede firmar el título si está en estado '{TituloStates.pendiente_firma_otp}', "
                     f"pero el estado actual es '{lifecycle_state or ''}'."
                 )
                 raise AthentoseError(
