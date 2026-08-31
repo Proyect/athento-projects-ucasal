@@ -186,13 +186,7 @@ class ApruebaTitulo(DocumentOperation):
                 mail_sg = usuario.email or "" 
                 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
-                """                
-                response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Estado: "+estado_meta},
-                    verify=False,
-                )"""
-                #flogger.entry(f"Response: {response.text}")
+                
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
