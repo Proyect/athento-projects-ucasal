@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Operation properties
-import requests
+#import requests
 from operations.classes.document_operation import DocumentOperation
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -75,8 +75,8 @@ class ApruebaTitulo(DocumentOperation):
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )"""
-                flogger.entry(f"Response: {response.text}")
+                )
+                flogger.entry(f"Response: {response.text}")"""
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -123,8 +123,8 @@ class ApruebaTitulo(DocumentOperation):
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )"""
-                flogger.entry(f"Response: {response.text}")
+                )
+                flogger.entry(f"Response: {response.text}")"""
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -170,8 +170,8 @@ class ApruebaTitulo(DocumentOperation):
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )"""
-                flogger.entry(f"Response: {response.text}")
+                )
+                flogger.entry(f"Response: {response.text}")"""
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
