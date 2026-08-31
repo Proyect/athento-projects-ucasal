@@ -151,7 +151,7 @@ class UcasalServices:
         logger = cls.logger
         logger.entry()
         endpoint = UcasalConfig.otp_validation_url_template().format(usuario=user, token=otp)
-        logger.entry(f"Endpoint: {endpoint}")
+        logger.debug(f"Endpoint: {endpoint}")
         headers = {}
         
         logger.debug("Llamando a requests.get con estos parámetros: %s" % str({'url':endpoint, 'headers':headers}))
