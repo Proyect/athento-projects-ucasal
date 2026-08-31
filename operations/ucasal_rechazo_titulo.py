@@ -45,13 +45,6 @@ class RechazaTitulo(DocumentOperation):
             motivo = fil.gmv("metadata.form_titulo_motivo_de_rechazo") or ""
             motivo = str(motivo).strip()
 
-            response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"Motivo de rechazo": motivo},
-                    verify=False,
-                    timeout=15,
-                )
-
             if (motivo == ""):                
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
             else:
