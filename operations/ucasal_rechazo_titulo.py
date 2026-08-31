@@ -42,7 +42,7 @@ class RechazaTitulo(DocumentOperation):
         try:
             
             # 2. Obtener motivo de rechazo
-            motivo = kwargs.get("metadata.form_titulo_motivo_de_rechazo") or kwargs.get("motivo") or "-"
+            motivo = str(fil.gmv("metadata.form_titulo_motivo_de_rechazo") or "-")
             motivo = str(motivo)
 
             if (motivo == ""):
