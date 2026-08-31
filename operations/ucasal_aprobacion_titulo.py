@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Operation properties
-#import requests
+
 from operations.classes.document_operation import DocumentOperation
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -39,12 +39,7 @@ class ApruebaTitulo(DocumentOperation):
 
             # Flujo real de validaciones de títulos:
             # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
-            """
-            response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Estado: "+estado_meta},
-                    verify=False,
-                )"""
+           
             flogger.entry(f"Response: {estado_meta}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
@@ -69,14 +64,6 @@ class ApruebaTitulo(DocumentOperation):
                 mail_sg = usuario.email or ""
 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
-
-                """
-                response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Estado: "+estado_meta},
-                    verify=False,
-                )
-                flogger.entry(f"Response: {response.text}")"""
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -117,14 +104,7 @@ class ApruebaTitulo(DocumentOperation):
                 mail_sg = usuario.email or "" 
                 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
-                
-                """
-                response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Estado: "+estado_meta},
-                    verify=False,
-                )
-                flogger.entry(f"Response: {response.text}")"""
+               
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
@@ -165,13 +145,7 @@ class ApruebaTitulo(DocumentOperation):
                 mail_sg = usuario.email or "" 
                 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
-                """                
-                response = requests.post(
-                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Estado: "+estado_meta},
-                    verify=False,
-                )
-                flogger.entry(f"Response: {response.text}")"""
+                
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)

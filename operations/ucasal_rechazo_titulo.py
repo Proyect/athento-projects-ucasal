@@ -61,11 +61,7 @@ class RechazaTitulo(DocumentOperation):
                 motivo,
                 overwrite=True,
             )
-            # fil.set_metadata(
-            #     "metadata.form_titulo_firmar",
-            #     "",
-            #     overwrite=True,
-            # )
+
 
             # 4. Cambiar estado lógico (metadato) y ciclo de vida al estado final RECHAZADO
             # Debe coincidir exactamente con el nombre configurado en el ciclo de vida
