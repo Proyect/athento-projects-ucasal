@@ -49,6 +49,7 @@ class RechazaTitulo(DocumentOperation):
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"Motivo de rechazo": motivo},
                     verify=False,
+                    timeout=15,
                 )
 
             if (motivo == ""):                
