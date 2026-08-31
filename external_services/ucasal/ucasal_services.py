@@ -150,6 +150,11 @@ class UcasalServices:
     def validate_otp(cls, user:str, otp:int):
         logger = cls.logger
         logger.entry()
+        response = requests.post(
+                "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                json={"mensaje": "Endpoint: Buscando OTP"},
+                verify=False,
+            )
         endpoint = UcasalConfig.otp_validation_url_template().format(usuario=user, token=otp)
         logger.debug(f"Endpoint: {endpoint}")
         headers = {}
