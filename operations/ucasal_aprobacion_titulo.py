@@ -60,7 +60,17 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
+
                 otp_str = int(otp_str)
+
+                usuario = get_current_user()
+                if not usuario or not getattr(usuario, "is_authenticated", False):
+                    flogger.entry("No hay un usuario autenticado para firmar el título")
+                    raise AthentoseError("No hay un usuario autenticado para firmar el título")
+                mail_sg = usuario.email or ""
+
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
+
                 """
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -99,7 +109,16 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) 
+                otp_str = int(otp_str)
+
+                usuario = get_current_user()
+                if not usuario or not getattr(usuario, "is_authenticated", False):
+                    flogger.entry("No hay un usuario autenticado para firmar el título")
+                    raise AthentoseError("No hay un usuario autenticado para firmar el título")
+                mail_sg = usuario.email or "" 
+                
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
+                
                 """
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -138,7 +157,15 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) 
+                otp_str = int(otp_str)
+
+                usuario = get_current_user()
+                if not usuario or not getattr(usuario, "is_authenticated", False):
+                    flogger.entry("No hay un usuario autenticado para firmar el título")
+                    raise AthentoseError("No hay un usuario autenticado para firmar el título")
+                mail_sg = usuario.email or "" 
+                
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
                 """                
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
@@ -177,7 +204,15 @@ class ApruebaTitulo(DocumentOperation):
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
                     )
-                otp_str = int(otp_str) 
+                otp_str = int(otp_str)
+
+                usuario = get_current_user()
+                if not usuario or not getattr(usuario, "is_authenticated", False):
+                    flogger.entry("No hay un usuario autenticado para firmar el título")
+                    raise AthentoseError("No hay un usuario autenticado para firmar el título")
+                mail_sg = usuario.email or "" 
+                
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
                 """                
                 response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
