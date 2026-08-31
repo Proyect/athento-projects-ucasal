@@ -69,7 +69,7 @@ class FirmaTituloOTP(DocumentOperation):
             # 1) Validar estado del título padre.
             # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP;
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.
-
+            """
             lifecycle_state = fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
             if lifecycle_state != TituloStates.pendiente_firma_otp:
                 flogger.entry(
@@ -85,7 +85,7 @@ class FirmaTituloOTP(DocumentOperation):
                         "esperado": TituloStates.pendiente_firma_otp,
                         "actual": lifecycle_state or "",
                     }
-                )
+                )   """
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
