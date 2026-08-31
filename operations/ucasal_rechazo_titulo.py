@@ -38,7 +38,7 @@ class RechazaTitulo(DocumentOperation):
             TituloStates.pendiente_validacion_tit: "TITULOS",
             TituloStates.pendiente_validacion_fsg: "SECRETARIA GRAL",
         }#pendiente a completar con los estados faltantes
-
+        flogger.entry(f"Datos del documento: {fil}")
         try:
             
             # 2. Obtener motivo de rechazo
