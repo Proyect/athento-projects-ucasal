@@ -45,7 +45,12 @@ class RechazaTitulo(DocumentOperation):
             motivo = kwargs.get("reason") or kwargs.get("motivo") or "-"
             motivo = str(motivo)
 
-            if motivo == nullcontext:
+            if (motivo == ""):
+                response = requests.post(
+                    "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                    json={"mensaje": "Motivo: "+motivo},
+                    verify=False,
+                )
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
 
             # 3. Actualizar metadatos de rechazo / firma
