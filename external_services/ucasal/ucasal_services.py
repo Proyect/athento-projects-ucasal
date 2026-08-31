@@ -151,10 +151,11 @@ class UcasalServices:
         logger = cls.logger
         logger.entry()
         endpoint = UcasalConfig.otp_validation_url_template().format(usuario=user, token=otp)
+        logger.entry(f"Endpoint: {endpoint}")
         headers = {}
         
         logger.debug("Llamando a requests.get con estos parámetros: %s" % str({'url':endpoint, 'headers':headers}))
-        response = requests.get(url=endpoint, headers=headers)
+        response = requests.get(url=endpoint, headers=headers, timeout=60)
 
         if response.status_code == requests.codes.ok:
             return logger.exit() #OK
