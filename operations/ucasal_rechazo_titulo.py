@@ -47,7 +47,7 @@ class RechazaTitulo(DocumentOperation):
 
             response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
-                    json={"mensaje": "Motivo: "+motivo},
+                    json={"mensaje": "Detalle del documento: "+str(fil)},
                     verify=False,
                 )
             if (motivo == ""):                
