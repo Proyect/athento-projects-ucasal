@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Operation properties
-#import requests
+import requests
 from operations.classes.document_operation import DocumentOperation
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -10,7 +10,6 @@ from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from ucasal2.utils import is_digit
-#import requests
 
 
 
@@ -41,11 +40,11 @@ class ApruebaTitulo(DocumentOperation):
             # Flujo real de validaciones de títulos:
             # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
 
-            """response = requests.post(
+            response = requests.post(
                     "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
                     json={"mensaje": "Estado: "+estado_meta},
                     verify=False,
-                )"""
+                )
             flogger.entry(f"Response: {response.text}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
