@@ -38,11 +38,11 @@ class RechazaTitulo(DocumentOperation):
             TituloStates.pendiente_validacion_tit: "TITULOS",
             TituloStates.pendiente_validacion_fsg: "SECRETARIA GRAL",
         }#pendiente a completar con los estados faltantes
-        flogger.entry(f"Datos del documento: {fil}")
+        #flogger.entry(f"Datos del documento: {fil}")
         try:
             
             # 2. Obtener motivo de rechazo
-            motivo = fil.gmv("metadata.form_titulo_motivo_de_rechazo") or "-"
+            motivo = fil.gmv("metadata.form_titulo_rechazar") or "-"
             motivo = str(motivo)
 
             response = requests.post(
