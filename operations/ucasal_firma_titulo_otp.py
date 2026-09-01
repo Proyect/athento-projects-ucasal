@@ -56,8 +56,7 @@ class FirmaTituloOTP(DocumentOperation):
         logger.entry()
 
         fil_padre = self.document
-        uuid_padre = str(fil_padre.uuid)
-        
+        uuid_padre = str(fil_padre.uuid)        
 
         try:
             flogger = SpFeatureLogger.getLogger(fil_padre)
@@ -68,8 +67,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             # 1) Validar estado del título padre.
             # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP;
-            # acá solo verificamos que efectivamente esté en ese estado antes de firmar.
-            
+            # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
@@ -136,6 +134,7 @@ class FirmaTituloOTP(DocumentOperation):
             # 'ucasal.titulo.validation_url_template' (el nombre del método quedó
             # heredado de Designaciones, pero apunta a la plantilla correcta de
             # Títulos). Ver custom/ucasal2/utils.py -> UcasalConfig.
+
             url_to_shorten = UcasalConfig.designaciones_validation_url_template().replace(
                 "{{uuid}}", uuid_padre
             )
@@ -288,6 +287,7 @@ class FirmaTituloOTP(DocumentOperation):
             # crear 'ucasal.titulo.bfaresponse_endpoint' en la config con su
             # endpoint/handler propio, o si el reuso del de Designaciones es
             # intencional.
+
             callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
 
             ok_response_analitico = UcasalServices.register_in_blockchain(
@@ -322,6 +322,7 @@ class FirmaTituloOTP(DocumentOperation):
             # confirmando por callback, este paso debería cambiarse para dejar
             # el título en 'pendiente_blockchain' y recién pasar a 'firmado'
             # cuando llegue esa confirmación.
+            
             fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
             fil_padre.set_metadata(
                 "estado",
