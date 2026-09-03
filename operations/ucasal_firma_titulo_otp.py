@@ -261,52 +261,60 @@ class FirmaTituloOTP(DocumentOperation):
                     )
 
             # 5) Registrar hashes de analítico y diploma en blockchain
-            registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
-            if registrada_en_blockchain == "pending":
-                flogger.entry(
-                    "El título ya había sido enviado a blockchain y su resultado aún "
-                    "está pendiente."
-                )
-                raise AthentoseError(
-                    _(
-                        "El título ya había sido enviado a blockchain y su resultado aún "
-                        "está pendiente."
-                    )
-                )
-            if registrada_en_blockchain == "success":
-                flogger.entry("El título ya está registrado en blockchain.")
-                raise AthentoseError(_("El título ya está registrado en blockchain."))
-
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
 
-            # TODO(ucasal-callback): no existe todavía un endpoint de bfaresponse
-            # propio para Títulos (urls.py sólo registra uno para Designaciones y
-            # otro para Actas), así que acá se reutiliza el callback de
-            # Designaciones. Confirmar con el equipo de UCASAL si corresponde
-            # crear 'ucasal.titulo.bfaresponse_endpoint' en la config con su
-            # endpoint/handler propio, o si el reuso del de Designaciones es
-            # intencional.
+            registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
+            ok_analitico = fil_padre.gfv("ucasal.svc.ok_response_analitico")
+            ok_diploma = fil_padre.gfv("ucasal.svc.ok_response_diploma")
 
-            callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
+            saltear_registro_blockchain = False
 
-            ok_response_analitico = UcasalServices.register_in_blockchain(
-                auth_token=auth_token,
-                hash=hash_analitico,
-                file_uuid=str(hijo_analitico.uuid),
-                callback_url=callback_url,
-            )
-            hijo_analitico.set_feature(
-                "ucasal.svc.ok_response_analitico", ok_response_analitico
-            )
+            if registrada_en_blockchain == "success":
+                flogger.entry("El título ya fue firmado y registrado en blockchain.")
+                return logger.exit(
+                    {
+                        "msg": _(
+                            "Título firmado digitalmente (analítico y diploma) y enviado a "
+                            "blockchain."
+                        ),
+                        "msg_type": "success",
+                    }
+                )
 
-            ok_response_diploma = UcasalServices.register_in_blockchain(
-                auth_token=auth_token,
-                hash=hash_diploma,
-                file_uuid=str(hijo_diploma.uuid),
-                callback_url=callback_url,
-            )
-            hijo_diploma.set_feature("ucasal.svc.ok_response_diploma", ok_response_diploma)
+            if ok_analitico and ok_diploma:
+                flogger.entry(
+                    "Blockchain ya registrado; se omite reenvío y se continúa con la finalización."
+                )
+                saltear_registro_blockchain = True
+            elif registrada_en_blockchain == "pending":
+                fil_padre.set_feature("registro_blockchain", "")
+                flogger.entry(
+                    "Estado 'pending' inconsistente; se resetea para reintentar."
+                )
+
+            if not saltear_registro_blockchain:
+                callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
+
+                ok_response_analitico = UcasalServices.register_in_blockchain(
+                    auth_token=auth_token,
+                    hash=hash_analitico,
+                    file_uuid=str(hijo_analitico.uuid),
+                    callback_url=callback_url,
+                )
+                hijo_analitico.set_feature(
+                    "ucasal.svc.ok_response_analitico", ok_response_analitico
+                )
+
+                ok_response_diploma = UcasalServices.register_in_blockchain(
+                    auth_token=auth_token,
+                    hash=hash_diploma,
+                    file_uuid=str(hijo_diploma.uuid),
+                    callback_url=callback_url,
+                )
+                hijo_diploma.set_feature(
+                    "ucasal.svc.ok_response_diploma", ok_response_diploma
+                )
 
             fil_padre.set_feature("registro_blockchain", "pending")
             fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
@@ -329,19 +337,30 @@ class FirmaTituloOTP(DocumentOperation):
                 TituloStates.pendiente_blockchain,
                 overwrite=True,
             )
-            fil_padre.change_life_cycle_state(TituloStates.firmado)
-            fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
-            flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
 
             try:
                 response = requests.post(
-                    "https://sistemasweb-desa.ucasal.edu.ar/v1/titulos/update-finalize",
+                    "https://backprod.ucasal.edu.ar/testing/titulos/athento/update-finalize",
                     json={"status": "5", "uuid": uuid_padre},
                     verify=False,
+                    timeout=30,
                 )
-                flogger.entry(f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")
+                response.raise_for_status()
+                flogger.entry(
+                    f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}"
+                )
             except Exception as notif_err:
-                flogger.entry(f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}")
+                flogger.entry(
+                    f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}"
+                )
+                raise AthentoseError(
+                    f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
+                )
+
+            fil_padre.change_life_cycle_state(TituloStates.firmado)
+            fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
+            fil_padre.set_feature("registro_blockchain", "success")
+            flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
 
             body_to_save = {
                 "fecha_firma": {"day": day, "month": month, "year": year},
