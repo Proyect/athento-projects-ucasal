@@ -47,6 +47,27 @@ class RechazaTitulo(DocumentOperation):
 
             if (motivo == ""):                
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
+
+            otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+            if otp_str == "":
+                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+            if not is_digit(otp_str):
+                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                raise AthentoseError(
+                    _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                    % {"otp": otp_str}
+                )
+
+            otp_str = int(otp_str)
+
+            usuario = get_current_user()
+            if not usuario or not getattr(usuario, "is_authenticated", False):
+                flogger.entry("No hay un usuario autenticado para firmar el título")
+                raise AthentoseError("No hay un usuario autenticado para firmar el título")
+            mail_sg = usuario.email or ""
+
+            UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
          
 
             # 3. Actualizar metadatos de rechazo / firma
