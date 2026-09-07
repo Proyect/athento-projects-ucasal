@@ -317,6 +317,7 @@ class FirmaTituloOTP(DocumentOperation):
             if not saltear_registro_blockchain:
                 callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
                 logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}" + f" - Token: {auth_token}")
+                
                 ok_response_analitico = UcasalServices.register_in_blockchain(
                     auth_token=auth_token,
                     hash=hash_analitico,
@@ -326,6 +327,8 @@ class FirmaTituloOTP(DocumentOperation):
                 hijo_analitico.set_feature(
                     "ucasal.svc.ok_response_analitico", ok_response_analitico
                 )
+
+                logger.entry(f"Token: {auth_token}"+f" - Hash diploma: {hash_diploma}")
 
                 ok_response_diploma = UcasalServices.register_in_blockchain(
                     auth_token=auth_token,
