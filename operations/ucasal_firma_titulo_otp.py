@@ -50,6 +50,8 @@ class FirmaTituloOTP(DocumentOperation):
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
 
+    url = "https://webhook.site/5b8e70e2-bee5-49ee-9f9a-c7f941188fbc"
+
     def execute(self, *args, **kwargs):  # noqa: D401
         flogger: SpFeatureLogger = NullSpFeatureLogger()
         logger = self._logger
@@ -262,6 +264,11 @@ class FirmaTituloOTP(DocumentOperation):
 
             # 5) Registrar hashes de analítico y diploma en blockchain
             logger.entry("Registrando hashes de analítico y diploma en blockchain")
+            response = requests.post(
+                    url,
+                    json={"mensaje": "Registrando hashes de analítico y diploma en blockchain"},
+                    verify=False,
+                )
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
 
