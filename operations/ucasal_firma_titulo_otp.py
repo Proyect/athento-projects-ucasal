@@ -261,6 +261,7 @@ class FirmaTituloOTP(DocumentOperation):
                     )
 
             # 5) Registrar hashes de analítico y diploma en blockchain
+            logger.entry("Registrando hashes de analítico y diploma en blockchain")
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
 
@@ -337,7 +338,7 @@ class FirmaTituloOTP(DocumentOperation):
                 TituloStates.pendiente_blockchain,
                 overwrite=True,
             )
-
+            flogger.entry("Enviando notificación de actualización de estado a UCASAL")
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/update-finalize",
