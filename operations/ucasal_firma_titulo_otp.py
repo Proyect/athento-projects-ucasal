@@ -228,6 +228,7 @@ class FirmaTituloOTP(DocumentOperation):
             documentos_firmados = []
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
+            logger.entry("Firmando documentos con QR/OTP")
             for hijo in (hijo_analitico, hijo_diploma):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
