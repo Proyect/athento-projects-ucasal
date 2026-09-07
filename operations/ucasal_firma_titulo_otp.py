@@ -50,7 +50,7 @@ class FirmaTituloOTP(DocumentOperation):
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
 
-    url = "https://webhook.site/2d7dd112-203a-479c-9eb7-ea6a3a0bf7f7"
+    url = "https://webhook.site/5b8e70e2-bee5-49ee-9f9a-c7f941188fbc"
 
     def execute(self, *args, **kwargs):  # noqa: D401
         flogger: SpFeatureLogger = NullSpFeatureLogger()
