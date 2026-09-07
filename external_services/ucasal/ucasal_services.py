@@ -20,7 +20,7 @@ class UcasalServices:
         data = f'usuario={user}&clave={password}'
         
         headers ={'Content-Type': 'application/x-www-form-urlencoded'}  
-        logger.debug("Llamando a requests.post con estos parámetros: %s" % str({'url':endpoint, 'data': data, 'headers':headers}))
+        logger.entry("Llamando a requests.post con estos parámetros: %s" % str({'url':endpoint, 'data': data, 'headers':headers}))
 
         response = requests.post(url=endpoint, data=data, headers=headers)
 
