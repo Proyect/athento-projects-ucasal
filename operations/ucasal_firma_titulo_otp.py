@@ -129,18 +129,7 @@ class FirmaTituloOTP(DocumentOperation):
                 flogger.entry("Error al obtener auth_token: " + str(err_msg))
                 flogger.entry("Traceback: " + traceback.format_exc())
                 raise
-
-            requests.post(
-                self.url,
-                json={
-                    "paso": "token",
-                    "token_raw": auth_token[:300],
-                    "token_len": len(auth_token),
-                    "es_json": auth_token.strip().startswith("{"),
-                    "es_jwt": auth_token.strip().startswith("eyJ"),
-                },
-                verify=False,
-            )
+            
 
             fil_padre.set_feature("obtuve_auth_token", "1")
 
@@ -223,6 +212,9 @@ class FirmaTituloOTP(DocumentOperation):
                         "al título para firmar."
                     )
                 )
+
+            logger.entry(f"Analítico: {hijo_analitico.uuid}")
+            logger.entry(f"Diploma: {hijo_diploma.uuid}")
 
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
