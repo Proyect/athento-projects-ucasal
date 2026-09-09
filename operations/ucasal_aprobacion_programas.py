@@ -1,0 +1,126 @@
+# -*- coding: utf-8 -*-
+# Operation properties
+
+from operations.classes.document_operation import DocumentOperation
+from django.http import HttpResponse
+from django.utils.translation import gettext as _
+from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
+from core.exceptions import AthentoseError
+from django_currentuser.middleware import get_current_user
+from file.foperations import op_send_by_email
+from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from ucasal2.utils import is_digit
+
+
+
+class ApruebaProgramas(DocumentOperation):
+    version = "1.0"
+    name = _("AprobacionProgramas")
+    description = _("Aprueba un programa y lo avanza de estado")
+    configuration_parameters = {}
+    _logger: SpLogger = SpLogger("athentose", "ApruebaProgramas")    
+        
+
+    def execute(self, *args, **kwargs):
+        flogger: SpFeatureLogger = NullSpFeatureLogger()
+        logger = self._logger
+        logger.entry()
+
+        fil = self.document
+        uuid = str(fil.uuid)
+
+        try:
+            flogger = SpFeatureLogger.getLogger(fil)
+
+            # Leer estado actual (lifecycle + metadato 'estado' si lo usas)
+            lifecycle_state = fil.life_cycle_state.name
+            estado_meta = fil.gfv("estado") or lifecycle_state
+            
+
+            # Flujo real de validaciones de títulos:
+            # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
+           
+            flogger.entry(f"Response: {estado_meta}")
+
+            if estado_meta == "Pendiente de validacion Docente":
+                
+                otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+
+                otp_str = int(otp_str)
+
+                usuario = get_current_user()
+                if not usuario or not getattr(usuario, "is_authenticated", False):
+                    flogger.entry("No hay un usuario autenticado para firmar el programa")
+                    raise AthentoseError("No hay un usuario autenticado para firmar el programa")
+                mail_sg = usuario.email or ""
+
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
+                
+                nuevo_estado = "Pendiente de validacion FD (firma del decano)"
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado)
+
+                op_send_by_email.run(
+                    uuid,
+                    notifications_template='titulos_notificacion_validacion',
+                    send_to_groups='Docentes',
+                    area='Docentes'
+                )    
+
+                return logger.exit(
+                    {
+                        "msg": f"El programa {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
+
+            # Si no se reconoce el estado, devolver error controlado
+            raise AthentoseError(
+                _(
+                    f"El estado actual del programas ({estado_meta}) no permite la aprobación."
+                )
+            )
+
+        except FileNotFoundError as e:  # noqa: F821,BLE001
+            flogger.error(f"Error al procesar el archivo: {e}")
+            return logger.exit(
+                HttpResponse(str(e), status=404),
+                exc_info=True,
+            )
+        except AthentoseError as e:
+            flogger.error(f"Error en la operación de aprobación de programas: {e}")
+            return logger.exit(
+                HttpResponse(str(e), status=400),
+                exc_info=True,
+            )
+        except Exception as e:  # noqa: BLE001
+            flogger.error(f"Error inesperado al aprobar el programa: {e}")
+            return logger.exit(
+                HttpResponse(str(e), status=500),
+                exc_info=True,
+            )
+
+
+VERSION = ApruebaProgramas.version
+NAME = ApruebaProgramas.name
+DESCRIPTION = ApruebaProgramas.description
+ORDER = 100
+CATEGORY = ""
+POSTLOAD = False
+POSTCHARACT = False
+POSTCLASSIF = False
+POSTEXTRACTION = False
+CONFIGURATION_PARAMETERS = ApruebaProgramas.configuration_parameters
+
+
+def run(uuid=None, **params):
+    return ApruebaProgramas(uuid, **params).run()

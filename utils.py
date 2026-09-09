@@ -78,6 +78,14 @@ class TituloStates:
     firmado = 'Firmado'
     rechazado = 'RECHAZADO'
 
+class ProgramaStates:
+    pendiente_validacion_doc = 'Pendiente de validacion Docente'
+    pendiente_firma_otp = 'Pendiente de Firma OTP'
+    pendiente_blockchain = 'Pendiente de Blockchain'
+    fallo_blockchain = 'Fallo en Blockchain'
+    firmado = 'Firmado'
+    rechazado = 'Rechazado'
+
 class UcasalConfig:
     @staticmethod
     def token_svc_url()->str:
