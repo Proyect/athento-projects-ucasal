@@ -28,6 +28,10 @@ class RechazaPrograma(DocumentOperation):
         flogger: SpFeatureLogger = SpFeatureLogger.getLogger(fil)
         flogger.entry("Rechazando el programas...")
 
+        if(fil.life_cycle_state is None):
+            flogger.error("El documento no tiene un ciclo de vida asignado.")
+            raise AthentoseError("El documento no tiene un ciclo de vida asignado.")
+    
         lifecycle_state = fil.life_cycle_state.name
         estado_meta = lifecycle_state
 
