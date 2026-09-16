@@ -32,7 +32,7 @@ class RechazaPrograma(DocumentOperation):
 
         fil = self.document
         uuid = str(fil.uuid)
-        flogger: SpFeatureLogger = SpFeatureLogger.getLogger(fil)
+        #flogger: SpFeatureLogger = SpFeatureLogger.getLogger(fil)
         flogger.entry("Rechazando el programa...")
         flogger.entry(f"Datos del documento: UUID {uuid}")
 
