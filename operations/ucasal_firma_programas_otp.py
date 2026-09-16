@@ -9,11 +9,10 @@ from core.exceptions import AthentoseError
 from django.core.files import File as DjangoFile
 from django_currentuser.middleware import get_current_user
 
-from custom.ucasal2.utils import TituloStates
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from custom.ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
 from custom.ucasal2.utils import UcasalConfig
-from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
+from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash, ProgramasStates
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
     SpPdfSimpleSigner,
     QRInfo,
@@ -27,15 +26,14 @@ from datetime import datetime
 import locale
 import requests
 
-from utils import ProgramasStates
 
 
 class FirmaProgramaOTP(DocumentOperation):
-    """Firma analítico y diploma de un programa con OTP y QR, y los registra en blockchain.
+    """Firma el PDF de un programa con OTP y QR, y lo registra en blockchain.
 
     Flujo esperado:
-      - El programa padre debe estar en estado ProgramaStates.pendiente_firma_otp       
-      - El OTP se ingresa en un metadato del título (metadata.programas_otp) y se
+      - El programa debe estar en estado ProgramasStates.pendiente_firma_otp
+      - El OTP se ingresa en un metadato del programa (metadata.programas_otp) y se
         valida contra el servicio de OTP de UCASAL.
       - Se Recibe el JSON con los datos del programa.
       - Se valida que el JSON sea válido.
@@ -44,8 +42,7 @@ class FirmaProgramaOTP(DocumentOperation):
       - Se valida que el OTP sea correcto.
       - Se genera el PDF 
       - Se firma el PDF con el OTP y se registra en blockchain.
-      - Se registran ambos hashes en blockchain.
-      - El título pasa a estado TituloStates.firmado.
+      - El programa pasa a estado ProgramasStates.firmado.
     """
 
     version = "1.0"
@@ -93,8 +90,8 @@ class FirmaProgramaOTP(DocumentOperation):
             flogger.entry("Validando usuario firmante...")
             usuario = get_current_user()
             if not usuario or not getattr(usuario, "is_authenticated", False):
-                flogger.entry("No hay un usuario autenticado para firmar el título")
-                raise AthentoseError("No hay un usuario autenticado para firmar el título")
+                flogger.entry("No hay un usuario autenticado para firmar el programa")
+                raise AthentoseError("No hay un usuario autenticado para firmar el programa")
 
             if not usuario.groups.filter(name="Docentes").exists():
                 flogger.entry("El usuario logueado no pertenece al grupo 'Docentes'")
@@ -114,7 +111,7 @@ class FirmaProgramaOTP(DocumentOperation):
             UcasalServices.validate_otp(user=mail_sg, otp=otp)
             fil.set_feature("valide_otp", "1")
 
-            # 2) Token, URL de validación del título y QR
+            # 2) Token, URL de validación del programa y QR
             flogger.entry("Obteniendo auth_token...")
             try:
                 auth_token = UcasalServices.get_auth_token(
@@ -184,15 +181,13 @@ class FirmaProgramaOTP(DocumentOperation):
                 accuracy="N/A",
                 user_agent="Athentose/Signer",
             )
-#Aqui :)
-            # 3) Encontrar Programa
-            
+            # 3) Preparar el firmador
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
-            # 4) Firmar ambos PDFs con el mismo QR/OTP
-            logger.entry("Firmando documentos con QR/OTP")
-            for hijo in (fil):
+            # 4) Firmar el PDF del programa con QR/OTP
+            logger.entry("Firmando documento con QR/OTP")
+            for hijo in (fil,):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
                 if not current_bytes:
@@ -202,7 +197,7 @@ class FirmaProgramaOTP(DocumentOperation):
                         % {"uuid": hijo.uuid}
                     )
 
-                qr_image_tmp_path = f"/var/www/athentose/media/tmp/ucasal_titulo_qr_{hijo.uuid}.png"
+                qr_image_tmp_path = f"/var/www/athentose/media/tmp/ucasal_programa_qr_{hijo.uuid}.png"
                 os.makedirs(os.path.dirname(qr_image_tmp_path), exist_ok=True)
                 with open(qr_image_tmp_path, "wb") as qr_file:
                     qr_file.write(qr_stream)
@@ -238,18 +233,11 @@ class FirmaProgramaOTP(DocumentOperation):
                         "No se pudo eliminar el archivo temporal %s", qr_image_tmp_path
                     )
 
-            # 5) Registrar hashes de analítico y diploma en blockchain
-            logger.entry("Registrando hashes de programas en blockchain")
-            response = requests.post(
-                    url,
-                    json={"mensaje": "Registrando hashes de programas en blockchain"},
-                    verify=False,
-                )
-            hash_programa = get_pdf_hash(fil.path())           
+            # 5) Registrar hash del programa en blockchain
+            logger.entry("Registrando hash del programa en blockchain")
+            hash_programa = get_pdf_hash(fil)
 
-            registrada_en_blockchain = fil.gfv("registro_blockchain")           
-
-            saltear_registro_blockchain = False
+            registrada_en_blockchain = fil.gfv("registro_blockchain")
 
             if registrada_en_blockchain == "success":
                 flogger.entry("El programa ya fue firmado y registrado en blockchain.")
@@ -263,38 +251,31 @@ class FirmaProgramaOTP(DocumentOperation):
                     }
                 )
 
-            
-         
-            callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
-            logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash : {hash_programa}" + f" - Token: {auth_token}")
-            
+            callback_url = DesignacionesServices.set_callback_url(uuid=uuid)
+            logger.entry(f"Callback URL: {callback_url} - UUID: {uuid} - Hash: {hash_programa}" + f" - Token: {auth_token}")
+
             ok_response = UcasalServices.register_in_blockchain(
                 auth_token=auth_token,
                 hash=hash_programa,
-                file_uuid=str(hijo_analitico.uuid),
+                file_uuid=uuid,
                 callback_url=callback_url,
             )
-            hijo_analitico.set_feature(
-                "ucasal.svc.ok_response_analitico", ok_response_analitico
-            )
+            fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
 
-            logger.entry(f"Token: {auth_token}"+f" - Hash: {hash_programa}")
-
+            logger.entry(f"Token: {auth_token}" + f" - Hash: {hash_programa}")
 
             fil.set_feature("registro_blockchain", "pending")
-            fil.set_feature("titulos.documentos_firmados", documentos_firmados)
-            fil.set_feature("hash_analitico", hash_analitico)
-            fil.set_feature("hash_diploma", hash_diploma)
+            fil.set_feature("programas.documentos_firmados", documentos_firmados)
+            fil.set_feature("hash_programa", hash_programa)
 
-            # 6) Cambiar estado del padre.
-            # No hay (todavía) un endpoint de bfaresponse para Títulos que
-            # confirme el registro en blockchain de forma asíncrona (ver TODO
-            # arriba), así que -como en la última versión desplegada- el título
-            # pasa directamente a 'firmado' apenas se envían los hashes, en vez
-            # de quedar esperando en 'pendiente_blockchain'. Si UCASAL termina
-            # confirmando por callback, este paso debería cambiarse para dejar
-            # el título en 'pendiente_blockchain' y recién pasar a 'firmado'
-            # cuando llegue esa confirmación.
+            # 6) Cambiar estado del programa.
+            # No hay (todavía) un endpoint de bfaresponse que confirme el
+            # registro en blockchain de forma asíncrona (ver TODO arriba), así
+            # que el programa pasa directamente a 'firmado' apenas se envía el
+            # hash, en vez de quedar esperando en 'pendiente_blockchain'. Si
+            # UCASAL termina confirmando por callback, este paso debería
+            # cambiarse para dejar el programa en 'pendiente_blockchain' y
+            # recién pasar a 'firmado' cuando llegue esa confirmación.
             
             fil.change_life_cycle_state(ProgramasStates.pendiente_blockchain)
             fil.set_metadata(
@@ -306,7 +287,7 @@ class FirmaProgramaOTP(DocumentOperation):
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/update-finalize",
-                    json={"status": "5", "uuid": uuid_padre},
+                    json={"status": "5", "uuid": uuid},
                     verify=False,
                     timeout=30,
                 )
@@ -322,10 +303,10 @@ class FirmaProgramaOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil.change_life_cycle_state(TituloStates.firmado)
-            fil.set_metadata("estado", TituloStates.firmado, overwrite=True)
+            fil.change_life_cycle_state(ProgramasStates.firmado)
+            fil.set_metadata("estado", ProgramasStates.firmado, overwrite=True)
             fil.set_feature("registro_blockchain", "success")
-            flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
+            flogger.entry("Documento firmado. Estado cambiado a 'Firmado'")
 
             body_to_save = {
                 "fecha_firma": {"day": day, "month": month, "year": year},
@@ -350,7 +331,7 @@ class FirmaProgramaOTP(DocumentOperation):
             )
 
         except AthentoseError as e:
-            error_msg = f"Error en la operación de firma de título OTP: {str(e)}"
+            error_msg = f"Error en la operación de firma de programa OTP: {str(e)}"
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
@@ -358,7 +339,7 @@ class FirmaProgramaOTP(DocumentOperation):
                 exc_info=True,
             )
         except Exception as e:  # noqa: BLE001
-            error_msg = f"Error inesperado en la operación de firma de título OTP: {str(e)}"
+            error_msg = f"Error inesperado en la operación de firma de programa OTP: {str(e)}"
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
