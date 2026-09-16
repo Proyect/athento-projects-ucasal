@@ -64,7 +64,7 @@ class FirmaProgramaOTP(DocumentOperation):
         uuid = str(fil.uuid)        
 
         try:
-            flogger = SpFeatureLogger.getLogger(fil_padre)
+            flogger = SpFeatureLogger.getLogger(fil)
 
             lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else ""
             flogger.debug(f"UUID: {uuid}")
@@ -75,7 +75,7 @@ class FirmaProgramaOTP(DocumentOperation):
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
-            otp_str = str(fil_padre.gmv("metadata.programas_otp") or "").strip()
+            otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
             if otp_str == "":
                 flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                 raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
@@ -110,7 +110,7 @@ class FirmaProgramaOTP(DocumentOperation):
 
             
             UcasalServices.validate_otp(user=mail_sg, otp=otp)
-            fil_padre.set_feature("valide_otp", "1")
+            fil.set_feature("valide_otp", "1")
 
             # 2) Token, URL de validación del título y QR
             flogger.entry("Obteniendo auth_token...")
@@ -127,7 +127,7 @@ class FirmaProgramaOTP(DocumentOperation):
                 raise
             
 
-            fil_padre.set_feature("obtuve_auth_token", "1")
+            fil.set_feature("obtuve_auth_token", "1")
 
             # Nota: designaciones_validation_url_template() lee la clave de config
             # 'ucasal.titulo.validation_url_template' (el nombre del método quedó
@@ -246,9 +246,9 @@ class FirmaProgramaOTP(DocumentOperation):
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
 
-            registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
-            ok_analitico = fil_padre.gfv("ucasal.svc.ok_response_analitico")
-            ok_diploma = fil_padre.gfv("ucasal.svc.ok_response_diploma")
+            registrada_en_blockchain = fil.gfv("registro_blockchain")
+            ok_analitico = fil.gfv("ucasal.svc.ok_response_analitico")
+            ok_diploma = fil.gfv("ucasal.svc.ok_response_diploma")
 
             saltear_registro_blockchain = False
 
@@ -270,7 +270,7 @@ class FirmaProgramaOTP(DocumentOperation):
                 )
                 saltear_registro_blockchain = True
             elif registrada_en_blockchain == "pending":
-                fil_padre.set_feature("registro_blockchain", "")
+                fil.set_feature("registro_blockchain", "")
                 flogger.entry(
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
@@ -301,10 +301,10 @@ class FirmaProgramaOTP(DocumentOperation):
                     "ucasal.svc.ok_response_diploma", ok_response_diploma
                 )
 
-            fil_padre.set_feature("registro_blockchain", "pending")
-            fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
-            fil_padre.set_feature("hash_analitico", hash_analitico)
-            fil_padre.set_feature("hash_diploma", hash_diploma)
+            fil.set_feature("registro_blockchain", "pending")
+            fil.set_feature("titulos.documentos_firmados", documentos_firmados)
+            fil.set_feature("hash_analitico", hash_analitico)
+            fil.set_feature("hash_diploma", hash_diploma)
 
             # 6) Cambiar estado del padre.
             # No hay (todavía) un endpoint de bfaresponse para Títulos que
@@ -316,8 +316,8 @@ class FirmaProgramaOTP(DocumentOperation):
             # el título en 'pendiente_blockchain' y recién pasar a 'firmado'
             # cuando llegue esa confirmación.
             
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
-            fil_padre.set_metadata(
+            fil.change_life_cycle_state(TituloStates.pendiente_blockchain)
+            fil.set_metadata(
                 "estado",
                 TituloStates.pendiente_blockchain,
                 overwrite=True,
@@ -342,9 +342,9 @@ class FirmaProgramaOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil_padre.change_life_cycle_state(TituloStates.firmado)
-            fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
-            fil_padre.set_feature("registro_blockchain", "success")
+            fil.change_life_cycle_state(TituloStates.firmado)
+            fil.set_metadata("estado", TituloStates.firmado, overwrite=True)
+            fil.set_feature("registro_blockchain", "success")
             flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
 
             body_to_save = {
