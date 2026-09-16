@@ -31,12 +31,9 @@ class RechazaPrograma(DocumentOperation):
         flogger.entry(f"Datos del documento:  UUID {uuid}")
      
         lifecycle_state = fil.life_cycle_state.name
-        estado_meta = "Pendiente de validacion Docente"
+        estado_meta = lifecycle_state
 
-        AREA_BY_STATE = {
-            ProgramasStates.pendiente_validacion_doc:  "Pendiente de validacion Docente",
-            ProgramasStates.rechazado: "Rechazado",
-        }
+        
         #flogger.entry(f"Datos del documento: {fil}")
         try:
             
