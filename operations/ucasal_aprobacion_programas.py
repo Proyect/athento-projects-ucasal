@@ -35,11 +35,7 @@ class ApruebaProgramas(DocumentOperation):
             # Leer estado actual (lifecycle + metadato 'estado' si lo usas)
             lifecycle_state = fil.life_cycle_state.name
             estado_meta = fil.gfv("estado") or lifecycle_state
-            
-
-            # Flujo real de validaciones de títulos:
-            # Pendiente de validacion DA -> FD -> FR -> TIT -> FSG
-           
+          
             flogger.entry(f"Response: {estado_meta}")
 
             if estado_meta == "Pendiente de validacion Docente":
@@ -65,7 +61,7 @@ class ApruebaProgramas(DocumentOperation):
 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
                 
-                nuevo_estado = "Pendiente de validacion FD (firma del decano)"
+                nuevo_estado = ProgramasStates.pendiente_firma_otp
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado)
 
