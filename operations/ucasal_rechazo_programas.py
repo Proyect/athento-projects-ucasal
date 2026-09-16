@@ -35,7 +35,7 @@ class RechazaPrograma(DocumentOperation):
             fil.set_metadata("estado", "Pendiente de Validación Docente", overwrite=True)
             raise AthentoseError("El documento no tiene un ciclo de vida asignado.")
     
-        #lifecycle_state = fil.life_cycle_state.name
+        lifecycle_state = fil.life_cycle_state.name
         estado_meta = "Pendiente de validacion Docente"
 
         AREA_BY_STATE = {

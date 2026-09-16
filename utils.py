@@ -78,7 +78,7 @@ class TituloStates:
     firmado = 'Firmado'
     rechazado = 'RECHAZADO'
 
-class ProgramaStates:
+class ProgramasStates:
     pendiente_validacion_doc = 'Pendiente de validacion Docente'
     pendiente_firma_otp = 'Pendiente de Firma OTP'
     pendiente_blockchain = 'Pendiente de Blockchain'
