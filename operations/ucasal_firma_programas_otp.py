@@ -27,6 +27,8 @@ from datetime import datetime
 import locale
 import requests
 
+from utils import ProgramasStates
+
 
 class FirmaProgramaOTP(DocumentOperation):
     """Firma analítico y diploma de un programa con OTP y QR, y los registra en blockchain.
@@ -190,7 +192,7 @@ class FirmaProgramaOTP(DocumentOperation):
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
-            for hijo in (hijo_analitico, hijo_diploma):
+            for hijo in (fil):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
                 if not current_bytes:
@@ -237,69 +239,47 @@ class FirmaProgramaOTP(DocumentOperation):
                     )
 
             # 5) Registrar hashes de analítico y diploma en blockchain
-            logger.entry("Registrando hashes de analítico y diploma en blockchain")
+            logger.entry("Registrando hashes de programas en blockchain")
             response = requests.post(
                     url,
-                    json={"mensaje": "Registrando hashes de analítico y diploma en blockchain"},
+                    json={"mensaje": "Registrando hashes de programas en blockchain"},
                     verify=False,
                 )
-            hash_analitico = get_pdf_hash(hijo_analitico)
-            hash_diploma = get_pdf_hash(hijo_diploma)
+            hash_programa = get_pdf_hash(fil.path())           
 
-            registrada_en_blockchain = fil.gfv("registro_blockchain")
-            ok_analitico = fil.gfv("ucasal.svc.ok_response_analitico")
-            ok_diploma = fil.gfv("ucasal.svc.ok_response_diploma")
+            registrada_en_blockchain = fil.gfv("registro_blockchain")           
 
             saltear_registro_blockchain = False
 
             if registrada_en_blockchain == "success":
-                flogger.entry("El título ya fue firmado y registrado en blockchain.")
+                flogger.entry("El programa ya fue firmado y registrado en blockchain.")
                 return logger.exit(
                     {
                         "msg": _(
-                            "Título firmado digitalmente (analítico y diploma) y enviado a "
+                            "Programa firmado digitalmente y enviado a "
                             "blockchain."
                         ),
                         "msg_type": "success",
                     }
                 )
 
-            if ok_analitico and ok_diploma:
-                flogger.entry(
-                    "Blockchain ya registrado; se omite reenvío y se continúa con la finalización."
-                )
-                saltear_registro_blockchain = True
-            elif registrada_en_blockchain == "pending":
-                fil.set_feature("registro_blockchain", "")
-                flogger.entry(
-                    "Estado 'pending' inconsistente; se resetea para reintentar."
-                )
+            
+         
+            callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
+            logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash : {hash_programa}" + f" - Token: {auth_token}")
+            
+            ok_response = UcasalServices.register_in_blockchain(
+                auth_token=auth_token,
+                hash=hash_programa,
+                file_uuid=str(hijo_analitico.uuid),
+                callback_url=callback_url,
+            )
+            hijo_analitico.set_feature(
+                "ucasal.svc.ok_response_analitico", ok_response_analitico
+            )
 
-            if not saltear_registro_blockchain:
-                callback_url = DesignacionesServices.set_callback_url(uuid=uuid_padre)
-                logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}" + f" - Token: {auth_token}")
-                
-                ok_response_analitico = UcasalServices.register_in_blockchain(
-                    auth_token=auth_token,
-                    hash=hash_analitico,
-                    file_uuid=str(hijo_analitico.uuid),
-                    callback_url=callback_url,
-                )
-                hijo_analitico.set_feature(
-                    "ucasal.svc.ok_response_analitico", ok_response_analitico
-                )
+            logger.entry(f"Token: {auth_token}"+f" - Hash: {hash_programa}")
 
-                logger.entry(f"Token: {auth_token}"+f" - Hash diploma: {hash_diploma}")
-
-                ok_response_diploma = UcasalServices.register_in_blockchain(
-                    auth_token=auth_token,
-                    hash=hash_diploma,
-                    file_uuid=str(hijo_diploma.uuid),
-                    callback_url=callback_url,
-                )
-                hijo_diploma.set_feature(
-                    "ucasal.svc.ok_response_diploma", ok_response_diploma
-                )
 
             fil.set_feature("registro_blockchain", "pending")
             fil.set_feature("titulos.documentos_firmados", documentos_firmados)
@@ -316,10 +296,10 @@ class FirmaProgramaOTP(DocumentOperation):
             # el título en 'pendiente_blockchain' y recién pasar a 'firmado'
             # cuando llegue esa confirmación.
             
-            fil.change_life_cycle_state(TituloStates.pendiente_blockchain)
+            fil.change_life_cycle_state(ProgramasStates.pendiente_blockchain)
             fil.set_metadata(
                 "estado",
-                TituloStates.pendiente_blockchain,
+                ProgramasStates.pendiente_blockchain,
                 overwrite=True,
             )
             flogger.entry("Enviando notificación de actualización de estado a UCASAL")
