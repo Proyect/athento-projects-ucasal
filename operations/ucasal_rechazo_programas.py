@@ -29,12 +29,7 @@ class RechazaPrograma(DocumentOperation):
         flogger.entry("Rechazando el programas...")
 
         flogger.entry(f"Datos del documento:  UUID {uuid}")
-
-        if(not fil.life_cycle_state):
-            flogger.error("El documento no tiene un ciclo de vida asignado.")
-            fil.set_metadata("estado", "Pendiente de Validación Docente", overwrite=True)
-            raise AthentoseError("El documento no tiene un ciclo de vida asignado.")
-    
+     
         lifecycle_state = fil.life_cycle_state.name
         estado_meta = "Pendiente de validacion Docente"
 
