@@ -9,7 +9,7 @@ from core.exceptions import AthentoseError
 from django_currentuser.middleware import get_current_user
 from file.foperations import op_send_by_email
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal2.utils import is_digit
+from custom.ucasal2.utils import ProgramasStates, is_digit
 
 
 
@@ -33,12 +33,12 @@ class ApruebaProgramas(DocumentOperation):
             flogger = SpFeatureLogger.getLogger(fil)
 
             # Leer estado actual (lifecycle + metadato 'estado' si lo usas)
-            lifecycle_state = fil.life_cycle_state.name
+            lifecycle_state = fil.life_cycle_state.name if fil.life_cycle_state else ""
             estado_meta = fil.gfv("estado") or lifecycle_state
           
-            flogger.entry(f"Response: {estado_meta}")
+            flogger.entry(f"Response: {estado_meta} ")
 
-            if estado_meta == "Pendiente de validacion Docente":
+            if estado_meta == ProgramasStates.pendiente_validacion_doc:
                 
                 otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
                 if otp_str == "":
@@ -51,7 +51,7 @@ class ApruebaProgramas(DocumentOperation):
                         % {"otp": otp_str}
                     )
 
-                otp_str = int(otp_str)
+                otp = int(otp_str)
 
                 usuario = get_current_user()
                 if not usuario or not getattr(usuario, "is_authenticated", False):
@@ -59,11 +59,12 @@ class ApruebaProgramas(DocumentOperation):
                     raise AthentoseError("No hay un usuario autenticado para firmar el programa")
                 mail_sg = usuario.email or ""
 
-                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
-                
+                UcasalServices.validate_otp(user=mail_sg, otp=otp)
+
                 nuevo_estado = ProgramasStates.pendiente_firma_otp
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
-                fil.change_life_cycle_state(nuevo_estado)
+                if fil.life_cycle_state:
+                    fil.change_life_cycle_state(nuevo_estado)
 
                 op_send_by_email.run(
                     uuid,
@@ -81,9 +82,7 @@ class ApruebaProgramas(DocumentOperation):
 
             # Si no se reconoce el estado, devolver error controlado
             raise AthentoseError(
-                _(
-                    f"El estado actual del programas ({estado_meta}) no permite la aprobación."
-                )
+                f"El estado actual del programa ({estado_meta or 'sin estado'}) no permite la aprobación."
             )
 
         except FileNotFoundError as e:  # noqa: F821,BLE001

@@ -43,7 +43,7 @@ class RechazaPrograma(DocumentOperation):
 
             if estado_meta not in self.AREA_BY_STATE:
                 raise AthentoseError(
-                    f"El estado actual del programa ({estado_meta or 'sin estado'}) no permite el rechazo."
+                    f"El estado actual del programas ({estado_meta or 'sin estado'}) no permite el rechazo."
                 )
             area = self.AREA_BY_STATE[estado_meta]
 
