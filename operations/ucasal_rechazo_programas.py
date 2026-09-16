@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
 from file.foperations import op_send_by_email
-from custom.ucasal2.utils  import TituloStates
+from custom.ucasal2.utils  import ProgramasStates
 from datetime import datetime
 import pytz
 import requests
@@ -28,7 +28,7 @@ class RechazaPrograma(DocumentOperation):
         flogger: SpFeatureLogger = SpFeatureLogger.getLogger(fil)
         flogger.entry("Rechazando el programas...")
 
-        flogger.entry(f"Datos del documento: {fil}")
+        flogger.entry(f"Datos del documento:  UUID {uuid}")
 
         if(not fil.life_cycle_state):
             flogger.error("El documento no tiene un ciclo de vida asignado.")
