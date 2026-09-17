@@ -269,8 +269,7 @@ class FirmaTituloOTP(DocumentOperation):
             # 5) Registrar hashes de analítico y diploma en blockchain
             # --- Registro en blockchain deshabilitado temporalmente ---
             # logger.entry("Registrando hashes de analítico y diploma en blockchain")
-            # response = requests.post(
-            #         url,
+            # response = requests.post(            #        
             #         json={"mensaje": "Registrando hashes de analítico y diploma en blockchain"},
             #         verify=False,
             #     )
