@@ -93,11 +93,10 @@ class FirmaProgramaOTP(DocumentOperation):
                 flogger.entry("No hay un usuario autenticado para firmar el programa")
                 raise AthentoseError("No hay un usuario autenticado para firmar el programa")
             
-            if(1 != 1):   #not usuario.groups.filter(name="Docentes").exists():
+            if not usuario.groups.filter(name="Docentes").exists():
                 flogger.entry("El usuario logueado no pertenece al grupo 'Docentes'")
-                raise AthentoseError(
-                    "El usuario logueado no pertenece al grupo 'Docentes'"
-                )
+               
+                #raise AthentoseError("El usuario logueado no pertenece al grupo 'Docentes'")
             else:
                 flogger.entry("Entro por condicion falsa")
    
