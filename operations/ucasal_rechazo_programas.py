@@ -80,6 +80,7 @@ class RechazaPrograma(DocumentOperation):
                 overwrite=True,
             )
             fil.set_metadata("estado", ProgramasStates.rechazado, overwrite=True)
+
             if fil.life_cycle_state:
                 fil.change_life_cycle_state(ProgramasStates.rechazado)
 
@@ -129,7 +130,6 @@ class RechazaPrograma(DocumentOperation):
                 },
                 exc_info=True,
             )
-
 
 VERSION = RechazaPrograma.version
 NAME = RechazaPrograma.name
