@@ -22,7 +22,7 @@ class RechazaPrograma(DocumentOperation):
 
     # Estados desde los que se puede rechazar -> area a notificar
     AREA_BY_STATE = {
-        ProgramasStates.pendiente_validacion_doc: "Pendiente de validacion Docente",
+        ProgramasStates.pendiente_validacion_doc: "Pendiente de Validación Docente",
         ProgramasStates.pendiente_firma_otp: "Pendiente de Firma OTP",
     }
 
