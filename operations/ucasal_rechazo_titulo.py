@@ -86,7 +86,7 @@ class RechazaTitulo(DocumentOperation):
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/reject",
-                    json={"uuid": uuid},
+                    json={"uuidExpediente": uuid},
                     verify=False,
                 )
                 flogger.entry(f"Notificación rechazo enviada a UCASAL - Status: {response.status_code}, Response: {response.text[:200]}")

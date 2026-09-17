@@ -277,13 +277,13 @@ class FirmaTituloOTP(DocumentOperation):
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/approve",
-                    json={"status": "5", "uuid": uuid_padre,},
+                    json={"uuidExpediente": uuid_padre,},
                     verify=False,
                     timeout=30,
                 )
                 response.raise_for_status()
                 flogger.entry(
-                    f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}"
+                    f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]} , UUID: {uuid_padre}" 
                 )
             except Exception as notif_err:
                 flogger.entry(
