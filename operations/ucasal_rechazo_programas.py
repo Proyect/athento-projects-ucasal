@@ -4,7 +4,7 @@ from operations.classes.document_operation import DocumentOperation
 from core.exceptions import AthentoseError
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
-from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger
+from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from file.foperations import op_send_by_email
 from django_currentuser.middleware import get_current_user
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
