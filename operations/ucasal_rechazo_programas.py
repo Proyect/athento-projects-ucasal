@@ -27,6 +27,7 @@ class RechazaPrograma(DocumentOperation):
     }
 
     def execute(self, *args, **kwargs):
+        flogger: SpFeatureLogger = NullSpFeatureLogger()
         logger = self._logger
         logger.entry()
 
