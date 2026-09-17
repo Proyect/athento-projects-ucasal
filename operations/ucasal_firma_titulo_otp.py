@@ -49,8 +49,7 @@ class FirmaTituloOTP(DocumentOperation):
     )
     configuration_parameters = {}
     _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP")
-
-    url = "https://webhook.site/5b8e70e2-bee5-49ee-9f9a-c7f941188fbc"
+    
 
     def execute(self, *args, **kwargs):  # noqa: D401
         flogger: SpFeatureLogger = NullSpFeatureLogger()
@@ -357,7 +356,7 @@ class FirmaTituloOTP(DocumentOperation):
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/update-finalize",
-                    json={"status": "5", "uuid": uuid_padre},
+                    json={"status": "5", "uuid": uuid_padre,},
                     verify=False,
                     timeout=30,
                 )
