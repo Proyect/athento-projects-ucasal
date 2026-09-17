@@ -355,7 +355,7 @@ class FirmaTituloOTP(DocumentOperation):
             flogger.entry("Enviando notificación de actualización de estado a UCASAL")
             try:
                 response = requests.post(
-                    "https://backprod.ucasal.edu.ar/testing/titulos/athento/update-finalize",
+                    "https://backprod.ucasal.edu.ar/testing/titulos/athento/approve",
                     json={"status": "5", "uuid": uuid_padre,},
                     verify=False,
                     timeout=30,
