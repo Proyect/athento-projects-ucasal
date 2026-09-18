@@ -243,12 +243,14 @@ class FirmaTituloOTP(DocumentOperation):
                     width=70,
                     height=70,
                 )
-
+                
+                flogger.entry(f"Firmando documento {hijo.uuid} con QR/OTP   {hijo.path()}  {qr_info}  {otp_info}")
                 signed_result = signer.sign(
                     hijo.path(),
                     qr_info,
                     otp_info,
                 )
+                flogger.entry(f"Resultado: {signed_result}")
 
                 signed_pdf_bytes = signed_result.getvalue()
 
