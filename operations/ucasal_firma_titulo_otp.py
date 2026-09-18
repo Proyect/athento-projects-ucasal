@@ -268,6 +268,10 @@ class FirmaTituloOTP(DocumentOperation):
 
                         
             fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
+            if("Pendiente de validacion FSG (secretaria general)" in fil_padre.get_metadata("estado")):
+                nuevo_estado = "Pendiente de Blockchain"
+                fil_padre.change_life_cycle_state(nuevo_estado)
+
             fil_padre.set_metadata(
                 "estado",
                 TituloStates.pendiente_blockchain,
@@ -294,6 +298,10 @@ class FirmaTituloOTP(DocumentOperation):
                 )
 
             fil_padre.change_life_cycle_state(TituloStates.firmado)
+            if("Firmado" in fil_padre.get_metadata("estado")):
+                nuevo_estado = "Firmado"
+                fil_padre.change_life_cycle_state(nuevo_estado)
+
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
             fil_padre.set_feature("registro_blockchain", "success")
             flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
