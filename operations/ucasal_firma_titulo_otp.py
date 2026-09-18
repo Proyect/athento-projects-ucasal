@@ -218,6 +218,8 @@ class FirmaTituloOTP(DocumentOperation):
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
+
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
             for hijo in (hijo_analitico, hijo_diploma):
@@ -269,10 +271,10 @@ class FirmaTituloOTP(DocumentOperation):
                     )
 
                         
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
             if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Pendiente de Blockchain"
-                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
+                fil_padre.change_life_cycle_state(nuevo_estado)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata(
