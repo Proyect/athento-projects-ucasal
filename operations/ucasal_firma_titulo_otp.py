@@ -252,7 +252,7 @@ class FirmaTituloOTP(DocumentOperation):
                     qr_info,
                     otp_info,
                 )
-                flogger.entry(f"Resultado: {signed_result}")
+                #flogger.entry(f"Resultado: {signed_result}")
 
                 signed_pdf_bytes = signed_result.getvalue()
 
@@ -311,6 +311,13 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
             fil_padre.set_feature("registro_blockchain", "success")
             flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
+
+            op_send_by_email.run(
+                    uuid_padre,
+                    notifications_template='titulos_notificacion_pendiente_firma',
+                    send_to_groups='SECRETARIA GRAL',
+                    area='TITULOS'
+                )
 
             body_to_save = {
                 "fecha_firma": {"day": day, "month": month, "year": year},
