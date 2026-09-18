@@ -246,13 +246,11 @@ class FirmaTituloOTP(DocumentOperation):
                     height=70,
                 )
                 
-                flogger.entry(f"Firmando documento {hijo.uuid} con QR/OTP   {hijo.path()}  {qr_info}  {otp_info}")
                 signed_result = signer.sign(
                     hijo.path(),
                     qr_info,
                     otp_info,
-                )
-                #flogger.entry(f"Resultado: {signed_result}")
+                )                
 
                 signed_pdf_bytes = signed_result.getvalue()
 
@@ -311,22 +309,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
             fil_padre.set_feature("registro_blockchain", "success")
-            flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
-
-            flogger.entry(f"Datos del documento: {fil_padre.get_metadata()}")
-            flogger.entry(f"Features del documento: {fil_padre}")
-
-            result = document.delivery_document(
-                email,
-                related_files_selected=related_files_selected,
-                **self.parameters,
-            )
-
-            logger.info(
-                "delivery_document devolvió: tipo=%s valor=%s",
-                type(result).__name__,
-                result,
-            )
+            flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")            
 
             body_to_save = {
                 "fecha_firma": {"day": day, "month": month, "year": year},
