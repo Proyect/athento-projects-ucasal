@@ -31,7 +31,7 @@ class DesignacionesServices:
 
       
     @classmethod
-    def set_callback_url(cls, uuid:str)->str:
+    def set_callback_url(cls, uuid:str)->str: #firma_programas_otp
         logger = SpLogger.getLogger("athentose")
         logger.entry()
         callback_url = f'{UcasalConfig.designaciones_bfaresponse_endpoint()}{uuid}/bfaresponse'

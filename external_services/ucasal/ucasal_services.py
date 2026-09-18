@@ -13,7 +13,7 @@ class UcasalServices:
     VERIFY_CERTIFICATE = False
     
     @classmethod
-    def get_auth_token(cls, user:str, password:str)->str:
+    def get_auth_token(cls, user:str, password:str)->str: #all_place
         logger = cls.logger
         logger.entry()
         endpoint = UcasalConfig.token_svc_url()
@@ -33,7 +33,7 @@ class UcasalServices:
             raise AthentoseError(error_msg)  
             
     @classmethod
-    def get_qr_image(cls, url:str)->io.BytesIO:
+    def get_qr_image(cls, url:str)->io.BytesIO: #all_place
         logger = cls.logger
         logger.entry(f"Generando QR para URL: {url}")
         endpoint = f"{UcasalConfig.qr_svc_url()}?b64={b64encode(url.encode('utf-8')).decode('utf-8')}"
@@ -47,7 +47,7 @@ class UcasalServices:
             raise logger.exit(AthentoseError('Error inesperado obteniendo imagen QR: ' + response.reason), exc_info=True)   
     
     @classmethod
-    def get_short_url(cls, auth_token:str, url:str)->str:
+    def get_short_url(cls, auth_token:str, url:str)->str: #all_place
         #TODO: consultar servicio de UCASAL
         logger = cls.logger
         logger.entry()
@@ -78,7 +78,7 @@ class UcasalServices:
 
 
     @classmethod
-    def register_in_blockchain(cls, auth_token:str, hash:str, file_uuid:str, callback_url:str)->str:
+    def register_in_blockchain(cls, auth_token:str, hash:str, file_uuid:str, callback_url:str)->str: #firma_programas
         #import logging
         #nlogger = logging.getLogger("athentose")
 
@@ -115,7 +115,7 @@ class UcasalServices:
             raise logger.exit(AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason), exc_info=True) 
 
     @classmethod
-    def notify_rejection(cls, auth_token:str, uuid:str, previous_uuid:str, reason:str)->str:
+    def notify_rejection(cls, auth_token:str, uuid:str, previous_uuid:str, reason:str)->str: #plataforma 
         logger = cls.logger
         logger.entry()
         endpoint = f'{UcasalConfig.change_acta_svc_url()}/{uuid}'
@@ -147,7 +147,7 @@ class UcasalServices:
             raise logger.exit(AthentoseError('Error inesperado notificando éxito registrando el acta en blockchain: ' + response.reason), exc_info=True)   
     
     @classmethod
-    def validate_otp(cls, user:str, otp:int):
+    def validate_otp(cls, user:str, otp:int): #all_place
         logger = cls.logger
         logger.entry()
         

@@ -13,6 +13,6 @@ from ucasal2.endpoints import(
 
 urlpatterns = [
     #*actas.routes,
-    *designaciones.routes,
+    #*designaciones.routes,
     #*resoluciones.routes
 ]

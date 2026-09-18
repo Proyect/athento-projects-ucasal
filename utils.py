@@ -24,48 +24,6 @@ serializableJsonTypes = (int, str, float, bool, NoneType)
 
 automation_user = 'ops.and.commands@athento.com'
 
-# Nombres de campos de Acta
-sector_metadata_name = 'metadata.acta_cod_sector'
-nro_revision_metadata_name =  'metadata.acta_nro_revision'
-uuid_previo_metadata_name =  'metadata.acta_id_acta_previa'
-serie_actas_revisadas_name = 'actas_revisadas'
-
-# Nombres de campos Resoluciones
-class CamposEquivalencias :
-    codigo_sector_equivalencias = 'metadata.resolucion_equivalencia_codigo_sector'
-
-# Nombre del doctype del Acta
-acta_examen_doctype_name = 'acta'
-
-# Nombres de Estados de Ciclo de Vida Designaciones
-class DesignacionesStates:
-    pendiente_validacion_ld = 'Pendiente de Validacion LD'
-    pendiente_validacion_personal = 'Pendiente de Validacion Personal'
-    pendiente_validacion_rrhh = 'Pendiente de Validacion RRHH'
-    pendiente_firma_otp = 'Pendiente de Firma OTP'
-    pendiente_blockchain = 'Pendiente de Blockchain'
-    fallo_blockchain = 'Fallo en Blockchain'
-    firmado = 'Firmado'
-    rechazado = 'Rechazado'
-
-# Nombres de Estados de Ciclo de Vida Equivalencia
-class EquivalenciaStates:
-    recibida = 'Recibida'
-    pendiente_DA = 'Pendiente de Revisión (DA)'
-    pendiente_firma = 'Pendiente Firma OTP'
-    pendiente_blockchain = 'Pendiente de Blockchain'
-    fallo_blockchain = 'Fallo en Blockchain'
-    firmada = 'Firmada'
-    rechazada = 'Rechazada'
-
-class ActaStates:
-    recibida = 'Recibida'
-    pendiente_otp = 'Pendiente Firma OTP'
-    pendiente_blockchain = 'Pendiente Blockchain'
-    firmada = 'Firmada'
-    fallo_blockchain = 'Fallo en Blockchain'
-    rechazada = 'Rechazada'
-
 class TituloStates:
     pendiente_validacion_da = 'Pendiente de validacion DA (direccion de alumnos)'
     pendiente_validacion_fd = 'Pendiente de validacion FD (firma del decano)'
