@@ -236,13 +236,23 @@ class FirmaTituloOTP(DocumentOperation):
                 with open(qr_image_tmp_path, "wb") as qr_file:
                     qr_file.write(qr_stream)
 
-                qr_info = QRInfo(
-                    image_path=qr_image_tmp_path,
-                    image_text=qr_text,
-                    x=20,
-                    y=11,
-                    width=70,
-                    height=70,
+                if(hijo == hijo_analitico):
+                    qr_info = QRInfo(
+                        image_path=qr_image_tmp_path,
+                        image_text=qr_text,
+                        x=30,
+                        y=40,
+                        width=40,
+                        height=40,
+                    )
+                else:                    
+                    qr_info = QRInfo(
+                        image_path=qr_image_tmp_path,
+                        image_text=qr_text,
+                        x=50,
+                        y=50,
+                        width=70,
+                        height=70,
                 )
                 
                 signed_result = signer.sign(
