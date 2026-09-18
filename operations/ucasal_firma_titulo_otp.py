@@ -283,6 +283,7 @@ class FirmaTituloOTP(DocumentOperation):
                 overwrite=True,
             )
             flogger.entry("Enviando notificación de actualización de estado a UCASAL")
+
             try:
                 response = requests.post(
                     "https://backprod.ucasal.edu.ar/testing/titulos/athento/approve",
@@ -312,6 +313,9 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("registro_blockchain", "success")
             flogger.entry("Ambos documentos firmados. Estado cambiado a 'Firmado'")
 
+            flogger.entry(f"Datos del documento: {fil_padre.get_metadata()}")
+            flogger.entry(f"Features del documento: {fil_padre}")
+
             op_send_by_email.run(
                     uuid_padre,
                     notifications_template='titulos_notificacion_pendiente_firma',
@@ -330,6 +334,8 @@ class FirmaTituloOTP(DocumentOperation):
                 },
             }
             fil_padre.set_feature("bodyFinalTitulo", body_to_save)
+
+
 
             return logger.exit(
                 {
