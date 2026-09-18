@@ -217,7 +217,7 @@ class FirmaTituloOTP(DocumentOperation):
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -249,8 +249,8 @@ class FirmaTituloOTP(DocumentOperation):
                     qr_info = QRInfo(
                         image_path=qr_image_tmp_path,
                         image_text=qr_text,
-                        x=50,
-                        y=50,
+                        x=70,
+                        y=70,
                         width=70,
                         height=70,
                 )
@@ -278,10 +278,10 @@ class FirmaTituloOTP(DocumentOperation):
                     )
 
                         
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
             if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Pendiente de Blockchain"
-                fil_padre.change_life_cycle_state(nuevo_estado)
+                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata(
@@ -310,10 +310,10 @@ class FirmaTituloOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil_padre.change_life_cycle_state(TituloStates.firmado)
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
             if("Pendiente de Blockchain" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Firmado"
-                fil_padre.change_life_cycle_state(nuevo_estado)
+                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
