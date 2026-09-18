@@ -240,8 +240,8 @@ class FirmaTituloOTP(DocumentOperation):
                     qr_info = QRInfo(
                         image_path=qr_image_tmp_path,
                         image_text=qr_text,
-                        x=40,
-                        y=40,
+                        x=30,
+                        y=50,
                         width=40,
                         height=40,
                     )
@@ -250,7 +250,7 @@ class FirmaTituloOTP(DocumentOperation):
                         image_path=qr_image_tmp_path,
                         image_text=qr_text,
                         x=90,
-                        y=70,
+                        y=80,
                         width=70,
                         height=70,
                 )
