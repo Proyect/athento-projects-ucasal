@@ -316,12 +316,17 @@ class FirmaTituloOTP(DocumentOperation):
             flogger.entry(f"Datos del documento: {fil_padre.get_metadata()}")
             flogger.entry(f"Features del documento: {fil_padre}")
 
-            op_send_by_email.run(
-                    uuid_padre,
-                    notifications_template='titulos_notificacion_pendiente_firma',
-                    send_to_groups='SECRETARIA GRAL',
-                    area='TITULOS'
-                )
+            result = document.delivery_document(
+                email,
+                related_files_selected=related_files_selected,
+                **self.parameters,
+            )
+
+            logger.info(
+                "delivery_document devolvió: tipo=%s valor=%s",
+                type(result).__name__,
+                result,
+            )
 
             body_to_save = {
                 "fecha_firma": {"day": day, "month": month, "year": year},
