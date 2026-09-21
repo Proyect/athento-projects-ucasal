@@ -190,7 +190,7 @@ class FirmaProgramaOTP(DocumentOperation):
 
             # 4) Firmar el PDF del programa con QR/OTP
             logger.entry("Firmando documento con QR/OTP")
-            for hijo in (fil):
+            for hijo in (fil,):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
                 if not current_bytes:
@@ -308,7 +308,7 @@ class FirmaProgramaOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil.change_life_cycle_state(ProgramasStates.firmado)
+            fil.change_life_cycle_state(ProgramasStates.firmado, force_transition=True)
             fil.set_metadata("estado", ProgramasStates.firmado, overwrite=True)
             fil.set_feature("registro_blockchain", "success")
             flogger.entry("Documento firmado. Estado cambiado a 'Firmado'")
