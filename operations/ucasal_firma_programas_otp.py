@@ -272,7 +272,7 @@ class FirmaProgramaOTP(DocumentOperation):
             # cambiarse para dejar el programa en 'pendiente_blockchain' y
             # recién pasar a 'firmado' cuando llegue esa confirmación.
             
-            fil.change_life_cycle_state(ProgramasStates.pendiente_blockchain)
+            fil.change_life_cycle_state(ProgramasStates.pendiente_blockchain, force_transition=True)
             fil.set_metadata(
                 "estado",
                 ProgramasStates.pendiente_blockchain,
