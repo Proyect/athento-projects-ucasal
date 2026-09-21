@@ -288,7 +288,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             try:
                 response = requests.post(
-                    "https://backprod.ucasal.edu.ar/testing/titulos/athento/approve",
+                    UcasalConfig.titulo_titulo_approve_url(),
                     json={"uuidExpediente": uuid_padre,},
                     verify=False,
                     timeout=30,
