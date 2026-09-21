@@ -186,9 +186,11 @@ class FirmaProgramaOTP(DocumentOperation):
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
+            fil.change_life_cycle_state(ProgramasStates.pendiente_firma_otp, force_transition=True)
+
             # 4) Firmar el PDF del programa con QR/OTP
             logger.entry("Firmando documento con QR/OTP")
-            for hijo in (fil,):
+            for hijo in (fil):
                 with open(hijo.path(), "rb") as f:
                     current_bytes = f.read()
                 if not current_bytes:
@@ -233,6 +235,8 @@ class FirmaProgramaOTP(DocumentOperation):
                     logger.warning(
                         "No se pudo eliminar el archivo temporal %s", qr_image_tmp_path
                     )
+
+            fil.change_life_cycle_state(ProgramasStates.pendiente_blockchain, force_transition=True)
 
             # 5) Registrar hash del programa en blockchain
             logger.entry("Registrando hash del programa en blockchain")
