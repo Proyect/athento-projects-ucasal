@@ -123,7 +123,7 @@ class UcasalConfig:
         return SAC.get_str('ucasal.titulo.validation_url_template')
 
     @staticmethod
-    def titulo_titulo_approve_url()->str:
+    def titulo_approve_url()->str:
         return SAC.get_str('ucasal.titulo.approve_url')
 
 
@@ -135,6 +135,11 @@ class UcasalConfig:
     @staticmethod
     def programas_titulo_approve_url()->str:
         return SAC.get_str('ucasal.programas.approve_url')
+
+    @staticmethod
+    def programas_change_state_svc_url()->str:
+        return SAC.get_str('ucasal.programas.change_state_svc_url')
+        
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])

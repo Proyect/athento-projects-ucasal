@@ -288,7 +288,7 @@ class FirmaTituloOTP(DocumentOperation):
 
             try:
                 response = requests.post(
-                    UcasalConfig.titulo_titulo_approve_url(),
+                    UcasalConfig.titulo_approve_url(),
                     json={"uuidExpediente": uuid_padre,},
                     verify=False,
                     timeout=30,

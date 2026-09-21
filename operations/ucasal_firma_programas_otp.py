@@ -280,6 +280,7 @@ class FirmaProgramaOTP(DocumentOperation):
             )
             flogger.entry("Enviando notificación de actualización de estado a UCASAL")
             try:
+                #posible error en el micro
                 response = requests.post(
                     UcasalConfig.programas_titulo_approve_url(),
                     json={"status": "5", "uuid": uuid},
