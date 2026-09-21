@@ -124,12 +124,7 @@ class FirmaProgramaOTP(DocumentOperation):
 
             fil.set_feature("obtuve_auth_token", "1")
 
-            # Nota: designaciones_validation_url_template() lee la clave de config
-            # 'ucasal.titulo.validation_url_template' (el nombre del método quedó
-            # heredado de Designaciones, pero apunta a la plantilla correcta de
-            # Títulos). Ver custom/ucasal2/utils.py -> UcasalConfig.
-
-            url_to_shorten = UcasalConfig.designaciones_validation_url_template().replace(
+            url_to_shorten = UcasalConfig.programas_validation_url_template().replace(
                 "{{uuid}}", uuid
             )
             flogger.entry(f"Obteniendo short_url para: {url_to_shorten}")

@@ -117,9 +117,14 @@ class UcasalConfig:
     def designaciones_bfaresponse_endpoint()->str:
         return SAC.get_str('ucasal.designaciones.bfaresponse_endpoint')
     
+ 
     @staticmethod
-    def designaciones_validation_url_template()->str:
-        return SAC.get_str('ucasal.designaciones.validation_url_template')
+    def titulo_validation_url_template()->str:
+        return SAC.get_str('ucasal.titulo.validation_url_template')
+
+    @staticmethod
+    def programas_validation_url_template()->str:
+        return SAC.get_str('ucasal.programas.validation_url_template')
 
 def default_permissions(func):
     @api_view(['POST', 'GET', 'DELETE', 'PUT', 'OPTIONS'])
