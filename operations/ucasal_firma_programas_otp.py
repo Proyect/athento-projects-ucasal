@@ -96,7 +96,7 @@ class FirmaProgramaOTP(DocumentOperation):
             if not usuario.groups.filter(name="Docentes").exists(): #not
                 flogger.entry("El usuario logueado no pertenece al grupo 'Docentes'")
                
-                #raise AthentoseError("El usuario logueado no pertenece al grupo 'Docentes'")
+                raise AthentoseError("El usuario logueado no pertenece al grupo 'Docentes'")
             else:
                 flogger.entry("Entro por condicion falsa")
             """
