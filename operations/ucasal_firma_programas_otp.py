@@ -255,7 +255,7 @@ class FirmaProgramaOTP(DocumentOperation):
             #    file_uuid=uuid,
             #   callback_url=callback_url,
             #)
-            fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
+            #fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
 
             logger.entry(f"Token: {auth_token}" + f" - Hash: {hash_programa}")
 
