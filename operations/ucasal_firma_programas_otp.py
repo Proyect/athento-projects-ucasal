@@ -249,12 +249,12 @@ class FirmaProgramaOTP(DocumentOperation):
             callback_url = DesignacionesServices.set_callback_url(uuid=uuid)
             logger.entry(f"Callback URL: {callback_url} - UUID: {uuid} - Hash: {hash_programa}" + f" - Token: {auth_token}")
 
-            ok_response = UcasalServices.register_in_blockchain(
-                auth_token=auth_token,
-                hash=hash_programa,
-                file_uuid=uuid,
-                callback_url=callback_url,
-            )
+            #ok_response = UcasalServices.register_in_blockchain(
+            #    auth_token=auth_token,
+            #    hash=hash_programa,
+            #    file_uuid=uuid,
+            #   callback_url=callback_url,
+            #)
             fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
 
             logger.entry(f"Token: {auth_token}" + f" - Hash: {hash_programa}")

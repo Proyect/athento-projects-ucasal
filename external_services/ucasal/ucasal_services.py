@@ -101,8 +101,7 @@ class UcasalServices:
         request_info = str({'url':endpoint, 'json':data, 'headers':headers})
         
         logger.debug(f"Llamando a requests.post con estos parametros: {request_info}")
-        logger.debug(f"Llamando a requests.post con estos parámetros: {request_info}")
-
+        
         response = requests.post(url=endpoint, json=data, headers=headers)
 
         rta = str(response.text)
