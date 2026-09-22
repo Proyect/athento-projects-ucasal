@@ -79,13 +79,13 @@ class UcasalServices:
 
     @classmethod
     def register_in_blockchain(cls, auth_token:str, hash:str, file_uuid:str, callback_url:str)->str: #firma_programas
-        #import logging
-        #nlogger = logging.getLogger("athentose")
+        import logging
+        nlogger = logging.getLogger("athentose")
 
-        #nlogger.debug("nlogger - Enter register_in_blockchain")
+        nlogger.debug("nlogger - Enter register_in_blockchain")
 
 
-        logger = cls.logger
+        #logger = cls.logger
         logger.entry()
         #TODO: validar parámetros
                 
