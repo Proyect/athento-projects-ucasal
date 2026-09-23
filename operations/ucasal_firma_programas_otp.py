@@ -282,7 +282,7 @@ class FirmaProgramaOTP(DocumentOperation):
             try:
                 #posible error en el micro
                 response = requests.post(
-                    UcasalConfig.programas_titulo_approve_url(),
+                    UcasalConfig.programas_approve_url(),
                     json={"status": "5", "uuid": uuid},
                     verify=False,
                     timeout=30,

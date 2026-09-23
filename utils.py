@@ -133,8 +133,12 @@ class UcasalConfig:
         return SAC.get_str('ucasal.programas.validation_url_template')
     
     @staticmethod
-    def programas_titulo_approve_url()->str:
-        return SAC.get_str('ucasal.programas.approve_url')
+    def programas_approve_url()->str:
+        return SAC.get_str('ucasal.programas.approve_url')    
+
+    @staticmethod
+    def programas_rejection_url()->str:
+        return SAC.get_str('ucasal.programas.rejection_url')
 
     @staticmethod
     def programas_change_state_svc_url()->str:
