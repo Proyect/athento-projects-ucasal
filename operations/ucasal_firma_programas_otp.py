@@ -10,7 +10,7 @@ from django.core.files import File as DjangoFile
 from django_currentuser.middleware import get_current_user
 
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from custom.ucasal2.external_services.ucasal.designaciones_services import DesignacionesServices
+from custom.ucasal2.external_services.ucasal.titulos_services import DesignacionesTitulos
 from custom.ucasal2.utils import UcasalConfig
 from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash, ProgramasStates
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
@@ -246,7 +246,7 @@ class FirmaProgramaOTP(DocumentOperation):
                     }
                 )
 
-            callback_url = DesignacionesServices.set_callback_url(uuid=uuid)
+            callback_url = DesignacionesTitulos.set_callback_url(uuid=uuid)
             logger.entry(f"Callback URL: {callback_url} - UUID: {uuid} - Hash: {hash_programa}" + f" - Token: {auth_token}")
 
             #ok_response = UcasalServices.register_in_blockchain(
