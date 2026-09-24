@@ -47,19 +47,7 @@ class RechazaTitulo(DocumentOperation):
 
             if (motivo == ""):                
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
-
-            otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
-            if otp_str == "":
-                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
-                raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-            if not is_digit(otp_str):
-                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
-                raise AthentoseError(
-                    _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                    % {"otp": otp_str}
-                )
-
-            otp_str = int(otp_str)
+            
 
             usuario = get_current_user()
             if not usuario or not getattr(usuario, "is_authenticated", False):
@@ -85,7 +73,8 @@ class RechazaTitulo(DocumentOperation):
 
             try:
                 response = requests.post(
-                    "https://backprod.ucasal.edu.ar/testing/titulos/athento/reject",
+                    #"https://backprod.ucasal.edu.ar/testing/titulos/athento/reject",
+                    UcasalConfig.titulo_rejection_url(),
                     json={"uuidExpediente": uuid},
                     verify=False,
                 )

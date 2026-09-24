@@ -111,6 +111,10 @@ class UcasalConfig:
     
     # Titulo
     @staticmethod
+    def titulo_bfaresponse_endpoint()->str:
+        return SAC.get_str('ucasal.titulos.bfaresponse_endpoint')
+
+    @staticmethod
     def titulo_validation_url_template()->str:
         return SAC.get_str('ucasal.titulo.validation_url_template')
 

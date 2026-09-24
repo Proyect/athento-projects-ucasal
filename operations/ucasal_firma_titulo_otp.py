@@ -11,6 +11,7 @@ from django_currentuser.middleware import get_current_user
 
 from custom.ucasal2.utils import TituloStates
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from custom.ucasal2.external_services.ucasal.titulos_services import TitulosServices
 from custom.ucasal2.utils import UcasalConfig
 from custom.ucasal2.utils import is_digit, get_mail_for_otp, get_arg_time, get_pdf_hash
 from custom.sp_libs.python.sp_pdf_otp_simple_signer.sp_pdf_otp_simple_signer import (
@@ -273,6 +274,71 @@ class FirmaTituloOTP(DocumentOperation):
                     )
 
                         
+            # 5) Registrar hashes de analítico y diploma en blockchain
+            logger.entry("Registrando hashes de analítico y diploma en blockchain")
+            hash_analitico = get_pdf_hash(hijo_analitico)
+            hash_diploma = get_pdf_hash(hijo_diploma)
+
+            registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
+            ok_analitico = fil_padre.gfv("ucasal.svc.ok_response_analitico")
+            ok_diploma = fil_padre.gfv("ucasal.svc.ok_response_diploma")
+
+            saltear_registro_blockchain = False
+
+            if registrada_en_blockchain == "success":
+                flogger.entry("El título ya fue firmado y registrado en blockchain.")
+                return logger.exit(
+                    {
+                        "msg": _(
+                            "Título firmado digitalmente (analítico y diploma) y enviado a "
+                            "blockchain."
+                        ),
+                        "msg_type": "success",
+                    }
+                )
+
+            if ok_analitico and ok_diploma:
+                flogger.entry(
+                    "Blockchain ya registrado; se omite reenvío y se continúa con la finalización."
+                )
+                saltear_registro_blockchain = True
+            elif registrada_en_blockchain == "pending":
+                fil_padre.set_feature("registro_blockchain", "")
+                flogger.entry(
+                    "Estado 'pending' inconsistente; se resetea para reintentar."
+                )
+
+            if not saltear_registro_blockchain:
+                callback_url = TitulosServices.set_callback_url(uuid=uuid_padre)
+                logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}")
+
+                ok_response_analitico = UcasalServices.register_in_blockchain(
+                    auth_token=auth_token,
+                    hash=hash_analitico,
+                    file_uuid=str(hijo_analitico.uuid),
+                    callback_url=callback_url,
+                )
+                hijo_analitico.set_feature(
+                    "ucasal.svc.ok_response_analitico", ok_response_analitico
+                )
+
+                logger.entry(f"Hash diploma: {hash_diploma}")
+
+                ok_response_diploma = UcasalServices.register_in_blockchain(
+                    auth_token=auth_token,
+                    hash=hash_diploma,
+                    file_uuid=str(hijo_diploma.uuid),
+                    callback_url=callback_url,
+                )
+                hijo_diploma.set_feature(
+                    "ucasal.svc.ok_response_diploma", ok_response_diploma
+                )
+
+            fil_padre.set_feature("registro_blockchain", "pending")
+            fil_padre.set_feature("titulos.documentos_firmados", documentos_firmados)
+            fil_padre.set_feature("hash_analitico", hash_analitico)
+            fil_padre.set_feature("hash_diploma", hash_diploma)
+
             fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
             if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Pendiente de Blockchain"

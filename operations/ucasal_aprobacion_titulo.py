@@ -213,18 +213,20 @@ class ApruebaTitulo(DocumentOperation):
                 )
             )
 
-        except FileNotFoundError as e:  # noqa: F821,BLE001
-            flogger.error(f"Error al procesar el archivo: {e}")
-            return logger.exit(
-                HttpResponse(str(e), status=404),
-                exc_info=True,
-            )
         except AthentoseError as e:
             flogger.error(f"Error en la operación de aprobación de título: {e}")
             return logger.exit(
                 HttpResponse(str(e), status=400),
                 exc_info=True,
             )
+            
+        except FileNotFoundError as e:  # noqa: F821,BLE001
+            flogger.error(f"Error al procesar el archivo: {e}")
+            return logger.exit(
+                HttpResponse(str(e), status=404),
+                exc_info=True,
+            )
+        
         except Exception as e:  # noqa: BLE001
             flogger.error(f"Error inesperado al aprobar el título: {e}")
             return logger.exit(
