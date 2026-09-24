@@ -6,10 +6,11 @@ from custom.ucasal2.utils import (
     default_permissions,
     traceback_ret,
     getJsonBody,
-    ProgramaStates,
+    ProgramasStates,
     UcasalConfig,
 )
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from custom.ucasal2.external_services.ucasal.programas_services import ProgramasServices
 from file.foperations import op_send_by_email
 
 @default_permissions
@@ -28,26 +29,24 @@ def bfaresponse(request, uuid):
     if fil.doctype.name != 'programa':
         raise AthentoseError(f"No es un programa, es {fil.doctype.label}")
 
-    if fil.life_cycle_state.name not in [ProgramaStates.pendiente_blockchain, ProgramaStates.fallo_blockchain]:
+    if fil.life_cycle_state.name not in [ProgramasStates.pendiente_blockchain, ProgramasStates.fallo_blockchain]:
         raise AthentoseError("Estado inválido para recibir respuesta BFA")
 
     fil.set_feature('bfa.result', body)
 
     if result == 'success':
-        fil.change_life_cycle_state(ProgramaStates.firmado)
-        fil.set_metadata("estado", ProgramaStates.firmado, overwrite=True)
+        fil.change_life_cycle_state(ProgramasStates.firmado)
+        fil.set_metadata("estado", ProgramasStates.firmado, overwrite=True)
         fil.set_feature("registro_blockchain", "success")
 
         auth_token = UcasalServices.get_auth_token(
             user=UcasalConfig.token_svc_user(),
             password=UcasalConfig.token_svc_password()
         )
-        requests.patch(
-            f"{UcasalConfig.programas_change_state_svc_url().rstrip('/')}/{uuid}",
-            json={"estado": 5},
-            headers={"Authorization": f"Bearer {auth_token}", "Content-Type": "application/json"},
-            verify=False,
-            timeout=30,
+        ProgramasServices.notify_change_state(
+            auth_token=auth_token,
+            uuid=uuid,
+            state=5,
         )
 
         op_send_by_email.run(
@@ -57,8 +56,8 @@ def bfaresponse(request, uuid):
         )
         return HttpResponse("Resultado BFA registrado exitosamente")
     else:
-        fil.change_life_cycle_state(ProgramaStates.fallo_blockchain)
-        fil.set_metadata("estado", ProgramaStates.fallo_blockchain, overwrite=True)
+        fil.change_life_cycle_state(ProgramasStates.fallo_blockchain)
+        fil.set_metadata("estado", ProgramasStates.fallo_blockchain, overwrite=True)
         op_send_by_email.run(
             uuid,
             notifications_template='programas_notificacion_fallo_blockchain',

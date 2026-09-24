@@ -82,10 +82,6 @@ class UcasalConfig:
         return SAC.get_str('ucasal.endpoint.change_equivalencia.url')
     
     @staticmethod
-    def change_designaciones_svc_url()->str:
-        return SAC.get_str('ucasal.endpoint.change_designaciones.url')
-
-    @staticmethod
     def shorten_url_svc_url()->str:
         return SAC.get_str('ucasal.endpoint.acortar_url.url')    
 
@@ -113,10 +109,6 @@ class UcasalConfig:
     def equivalencia_nro_resolucion_endpoint()->str:
         return SAC.get_str('ucasal.equivalencia.nro_resolucion_endpoint')
     
-    @staticmethod
-    def designaciones_bfaresponse_endpoint()->str:
-        return SAC.get_str('ucasal.designaciones.bfaresponse_endpoint')
-    
     # Titulo
     @staticmethod
     def titulo_validation_url_template()->str:
@@ -128,6 +120,10 @@ class UcasalConfig:
 
 
     # Programas
+    @staticmethod
+    def programas_bfaresponse_endpoint()->str:
+        return SAC.get_str('ucasal.programas.bfaresponse_endpoint')
+
     @staticmethod
     def programas_validation_url_template()->str:
         return SAC.get_str('ucasal.programas.validation_url_template')

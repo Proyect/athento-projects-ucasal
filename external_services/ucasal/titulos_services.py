@@ -5,7 +5,7 @@ from custom.sp_libs.python.sp_logger.sp_logger import SpLogger
 from ucasal2.utils import UcasalConfig
 from ucasal2.model.ucasal.exceptions import UcasalServiceError
 
-class DesignacionesServices:
+class TitulosServices:
     @classmethod    
     def notify_blockchain_success(cls, uuid: str, state: int, auth_token: str) -> str:
         logger = SpLogger.getLogger("athentose")
