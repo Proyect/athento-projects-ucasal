@@ -43,17 +43,21 @@ class ApruebaTitulo(DocumentOperation):
             flogger.entry(f"Response: {estado_meta}")
 
             if estado_meta == "Pendiente de validacion DA (direccion de alumnos)":
-                
-                otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
-                if otp_str == "":
-                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
-                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-                if not is_digit(otp_str):
-                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
-                    raise AthentoseError(
-                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                        % {"otp": otp_str}
-                    )
+                try:
+                    otp_str = str(fil.gmv("metadata.titulo_otp") or "").strip()
+                    if otp_str == "":                        
+                        raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                    if not is_digit(otp_str):                        
+                        raise AthentoseError(
+                            _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                            % {"otp": otp_str}
+                        )
+                except AthentoseError as e:
+                    flogger.error(f"Error en la operación de aprobación de título: {e}")
+                    return logger.exit(
+                        HttpResponse(str(e), status=400),
+                        exc_info=True,
+                    )    
 
                 otp_str = int(otp_str)
 
