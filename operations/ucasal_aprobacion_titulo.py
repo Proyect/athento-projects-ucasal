@@ -225,7 +225,10 @@ class ApruebaTitulo(DocumentOperation):
         except AthentoseError as e:
             flogger.error(f"Error en la operación de aprobación de título: {e}")
             return logger.exit(
-                HttpResponse(str(e), status=400),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error en el proceso de aprobar el título: {e}",
+                },
                 exc_info=True,
             )
             
@@ -239,7 +242,10 @@ class ApruebaTitulo(DocumentOperation):
         except Exception as e:  # noqa: BLE001
             flogger.error(f"Error inesperado al aprobar el título: {e}")
             return logger.exit(
-                HttpResponse(str(e), status=500),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error inesperado al aprobar el título: {e}",
+                },
                 exc_info=True,
             )
 

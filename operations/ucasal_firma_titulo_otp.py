@@ -417,9 +417,13 @@ class FirmaTituloOTP(DocumentOperation):
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
-                HttpResponse(str(e), status=400),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error en la operación de firma de título OTP: {str(e)}",
+                },
                 exc_info=True,
             )
+
         except Exception as e:  # noqa: BLE001
             error_msg = f"Error inesperado en la operación de firma de título OTP: {str(e)}"
             flogger.error(error_msg)
