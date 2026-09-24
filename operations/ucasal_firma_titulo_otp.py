@@ -71,17 +71,24 @@ class FirmaTituloOTP(DocumentOperation):
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
-            otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
-            if otp_str == "":
-                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
-                raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-            if not is_digit(otp_str):
-                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
-                raise AthentoseError(
-                    _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                    % {"otp": otp_str}
-                )
-            otp = int(otp_str)
+            try:
+                otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
+                if otp_str == "":
+                    flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+                if not is_digit(otp_str):
+                    flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                    raise AthentoseError(
+                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                        % {"otp": otp_str}
+                    )
+                otp = int(otp_str)
+            except AthentoseError as e:
+                flogger.error(f"Error en la aprobación de título 1: {e}")
+                return logger.exit(
+                    HttpResponse(str(e), status=400),
+                    exc_info=True,
+            )    
 
             # 1.c) Usuario firmante (Secretaría General)
             flogger.entry("Validando usuario firmante...")
