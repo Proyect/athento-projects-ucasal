@@ -220,7 +220,7 @@ class FirmaTituloOTP(DocumentOperation):
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -346,10 +346,10 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("hash_analitico", hash_analitico)
             fil_padre.set_feature("hash_diploma", hash_diploma)
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
             if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Pendiente de Blockchain"
-                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
+                fil_padre.change_life_cycle_state(nuevo_estado)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata(
@@ -378,10 +378,10 @@ class FirmaTituloOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.firmado)
             if("Pendiente de Blockchain" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Firmado"
-                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
+                fil_padre.change_life_cycle_state(nuevo_estado)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)

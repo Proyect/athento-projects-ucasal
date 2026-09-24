@@ -150,7 +150,9 @@ class UcasalServices:
         logger = cls.logger
         logger.entry()
         
-        endpoint = UcasalConfig.otp_validation_url_template().format(usuario=user, token=otp)
+        endpoint = UcasalConfig.otp_validation_url_template()
+        endpoint = endpoint.replace("{{usuario}}", str(user))
+        endpoint = endpoint.replace("{{token}}", str(otp))
         logger.debug(f"Endpoint: {endpoint}")
         headers = {}
         
