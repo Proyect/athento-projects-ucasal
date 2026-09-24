@@ -54,13 +54,6 @@ class RechazaPrograma(DocumentOperation):
                 raise AthentoseError("Debe ingresar un motivo de rechazo para continuar.")
 
 
-            usuario = get_current_user()
-            if not usuario or not getattr(usuario, "is_authenticated", False):
-                flogger.entry("No hay un usuario autenticado para rechazar el programa")
-                raise AthentoseError("No hay un usuario autenticado para rechazar el programa")
-            mail_sg = usuario.email or ""
-
-            UcasalServices.validate_otp(user=mail_sg, otp=otp)
 
             # 3. Persistir motivo y cambiar estado a RECHAZADO
             fil.set_metadata(
