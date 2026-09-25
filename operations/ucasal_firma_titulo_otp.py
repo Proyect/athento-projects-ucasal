@@ -301,7 +301,7 @@ class FirmaTituloOTP(DocumentOperation):
                         "msg_type": "success",
                     }
                 )
-
+            
             if ok_analitico and ok_diploma:
                 flogger.entry(
                     "Blockchain ya registrado; se omite reenvío y se continúa con la finalización."
@@ -312,7 +312,13 @@ class FirmaTituloOTP(DocumentOperation):
                 flogger.entry(
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
+            #estados
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
 
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            flogger.entry("Estado cambiado a 'Firmado'")
+            
             if not saltear_registro_blockchain:
                 callback_url = TitulosServices.set_callback_url(uuid=uuid_padre)
                 logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}")
