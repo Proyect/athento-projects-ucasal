@@ -197,7 +197,7 @@ class ApruebaTitulo(DocumentOperation):
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
                 
                
-                nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
+                nuevo_estado = "Pendiente de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
