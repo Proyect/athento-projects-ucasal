@@ -343,11 +343,7 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("hash_diploma", hash_diploma)
 
             fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
-            if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
-                nuevo_estado = "Pendiente de Blockchain"
-                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
-                flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
-
+            
             fil_padre.set_metadata(
                 "estado",
                 TituloStates.pendiente_blockchain,
@@ -375,10 +371,7 @@ class FirmaTituloOTP(DocumentOperation):
                 )
 
             fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
-            if("Pendiente de Blockchain" == fil_padre.life_cycle_state.name):
-                nuevo_estado = "Firmado"
-                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
-                flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
+            
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
             fil_padre.set_feature("registro_blockchain", "success")
@@ -413,7 +406,10 @@ class FirmaTituloOTP(DocumentOperation):
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
-                HttpResponse(str(e), status=400),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error en la operación de firma de título OTP: {str(e)}",
+                },
                 exc_info=True,
             )
         except Exception as e:  # noqa: BLE001
