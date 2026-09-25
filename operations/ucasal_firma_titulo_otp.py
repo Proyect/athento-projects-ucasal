@@ -280,6 +280,13 @@ class FirmaTituloOTP(DocumentOperation):
 
                         
             # 5) Registrar hashes de analítico y diploma en blockchain
+            #estados
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
+
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            flogger.entry("Estado cambiado a 'Firmado'")
+            
             logger.entry("Registrando hashes de analítico y diploma en blockchain")
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
@@ -312,11 +319,7 @@ class FirmaTituloOTP(DocumentOperation):
                 flogger.entry(
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
-            #estados
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
-            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
-
-            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            
             flogger.entry("Estado cambiado a 'Firmado'")
             
             if not saltear_registro_blockchain:
