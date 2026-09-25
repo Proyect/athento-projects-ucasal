@@ -316,7 +316,7 @@ class FirmaTituloOTP(DocumentOperation):
                 )
                 saltear_registro_blockchain = True
             elif registrada_en_blockchain == "pending":
-                fil_padre.set_feature("registro_blockchain", "")
+              #  fil_padre.set_feature("registro_blockchain", "")
                 flogger.entry(
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
