@@ -219,6 +219,12 @@ class FirmaTituloOTP(DocumentOperation):
             documentos_firmados = []
 
             fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
+            #estados
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
+
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            flogger.entry("Estado cambiado a 'Firmado'")
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -280,12 +286,7 @@ class FirmaTituloOTP(DocumentOperation):
 
                         
             # 5) Registrar hashes de analítico y diploma en blockchain
-            #estados
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
-            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
-
-            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
-            flogger.entry("Estado cambiado a 'Firmado'")
+            
             
             logger.entry("Registrando hashes de analítico y diploma en blockchain")
             hash_analitico = get_pdf_hash(hijo_analitico)
