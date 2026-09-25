@@ -346,10 +346,10 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("hash_analitico", hash_analitico)
             fil_padre.set_feature("hash_diploma", hash_diploma)
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
             if("Pendiente de validacion FSG (secretaria general)" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Pendiente de Blockchain"
-                fil_padre.change_life_cycle_state(nuevo_estado)
+                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata(
