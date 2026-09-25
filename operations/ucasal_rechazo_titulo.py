@@ -119,7 +119,10 @@ class RechazaTitulo(DocumentOperation):
                     send_to_groups="TITULOS",
                     area=area,
                 )    
-            return logger.exit(HttpResponse("Título rechazado exitosamente"))
+            return logger.exit({
+                            "msg_type": "success",
+                            "msg": "Título rechazado exitosamente",
+                     })
 
         except AthentoseError as e:
             flogger.error(f"Error rechazando el título: {e}")
