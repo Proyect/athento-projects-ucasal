@@ -220,7 +220,7 @@ class FirmaTituloOTP(DocumentOperation):
             signer = SpPdfSimpleSigner()
             documentos_firmados = []
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -378,7 +378,7 @@ class FirmaTituloOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil_padre.change_life_cycle_state(TituloStates.firmado)
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
             if("Pendiente de Blockchain" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Firmado"
                 fil_padre.change_life_cycle_state(nuevo_estado)
