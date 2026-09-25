@@ -71,7 +71,7 @@ class ApruebaTitulo(DocumentOperation):
                 
                 nuevo_estado = "Pendiente de validacion FD (firma del decano)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
-                fil.change_life_cycle_state(nuevo_estado)
+                fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
                 op_send_by_email.run(
                     uuid,
@@ -112,7 +112,7 @@ class ApruebaTitulo(DocumentOperation):
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
-                fil.change_life_cycle_state(nuevo_estado)
+                fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
                 op_send_by_email.run(
                     uuid,
@@ -158,7 +158,7 @@ class ApruebaTitulo(DocumentOperation):
                 
                 nuevo_estado = "Pendiente de Validacion TIT (titulo)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
-                fil.change_life_cycle_state(nuevo_estado)
+                fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
                 op_send_by_email.run(
                     uuid,
@@ -199,7 +199,7 @@ class ApruebaTitulo(DocumentOperation):
                
                 nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
-                fil.change_life_cycle_state(nuevo_estado)
+                fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
                 op_send_by_email.run(
                     uuid,
