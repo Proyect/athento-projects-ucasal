@@ -32,8 +32,7 @@ class TitulosServices:
       
     @classmethod
     def set_callback_url(cls, uuid:str)->str: #firma_titulos_otp
-        callback_url = f'{UcasalConfig.titulo_bfaresponse_endpoint()}{uuid}/bfaresponse'
-        logger.debug(f'Setting callback URL: {callback_url}')
+        callback_url = f'{UcasalConfig.titulo_bfaresponse_endpoint()}{uuid}/bfaresponse' 
         return callback_url
     
 
