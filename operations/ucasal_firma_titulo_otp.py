@@ -71,22 +71,17 @@ class FirmaTituloOTP(DocumentOperation):
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
-            try:
-                otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
-                if otp_str == "":
-                    raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
-                if not is_digit(otp_str):
-                    raise AthentoseError(
-                        _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
-                        % {"otp": otp_str}
-                    )
-                otp = int(otp_str)
-            except AthentoseError as e:
-                flogger.error(f"Error en la aprobación de título 1: {e}")
-                return logger.exit(
-                    HttpResponse(str(e), status=400),
-                    exc_info=True,
-            )    
+            otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
+            if otp_str == "":
+                flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
+                raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
+            if not is_digit(otp_str):
+                flogger.entry(f"'OTP' debe ser un número entero positivo en lugar de '{otp_str}'")
+                raise AthentoseError(
+                    _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
+                    % {"otp": otp_str}
+                )
+            otp = int(otp_str)
 
             # 1.c) Usuario firmante (Secretaría General)
             flogger.entry("Validando usuario firmante...")
@@ -219,12 +214,6 @@ class FirmaTituloOTP(DocumentOperation):
             documentos_firmados = []
 
             fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
-            #estados
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
-            flogger.entry("Estado cambiado a 'Pendiente de blockchain'")
-
-            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
-            flogger.entry("Estado cambiado a 'Firmado'")
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -286,8 +275,6 @@ class FirmaTituloOTP(DocumentOperation):
 
                         
             # 5) Registrar hashes de analítico y diploma en blockchain
-            
-            
             logger.entry("Registrando hashes de analítico y diploma en blockchain")
             hash_analitico = get_pdf_hash(hijo_analitico)
             hash_diploma = get_pdf_hash(hijo_diploma)
@@ -309,20 +296,18 @@ class FirmaTituloOTP(DocumentOperation):
                         "msg_type": "success",
                     }
                 )
-            
+
             if ok_analitico and ok_diploma:
                 flogger.entry(
                     "Blockchain ya registrado; se omite reenvío y se continúa con la finalización."
                 )
                 saltear_registro_blockchain = True
             elif registrada_en_blockchain == "pending":
-              #  fil_padre.set_feature("registro_blockchain", "")
+                fil_padre.set_feature("registro_blockchain", "")
                 flogger.entry(
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
-            
-            flogger.entry("Estado cambiado a 'Firmado'")
-            
+
             if not saltear_registro_blockchain:
                 callback_url = TitulosServices.set_callback_url(uuid=uuid_padre)
                 logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}")
@@ -389,7 +374,7 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
             if("Pendiente de Blockchain" == fil_padre.life_cycle_state.name):
                 nuevo_estado = "Firmado"
-                fil_padre.change_life_cycle_state(nuevo_estado)
+                fil_padre.change_life_cycle_state(nuevo_estado, force_transition=True)
                 flogger.entry(f"Estado cambiado a '{nuevo_estado}'")
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
@@ -425,13 +410,9 @@ class FirmaTituloOTP(DocumentOperation):
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
-                {
-                    "msg_type": "error",
-                    "msg": f"Error en la operación de firma de título OTP: {str(e)}",
-                },
+                HttpResponse(str(e), status=400),
                 exc_info=True,
             )
-
         except Exception as e:  # noqa: BLE001
             error_msg = f"Error inesperado en la operación de firma de título OTP: {str(e)}"
             flogger.error(error_msg)
