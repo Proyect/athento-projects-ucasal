@@ -14,7 +14,7 @@ from custom.ucasal2.utils import is_digit
 
 
 class ApruebaTitulo(DocumentOperation):
-    version = "1.0"
+    version = "1.1"
     name = _("AprobacionTitulo")
     description = _("Aprueba un título y lo avanza de estado")
     configuration_parameters = {}
