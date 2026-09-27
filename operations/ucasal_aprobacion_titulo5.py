@@ -13,12 +13,12 @@ from custom.ucasal2.utils import is_digit
 
 
 
-class ApruebaTitulo4(DocumentOperation):
+class ApruebaTitulo5(DocumentOperation):
     version = "1.2"
-    name = _("AprobacionTitulo4")
+    name = _("AprobacionTitulo5")
     description = _("Aprueba un título y lo avanza de estado 4")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo4")    
+    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo5")    
         
 
     def execute(self, *args, **kwargs):
@@ -250,17 +250,17 @@ class ApruebaTitulo4(DocumentOperation):
             )
 
 
-VERSION = ApruebaTitulo4.version
-NAME = ApruebaTitulo4.name
-DESCRIPTION = ApruebaTitulo4.description
+VERSION = ApruebaTitulo5.version
+NAME = ApruebaTitulo5.name
+DESCRIPTION = ApruebaTitulo5.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = ApruebaTitulo4.configuration_parameters
+CONFIGURATION_PARAMETERS = ApruebaTitulo5.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return ApruebaTitulo4(uuid, **params).run()
+    return ApruebaTitulo5(uuid, **params).run()
