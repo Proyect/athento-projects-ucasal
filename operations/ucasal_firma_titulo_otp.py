@@ -214,6 +214,9 @@ class FirmaTituloOTP(DocumentOperation):
             documentos_firmados = []
 
             fil_padre.change_life_cycle_state(TituloStates.pendiente_firma_otp, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+
 
             # 4) Firmar ambos PDFs con el mismo QR/OTP
             logger.entry("Firmando documentos con QR/OTP")
@@ -342,7 +345,7 @@ class FirmaTituloOTP(DocumentOperation):
             fil_padre.set_feature("hash_analitico", hash_analitico)
             fil_padre.set_feature("hash_diploma", hash_diploma)
 
-            fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
+            #fil_padre.change_life_cycle_state(TituloStates.pendiente_blockchain, force_transition=True)
             
             fil_padre.set_metadata(
                 "estado",
@@ -370,7 +373,7 @@ class FirmaTituloOTP(DocumentOperation):
                     f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
                 )
 
-            fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
+            #fil_padre.change_life_cycle_state(TituloStates.firmado, force_transition=True)
             
 
             fil_padre.set_metadata("estado", TituloStates.firmado, overwrite=True)
