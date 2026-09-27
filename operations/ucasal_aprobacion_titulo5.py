@@ -215,6 +215,18 @@ class ApruebaTitulo5(DocumentOperation):
                     }
                 )
 
+            if estado_meta == "Pendiente de validacion FSG (secretaria general)":    
+                nuevo_estado = "Pendiente de validacion FSG (secretaria general)"
+                fil.set_metadata("estado", nuevo_estado, overwrite=True)
+                fil.change_life_cycle_state(nuevo_estado, force_transition=True)
+                
+                return logger.exit(
+                    {
+                        "msg": f"El título {uuid} avanzó a '{nuevo_estado}'",
+                        "msg_type": "success",
+                    }
+                )
+
             # Si no se reconoce el estado, devolver error controlado
             raise AthentoseError(
                 _(
