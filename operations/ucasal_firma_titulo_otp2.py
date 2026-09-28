@@ -317,7 +317,7 @@ class FirmaTituloOTP2(DocumentOperation):
                 callback_url = ""
                 callback_url = TitulosServices.set_callback_url(uuid=hijo_analitico.uuid)
                 logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}")
-                ok_response_analitico = TitulosServices.register_in_blockchain(
+                ok_response_analitico = UcasalServices.register_in_blockchain(
                     auth_token=auth_token,
                     hash=hash_analitico,
                     file_uuid=str(hijo_analitico.uuid),
@@ -331,7 +331,7 @@ class FirmaTituloOTP2(DocumentOperation):
 
                 callback_url = ""
                 callback_url = TitulosServices.set_callback_url(uuid=hijo_diploma.uuid)
-                ok_response_diploma = TitulosServices.register_in_blockchain(
+                ok_response_diploma = UcasalServices.register_in_blockchain(
                     auth_token=auth_token,
                     hash=hash_diploma,
                     file_uuid=str(hijo_diploma.uuid),
