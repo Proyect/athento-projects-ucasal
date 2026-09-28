@@ -83,9 +83,7 @@ class UcasalServices:
         nlogger = logging.getLogger("athentose")
 
         nlogger.debug("nlogger - Enter register_in_blockchain")
-
-
-        nlogger = cls.logger
+       
         nlogger.entry()
         #TODO: validar parámetros
                 
@@ -108,10 +106,10 @@ class UcasalServices:
         nlogger.debug(f"Respuesta del servicio: {rta}")
 
         if response.status_code == requests.codes.ok:
-            return logger.exit(response.text)
+            return nlogger.exit(response.text)
             #TODO: Manejar response?
         else:
-            raise logger.exit(AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason), exc_info=True) 
+            raise nlogger.exit(AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason), exc_info=True) 
 
     @classmethod
     def notify_rejection(cls, auth_token:str, uuid:str, previous_uuid:str, reason:str)->str: #plataforma 
