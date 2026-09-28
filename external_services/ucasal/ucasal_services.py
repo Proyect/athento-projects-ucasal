@@ -82,8 +82,7 @@ class UcasalServices:
         import logging
         nlogger = logging.getLogger("athentose")
 
-        nlogger.debug("nlogger - Enter register_in_blockchain")
-     
+        nlogger.debug("nlogger - Enter register_in_blockchain")     
         
         endpoint = UcasalConfig.stamps_svc_url()
         headers = {'Authorization': f'Bearer {auth_token}'}
