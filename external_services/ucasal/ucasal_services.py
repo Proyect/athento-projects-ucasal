@@ -83,10 +83,8 @@ class UcasalServices:
         nlogger = logging.getLogger("athentose")
 
         nlogger.debug("nlogger - Enter register_in_blockchain")
-       
-        nlogger.entry()
-        #TODO: validar parámetros
-                
+     
+        
         endpoint = UcasalConfig.stamps_svc_url()
         headers = {'Authorization': f'Bearer {auth_token}'}
         #TODO: y el file_uuid, no se envía?
