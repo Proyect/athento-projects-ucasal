@@ -112,6 +112,7 @@ class FirmaTituloOTP1(DocumentOperation):
             # responder ahí, es un problema del servicio/ambiente -conviene
             # mockearlo en desa- y no debería resolverse comentando la
             # validación en el código que va a producción.
+            
             UcasalServices.validate_otp(user=mail_sg, otp=otp)
             fil_padre.set_feature("valide_otp", "1")
 
