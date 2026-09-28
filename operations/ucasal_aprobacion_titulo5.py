@@ -55,9 +55,12 @@ class ApruebaTitulo5(DocumentOperation):
                 except AthentoseError as e:
                     flogger.error(f"Error en la operación de aprobación de título: {e}")
                     return logger.exit(
-                        HttpResponse(str(e), status=400),
-                        exc_info=True,
-                    )    
+                            {
+                                "msg_type": "error",
+                                "msg": f"Error en la operación de aprobación de título: {e}",
+                            },
+                            exc_info=True,
+                        )   
 
                 otp_str = int(otp_str)
 
