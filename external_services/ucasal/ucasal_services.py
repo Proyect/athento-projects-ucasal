@@ -85,8 +85,8 @@ class UcasalServices:
         nlogger.debug("nlogger - Enter register_in_blockchain")
 
 
-        logger = cls.logger
-        logger.entry()
+        nlogger = cls.logger
+        nlogger.entry()
         #TODO: validar parámetros
                 
         endpoint = UcasalConfig.stamps_svc_url()
@@ -100,12 +100,12 @@ class UcasalServices:
 
         request_info = str({'url':endpoint, 'json':data, 'headers':headers})
         
-        logger.debug(f"Llamando a requests.post con estos parametros: {request_info}")
+        nlogger.debug(f"Llamando a requests.post con estos parametros: {request_info}")
         
         response = requests.post(url=endpoint, json=data, headers=headers)
 
         rta = str(response.text)
-        logger.debug(f"Respuesta del servicio: {rta}")
+        nlogger.debug(f"Respuesta del servicio: {rta}")
 
         if response.status_code == requests.codes.ok:
             return logger.exit(response.text)

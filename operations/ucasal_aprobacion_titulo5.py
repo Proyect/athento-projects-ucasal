@@ -53,8 +53,7 @@ class ApruebaTitulo5(DocumentOperation):
                     raise AthentoseError(
                         _("'OTP' debe ser un número entero positivo en lugar de '%(otp)s'")
                         % {"otp": otp_str}
-                    )
-                 
+                    )                 
 
                 otp_str = int(otp_str)
 
@@ -104,8 +103,7 @@ class ApruebaTitulo5(DocumentOperation):
                     raise AthentoseError("No hay un usuario autenticado para firmar el título")
                 mail_sg = usuario.email or "" 
                 
-                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)
-               
+                UcasalServices.validate_otp(user=mail_sg, otp=otp_str)               
                 
                 nuevo_estado = "Pendiente de validacion FR (firma del rector)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
