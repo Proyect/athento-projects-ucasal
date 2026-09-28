@@ -197,7 +197,7 @@ class ApruebaTitulo5(DocumentOperation):
                 UcasalServices.validate_otp(user=mail_sg, otp=otp_str) 
                 
                
-                nuevo_estado = "Pendiente  de validacion FSG (secretaria general)"
+                nuevo_estado = "Pendiente de validacion FSG (secretaria general)"
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 fil.change_life_cycle_state(nuevo_estado, force_transition=True)
 
@@ -230,7 +230,7 @@ class ApruebaTitulo5(DocumentOperation):
             # Si no se reconoce el estado, devolver error controlado
             raise AthentoseError(
                 _(
-                    f"El estado actual del título ({estado_meta}) no permite la aprobación."
+                    f"El estado actual del título ({estado_meta}) no permite la aprobación. ({lifecycle_state})"
                 )
             )
 
