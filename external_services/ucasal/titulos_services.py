@@ -67,4 +67,36 @@ class TitulosServices:
         except Exception as e:
             logger.error(f"[Designaciones] Error notificando estado {state} para {uuid}: {str(e)}")
             raise
+
+    @classmethod
+    def register_in_blockchain(cls, auth_token:str, hash:str, file_uuid:str, callback_url:str)->str: #firma_programas
+        import logging
+        nlogger = logging.getLogger("athentose")
+
+        nlogger.debug("nlogger - Enter register_in_blockchain")
+     
         
+        endpoint = UcasalConfig.stamps_svc_url()
+        headers = {'Authorization': f'Bearer {auth_token}'}
+        
+        data = {
+            'fileHash': hash,
+            'callbackUrl': callback_url
+        }
+
+
+        request_info = str({'url':endpoint, 'json':data, 'headers':headers})
+        
+        nlogger.debug(f"Llamando a requests.post con estos parametros: {request_info}")
+        
+        response = requests.post(url=endpoint, json=data, headers=headers)
+
+        rta = str(response.text)
+        nlogger.debug(f"Respuesta del servicio: {rta}")
+
+        if response.status_code == requests.codes.ok:
+            return nlogger.exit(response.text)
+            #TODO: Manejar response?
+        else:
+            raise nlogger.exit(AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason), exc_info=True) 
+

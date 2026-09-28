@@ -28,12 +28,12 @@ import locale
 import requests
 
 
-class FirmaTituloOTP1(DocumentOperation):
+class FirmaTituloOTP2(DocumentOperation):
     """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain.
 
     Flujo esperado:
       - El título padre debe estar en estado TituloStates.pendiente_firma_otp
-        (la transición hacia ese estado la hace la operación IniciaFirmaTituloOTP1,
+        (la transición hacia ese estado la hace la operación IniciaFirmaTituloOTP2,
         no esta operación).
       - El OTP se ingresa en un metadato del título (metadata.titulo_otp) y se
         valida contra el servicio de OTP de UCASAL.
@@ -43,12 +43,12 @@ class FirmaTituloOTP1(DocumentOperation):
     """
 
     version = "1.1"
-    name = _("FirmaTituloOTP1")
+    name = _("FirmaTituloOTP2")
     description = _(
         "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain"
     )
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP1")
+    _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP2")
     
 
     def execute(self, *args, **kwargs):  # noqa: D401
@@ -67,7 +67,7 @@ class FirmaTituloOTP1(DocumentOperation):
             flogger.debug(f"Estado lifecycle: {lifecycle_state}")
 
             # 1) Validar estado del título padre.
-            # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP1;
+            # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP2;
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
@@ -317,7 +317,7 @@ class FirmaTituloOTP1(DocumentOperation):
                 callback_url = ""
                 callback_url = TitulosServices.set_callback_url(uuid=hijo_analitico.uuid)
                 logger.entry(f"Callback URL: {callback_url} - UUID: {uuid_padre} - Hash analítico: {hash_analitico}")
-                ok_response_analitico = UcasalServices.register_in_blockchain(
+                ok_response_analitico = TitulosServices.register_in_blockchain(
                     auth_token=auth_token,
                     hash=hash_analitico,
                     file_uuid=str(hijo_analitico.uuid),
@@ -331,7 +331,7 @@ class FirmaTituloOTP1(DocumentOperation):
 
                 callback_url = ""
                 callback_url = TitulosServices.set_callback_url(uuid=hijo_diploma.uuid)
-                ok_response_diploma = UcasalServices.register_in_blockchain(
+                ok_response_diploma = TitulosServices.register_in_blockchain(
                     auth_token=auth_token,
                     hash=hash_diploma,
                     file_uuid=str(hijo_diploma.uuid),
@@ -426,17 +426,17 @@ class FirmaTituloOTP1(DocumentOperation):
             )
 
 
-VERSION = FirmaTituloOTP1.version
-NAME = FirmaTituloOTP1.name
-DESCRIPTION = FirmaTituloOTP1.description
+VERSION = FirmaTituloOTP2.version
+NAME = FirmaTituloOTP2.name
+DESCRIPTION = FirmaTituloOTP2.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = FirmaTituloOTP1.configuration_parameters
+CONFIGURATION_PARAMETERS = FirmaTituloOTP2.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return FirmaTituloOTP1(uuid, **params).run()
+    return FirmaTituloOTP2(uuid, **params).run()
