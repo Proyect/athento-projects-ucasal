@@ -87,7 +87,7 @@ class UcasalServices:
         
         endpoint = UcasalConfig.stamps_svc_url()
         headers = {'Authorization': f'Bearer {auth_token}'}
-        #TODO: y el file_uuid, no se envía?
+        
         data = {
             'fileHash': hash,
             'callbackUrl': callback_url
