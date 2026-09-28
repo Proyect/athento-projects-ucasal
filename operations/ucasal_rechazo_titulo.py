@@ -13,7 +13,7 @@ import pytz
 import requests
 from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
 from custom.ucasal2.utils import UcasalConfig
-from custom.sp_libs.python.utils import is_digit
+from custom.ucasal2.utils import is_digit
 from custom.sp_libs.python.auth import get_current_user
 
 class RechazaTitulo(DocumentOperation):
