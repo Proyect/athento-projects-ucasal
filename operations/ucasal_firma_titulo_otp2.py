@@ -281,7 +281,9 @@ class FirmaTituloOTP2(DocumentOperation):
             # 5) Registrar hashes de analítico y diploma en blockchain
             logger.entry("Registrando hashes de analítico y diploma en blockchain")
             hash_analitico = get_pdf_hash(hijo_analitico)
+            logger.entry(f"Hash analítico: {hash_analitico}")
             hash_diploma = get_pdf_hash(hijo_diploma)
+            logger.entry(f"Hash diploma: {hash_diploma}")
 
             registrada_en_blockchain = fil_padre.gfv("registro_blockchain")
             ok_analitico = fil_padre.gfv("ucasal.svc.ok_response_analitico")
