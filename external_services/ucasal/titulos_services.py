@@ -31,9 +31,9 @@ class TitulosServices:
 
       
     @classmethod
-    def set_callback_url(cls, uuid) -> str:
+    def set_callback_url(cls, uuid: str) -> str:
         base = UcasalConfig.titulo_bfaresponse_endpoint().rstrip('/')
-        return f"{base}/21c6eac4-cfa7-4908-a4aa-5dcba75318f2/bfaresponse"
+        return f"{base}/{uuid}/bfaresponse"
     
 
     @classmethod
