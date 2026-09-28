@@ -32,8 +32,7 @@ class TitulosServices:
       
     @classmethod
     def set_callback_url(cls, uuid:str)->str:
-        callback_url = f"https://ucasal-uat.athento.com/ucasal/api/titulos/{uuid}/bfaresponse" #f"{UcasalConfig.titulo_bfaresponse_endpoint()}{uuid}/bfaresponse" 
-        return callback_url
+        return f"{UcasalConfig.titulo_bfaresponse_endpoint()}{str(uuid)}/bfaresponse"
     
 
     @classmethod
