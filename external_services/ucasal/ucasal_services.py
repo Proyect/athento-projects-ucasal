@@ -85,7 +85,7 @@ class UcasalServices:
         nlogger.debug("nlogger - Enter register_in_blockchain")
 
 
-        #logger = cls.logger
+        logger = cls.logger
         logger.entry()
         #TODO: validar parámetros
                 
