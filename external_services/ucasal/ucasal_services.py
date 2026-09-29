@@ -106,7 +106,7 @@ class UcasalServices:
             return nlogger.exit(response.text)
             #TODO: Manejar response?
         else:
-            raise nlogger.exit(AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason), exc_info=True) 
+            raise AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason)
 
     @classmethod
     def notify_rejection(cls, auth_token:str, uuid:str, previous_uuid:str, reason:str)->str: #plataforma 
