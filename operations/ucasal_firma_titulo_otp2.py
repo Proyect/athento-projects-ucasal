@@ -314,6 +314,8 @@ class FirmaTituloOTP2(DocumentOperation):
                     "Estado 'pending' inconsistente; se resetea para reintentar."
                 )
 
+            logger.entry(f"callback: {titulo_bfaresponse_endpoint()}{hijo_analitico.uuid}/bfaresponse")
+
             if not saltear_registro_blockchain:
                                 
                 callback_url = ""
