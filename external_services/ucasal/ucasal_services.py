@@ -103,7 +103,7 @@ class UcasalServices:
         nlogger.debug(f"Respuesta del servicio: {rta}")
 
         if response.status_code == requests.codes.ok:
-            return nlogger.exit(response.text)
+            return response.text
             #TODO: Manejar response?
         else:
             raise AthentoseError('Error inesperado registrando el hash en UCASAL/BFA: ' + response.reason)
