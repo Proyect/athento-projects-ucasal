@@ -94,7 +94,10 @@ class ApruebaProgramas(DocumentOperation):
         except AthentoseError as e:
             flogger.error(f"Error en la operación de aprobación de programas: {e}")
             return logger.exit(
-                HttpResponse(str(e), status=400),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error en el proceso de aprobar el título: {e}",
+                },
                 exc_info=True,
             )
         except Exception as e:  # noqa: BLE001
