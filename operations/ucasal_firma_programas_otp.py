@@ -278,8 +278,7 @@ class FirmaProgramaOTP(DocumentOperation):
                 ProgramasStates.pendiente_blockchain,
                 overwrite=True,
             )
-            flogger.entry("Enviando notificación de actualización de estado a UCASAL")
-            
+            flogger.entry("Enviando notificación de actualización de estado a UCASAL")            
 
             fil.change_life_cycle_state(ProgramasStates.firmado, force_transition=True)
             fil.set_metadata("estado", ProgramasStates.firmado, overwrite=True)
