@@ -74,7 +74,7 @@ class FirmaProgramaOTP(DocumentOperation):
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
-            otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
+            otp_str = str(fil.gmv("programas_firmar") or "").strip()
             if otp_str == "":
                 flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                 raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
@@ -249,13 +249,13 @@ class FirmaProgramaOTP(DocumentOperation):
             callback_url = ProgramasServices.get_callback_url(uuid=uuid)
             logger.entry(f"Callback URL: {callback_url} - UUID: {uuid} - Hash: {hash_programa}")
 
-            #ok_response = UcasalServices.register_in_blockchain(
-            #    auth_token=auth_token,
-            #    hash=hash_programa,
-            #    file_uuid=uuid,
-            #   callback_url=callback_url,
-            #)
-            #fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
+            ok_response = UcasalServices.register_in_blockchain(
+                auth_token=auth_token,
+                hash=hash_programa,
+                file_uuid=uuid,
+               callback_url=callback_url,
+            )
+            fil.set_feature("ucasal.svc.ok_response_programa", ok_response)
 
             logger.entry(f"Token: {auth_token}" + f" - Hash: {hash_programa}")
 
@@ -279,25 +279,7 @@ class FirmaProgramaOTP(DocumentOperation):
                 overwrite=True,
             )
             flogger.entry("Enviando notificación de actualización de estado a UCASAL")
-            try:
-                #posible error en el micro
-                response = requests.post(
-                    UcasalConfig.programas_approve_url(),
-                    json={"status": "5", "uuid": uuid},
-                    verify=False,
-                    timeout=30,
-                )
-                response.raise_for_status()
-                flogger.entry(
-                    f"Actualizacion estado firmada UCASAL - Status: {response.status_code}, Response: {response.text[:200]}"
-                )
-            except Exception as notif_err:
-                flogger.entry(
-                    f"Error al Actualizacion estado firmada a UCASAL: {str(notif_err)}"
-                )
-                raise AthentoseError(
-                    f"No se pudo notificar el estado firmado a UCASAL: {notif_err}"
-                )
+            
 
             fil.change_life_cycle_state(ProgramasStates.firmado, force_transition=True)
             fil.set_metadata("estado", ProgramasStates.firmado, overwrite=True)
@@ -331,7 +313,10 @@ class FirmaProgramaOTP(DocumentOperation):
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
-                HttpResponse(str(e), status=400),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error en la operación de firma de programa OTP: {str(e)}",
+                },
                 exc_info=True,
             )
         except Exception as e:  # noqa: BLE001
@@ -339,7 +324,10 @@ class FirmaProgramaOTP(DocumentOperation):
             flogger.error(error_msg)
             logger.error(error_msg)
             return logger.exit(
-                HttpResponse(str(e), status=500),
+                {
+                    "msg_type": "error",
+                    "msg": f"Error inesperado en la operación de firma de programa OTP: {str(e)}",
+                },
                 exc_info=True,
             )
 
