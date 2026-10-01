@@ -71,7 +71,7 @@ class FirmaTituloOTP2(DocumentOperation):
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
-            otp_str = str(fil_padre.gmv("metadata.programas_firmar") or "").strip()
+            otp_str = str(fil_padre.gmv("metadata.titulo_otp") or "").strip()
             if otp_str == "":
                 flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                 raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")

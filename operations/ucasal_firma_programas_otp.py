@@ -75,6 +75,7 @@ class FirmaProgramaOTP(DocumentOperation):
 
             # 1.b) Leer y validar OTP (metadato del título)
             otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
+            flogger.entry(f"OTP leído: {otp_str}")
             if otp_str == "":
                 flogger.entry("El OTP no puede ser nulo, ingrese un valor válido")
                 raise AthentoseError("El OTP no puede ser nulo, ingrese un valor válido")
