@@ -38,6 +38,10 @@ class ApruebaProgramas(DocumentOperation):
           
             flogger.entry(f"Response: {estado_meta} ")
 
+            if estado_meta == ProgramasStates.pendiente_firma_jc:
+                flogger.entry("El programa ya fue aprobado por el docente")
+                return
+
             if estado_meta == ProgramasStates.pendiente_validacion_doc:
                 
                 otp_str = str(fil.gmv("metadata.programas_otp") or "").strip()
@@ -61,7 +65,7 @@ class ApruebaProgramas(DocumentOperation):
 
                 UcasalServices.validate_otp(user=mail_sg, otp=otp)
 
-                nuevo_estado = ProgramasStates.pendiente_firma_otp
+                nuevo_estado = ProgramasStates.pendiente_firma_jc
                 fil.set_metadata("estado", nuevo_estado, overwrite=True)
                 if fil.life_cycle_state:
                     fil.change_life_cycle_state(nuevo_estado)

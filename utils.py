@@ -38,6 +38,7 @@ class TituloStates:
 
 class ProgramasStates:
     pendiente_validacion_doc = 'Pendiente de Validación Docente'
+    pendiente_firma_jc = 'Pendiente Firma Jefe de Carrera'
     pendiente_firma_otp = 'Pendiente de Firma OTP'
     pendiente_blockchain = 'Pendiente de Blockchain'
     fallo_blockchain = 'Fallo en Blockchain'
