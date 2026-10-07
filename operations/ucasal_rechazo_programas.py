@@ -64,7 +64,7 @@ class RechazaPrograma(DocumentOperation):
             fil.set_metadata("estado", ProgramasStates.rechazado, overwrite=True)
 
             if fil.life_cycle_state:
-                fil.change_life_cycle_state(ProgramasStates.rechazado)
+                fil.change_life_cycle_state(ProgramasStates.rechazado, force_transition=True)
 
             # 4. Notificar rechazo a UCASAL
             try:
