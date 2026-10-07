@@ -28,7 +28,7 @@ import requests
 
 
 
-class FirmaProgramaOTP(DocumentOperation):
+class FirmaProgramaOTP2(DocumentOperation):
     """Firma el PDF de un programa con OTP y QR, y lo registra en blockchain.
 
     Flujo esperado:
@@ -332,17 +332,17 @@ class FirmaProgramaOTP(DocumentOperation):
             )
 
 
-VERSION = FirmaProgramaOTP.version
-NAME = FirmaProgramaOTP.name
-DESCRIPTION = FirmaProgramaOTP.description
+VERSION = FirmaProgramaOTP2.version
+NAME = FirmaProgramaOTP2.name
+DESCRIPTION = FirmaProgramaOTP2.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = FirmaProgramaOTP.configuration_parameters
+CONFIGURATION_PARAMETERS = FirmaProgramaOTP2.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return FirmaProgramaOTP(uuid, **params).run()
+    return FirmaProgramaOTP2(uuid, **params).run()
