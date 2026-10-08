@@ -28,12 +28,12 @@ import locale
 import requests
 
 
-class FirmaTituloOTP3(DocumentOperation):
+class FirmaTituloOTP4(DocumentOperation):
     """Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain.
 
     Flujo esperado:
       - El título padre debe estar en estado TituloStates.pendiente_firma_otp
-        (la transición hacia ese estado la hace la operación IniciaFirmaTituloOTP3,
+        (la transición hacia ese estado la hace la operación IniciaFirmaTituloOTP4,
         no esta operación).
       - El OTP se ingresa en un metadato del título (metadata.titulo_otp) y se
         valida contra el servicio de OTP de UCASAL.
@@ -43,12 +43,12 @@ class FirmaTituloOTP3(DocumentOperation):
     """
 
     version = "1.1"
-    name = _("FirmaTituloOTP3")
+    name = _("FirmaTituloOTP4")
     description = _(
         "Firma analítico y diploma de un título con OTP y QR, y los registra en blockchain"
     )
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP3")
+    _logger: SpLogger = SpLogger("athentose", "FirmaTituloOTP4")
     
 
     def execute(self, *args, **kwargs):  # noqa: D401
@@ -67,7 +67,7 @@ class FirmaTituloOTP3(DocumentOperation):
             flogger.debug(f"Estado lifecycle: {lifecycle_state}")
 
             # 1) Validar estado del título padre.
-            # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP3;
+            # La transición hacia 'pendiente_firma_otp' la hace IniciaFirmaTituloOTP4;
             # acá solo verificamos que efectivamente esté en ese estado antes de firmar.            
 
             # 1.b) Leer y validar OTP (metadato del título)
@@ -447,17 +447,17 @@ class FirmaTituloOTP3(DocumentOperation):
             )
 
 
-VERSION = FirmaTituloOTP3.version
-NAME = FirmaTituloOTP3.name
-DESCRIPTION = FirmaTituloOTP3.description
+VERSION = FirmaTituloOTP4.version
+NAME = FirmaTituloOTP4.name
+DESCRIPTION = FirmaTituloOTP4.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = FirmaTituloOTP3.configuration_parameters
+CONFIGURATION_PARAMETERS = FirmaTituloOTP4.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return FirmaTituloOTP3(uuid, **params).run()
+    return FirmaTituloOTP4(uuid, **params).run()
