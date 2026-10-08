@@ -86,8 +86,8 @@ class RechazaPrograma(DocumentOperation):
 
             op_send_by_email.run(
                 uuid,
-                notifications_template="titulos_notificacion_rechazo",
-                send_to_groups="TITULOS",
+                notifications_template="programas_notificacion_rechazo",
+                send_to_groups="Jefe de Carrera",
                 area=area,
             )
             return logger.exit(HttpResponse("Programa rechazado exitosamente"))
