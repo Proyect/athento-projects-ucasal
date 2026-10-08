@@ -6,9 +6,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from custom.sp_libs.python.logging import SpLogger, SpFeatureLogger, NullSpFeatureLogger
 from file.foperations import op_send_by_email
-from django_currentuser.middleware import get_current_user
-from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
-from custom.ucasal2.utils import ProgramasStates, is_digit
+from custom.ucasal2.utils import ProgramasStates
 from datetime import datetime
 import pytz
 import requests
@@ -24,6 +22,7 @@ class RechazaPrograma(DocumentOperation):
     AREA_BY_STATE = {
         ProgramasStates.pendiente_validacion_doc: "Pendiente de Validación Docente",
         ProgramasStates.pendiente_firma_otp: "Pendiente de Firma OTP",
+        ProgramasStates.pendiente_firma_jc: "Pendiente Firma Jefe de Carrera",
     }
 
     def execute(self, *args, **kwargs):
