@@ -83,6 +83,17 @@ class RechazaPrograma(DocumentOperation):
             fil.set_metadata("metadata.programas_fecha_rechazo", date_str, overwrite=True)
 
             flogger.debug("Programa rechazado exitosamente")
+            flogger.debug("ultima actualizacion")
+
+            #delete programa
+            url_api = UcasalConfig.get_url_api().replace(
+                "{{uuid}}", uuid
+            )
+            headers ={'Content-Type': 'application/x-www-form-urlencoded'}
+            user = UcasalConfig.get_user()
+            password = UcasalConfig.get_password()
+            data = f'usuario={user}&clave={password}' 
+            response = requests.delete(url=url_api, data=data, headers=headers)
 
             op_send_by_email.run(
                 uuid,

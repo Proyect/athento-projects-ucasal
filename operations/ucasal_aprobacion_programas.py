@@ -51,7 +51,7 @@ class ApruebaProgramas(DocumentOperation):
 
                 op_send_by_email.run(
                     uuid,
-                    notifications_template='titulos_notificacion_validacion',
+                    notifications_template='programas_notificacion_validacion',
                     send_to_groups='Docentes',
                     area='Docentes'
                 )    
