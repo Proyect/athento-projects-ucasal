@@ -84,6 +84,7 @@ class RechazaPrograma(DocumentOperation):
 
             flogger.debug("Programa rechazado exitosamente")
             flogger.debug("ultima actualizacion")
+            fil.set_feature("debug xxx ", "xxx", overwrite=True)
 
             #delete programa
             url_api = UcasalConfig.get_url_api().replace(
