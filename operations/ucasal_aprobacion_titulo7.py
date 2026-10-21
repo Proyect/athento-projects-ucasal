@@ -13,12 +13,12 @@ from custom.ucasal2.utils import is_digit
 
 
 
-class ApruebaTitulo6(DocumentOperation):
+class ApruebaTitulo7(DocumentOperation):
     version = "1.2"
-    name = _("AprobacionTitulo6")
+    name = _("AprobacionTitulo7")
     description = _("Aprueba un título y lo avanza de estado 4")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo6")    
+    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo7")    
         
 
     def execute(self, *args, **kwargs):
@@ -77,7 +77,7 @@ class ApruebaTitulo6(DocumentOperation):
                         send_to_groups='DECANO',
                         area='DEPARTAMENTO DE ALUMNOS'  
                     )    
-                if nombre_serie == 'titulo_ing' :    
+                if nombre_serie == 'titulo_ingenieria' :    
                     op_send_by_email.run(
                         uuid,
                         notifications_template='titulos_notificacion_validacion',
@@ -257,17 +257,17 @@ class ApruebaTitulo6(DocumentOperation):
             )
 
 
-VERSION = ApruebaTitulo6.version
-NAME = ApruebaTitulo6.name
-DESCRIPTION = ApruebaTitulo6.description
+VERSION = ApruebaTitulo7.version
+NAME = ApruebaTitulo7.name
+DESCRIPTION = ApruebaTitulo7.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = ApruebaTitulo6.configuration_parameters
+CONFIGURATION_PARAMETERS = ApruebaTitulo7.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return ApruebaTitulo6(uuid, **params).run()
+    return ApruebaTitulo7(uuid, **params).run()
