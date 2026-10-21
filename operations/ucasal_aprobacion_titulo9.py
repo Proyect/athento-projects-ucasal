@@ -13,12 +13,12 @@ from custom.ucasal2.utils import is_digit
 
 
 
-class ApruebaTitulo8(DocumentOperation):
+class ApruebaTitulo9(DocumentOperation):
     version = "1.2"
-    name = _("AprobacionTitulo8")
+    name = _("AprobacionTitulo9")
     description = _("Aprueba un título y lo avanza de estado 4")
     configuration_parameters = {}
-    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo8")    
+    _logger: SpLogger = SpLogger("athentose", "ApruebaTitulo9")    
         
 
     def execute(self, *args, **kwargs):
@@ -77,14 +77,14 @@ class ApruebaTitulo8(DocumentOperation):
                         send_to_groups='DECANO',
                         area='DEPARTAMENTO DE ALUMNOS'  
                     )    
-                if nombre_serie == 'titulo_ingenieria' :    
+                if nombre_serie == 'titulos_ingenieria' :    
                     op_send_by_email.run(
                         uuid,
                         notifications_template='titulos_notificacion_validacion',
                         send_to_groups='DECANO-INGENIERIA',
                         area='DEPARTAMENTO DE ALUMNOS'  
                     )    
-                if nombre_serie == 'titulo_salud' :    
+                if nombre_serie == 'titulos_salud' :    
                     op_send_by_email.run(
                         uuid,
                         notifications_template='titulos_notificacion_validacion',
@@ -257,17 +257,17 @@ class ApruebaTitulo8(DocumentOperation):
             )
 
 
-VERSION = ApruebaTitulo8.version
-NAME = ApruebaTitulo8.name
-DESCRIPTION = ApruebaTitulo8.description
+VERSION = ApruebaTitulo9.version
+NAME = ApruebaTitulo9.name
+DESCRIPTION = ApruebaTitulo9.description
 ORDER = 100
 CATEGORY = ""
 POSTLOAD = False
 POSTCHARACT = False
 POSTCLASSIF = False
 POSTEXTRACTION = False
-CONFIGURATION_PARAMETERS = ApruebaTitulo8.configuration_parameters
+CONFIGURATION_PARAMETERS = ApruebaTitulo9.configuration_parameters
 
 
 def run(uuid=None, **params):
-    return ApruebaTitulo8(uuid, **params).run()
+    return ApruebaTitulo9(uuid, **params).run()
