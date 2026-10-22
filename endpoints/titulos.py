@@ -1,21 +1,20 @@
 from django.urls import re_path as url
-from ucasal.utils import default_permissions, traceback_ret, encodeJSON, getJsonBody, decodeUTF8
-from ucasal.utils import METHOD_NOT_ALLOWED
-from ucasal.utils import titulostates 
+from custom.ucasal2.utils import default_permissions, traceback_ret, encodeJSON, getJsonBody, decodeUTF8
+from custom.ucasal2.utils import METHOD_NOT_ALLOWED
+from custom.ucasal2.utils import TituloStates 
 from sp_logger import SpLogger
 from sp_totp_generator import TOTPGenerator
 from sp_form_totp_notifier import SpFormTotpNotifier
 from sp_athento_config import SpAthentoConfig as AC
-from ucasal.utils import UcasalConfig
-from ucasal.utils import get_totp_key
+from custom.ucasal2.utils import UcasalConfig
+from custom.ucasal2.utils import get_totp_key
 from django.http import HttpResponse
 from file.models import File
 from core.exceptions import AthentoseError
 from django.core.files import File as FileObject
 from sp_pdf_otp_simple_signer import SpPdfSimpleSigner, QRInfo, OTPInfo
-from ucasal.external_services.ucasal.ucasal_services import UcasalServices
-from ucasal.utils import uuid_previo_metadata_name
-from ucasal.model.exceptions.invalid_otp_error import InvalidOtpError
+from custom.ucasal2.external_services.ucasal.ucasal_services import UcasalServices
+from custom.ucasal2.model.exceptions.invalid_otp_error import InvalidOtpError
 
 from datetime import datetime
 import pytz
@@ -159,7 +158,7 @@ def bfaresponse(request, uuid):
 
         # Verificar estados válidos del acta
         lifecycle_state = fil.life_cycle_state.name
-        valid_states = [titulostates.pendiente_blockchain, titulostates.fallo_blockchain]
+        valid_states = [TituloStates.pendiente_blockchain, TituloStates.fallo_blockchain]
         if not lifecycle_state in valid_states:
             raise AthentoseError(f"Sólo se puede registrar el resultado de blockchain si el acta encuentra en los estados {' o '.join(valid_states)}, pero el estado actual es '{lifecycle_state}'.")
 
@@ -183,11 +182,11 @@ def bfaresponse(request, uuid):
             #TODO: ¿validar que el sello corresponda al hash?
             #TODO: ¿validar que el sello no haya sido previamente registrado el sello?
             #fil.set_metadata('metadata.acta_resultado_bfa', 'exitoso', overwrite=True)
-            fil.change_life_cycle_state(titulostates.firmada) #, force_transition=True)
+            fil.change_life_cycle_state(TituloStates.firmada) #, force_transition=True)
         else:
             #TODO: ¿qué hacemos en caso de falla?
             #fil.set_metadata('metadata.acta_resultado_bfa', 'fallido', overwrite=True)
-            fil.change_life_cycle_state(titulostates.fallo_blockchain) #, force_transition=True)
+            fil.change_life_cycle_state(TituloStates.fallo_blockchain) #, force_transition=True)
 
         fil.set_feature('registro.en.blockchain', result)
 
@@ -238,7 +237,7 @@ def registerotp(request, uuid):
 
         # Verificar estados válidos del acta
         lifecycle_state = fil.life_cycle_state.name
-        signature_valid_states = [titulostates.pendiente_otp, titulostates.fallo_blockchain]
+        signature_valid_states = [TituloStates.pendiente_otp, TituloStates.fallo_blockchain]
         if not lifecycle_state in signature_valid_states :
             raise AthentoseError(f"Sólo se puede firmar el acta si se encuentra en los estados {' o '.join(signature_valid_states)}, pero el estado actual es '{lifecycle_state}'.")
 
@@ -355,7 +354,7 @@ def registerotp(request, uuid):
         fil.set_feature('ucasal.svc.ok_response', ok_response_text)
         # Cambiar estado a Pendiente Blockchain
         #TODO: forzar transición?
-        fil.change_life_cycle_state(titulostates.pendiente_blockchain) #, force_transition=True)
+        fil.change_life_cycle_state(TituloStates.pendiente_blockchain) #, force_transition=True)
         fil.set_feature('registro.en.blockchain', 'pending')
 
         return logger.exit(HttpResponse(
@@ -388,86 +387,6 @@ def registerotp(request, uuid):
 
 @default_permissions
 @traceback_ret
-## Rechaza el acta de parte del docente
-def reject(request, uuid):    
-    try:
-        
-        logger = SpLogger("athentose", "titulos.reject")
-        logger.entry()
-
-        if request.method != 'POST':
-            return  logger.exit(METHOD_NOT_ALLOWED)          
-        
-        body = getJsonBody(request)
-
-        ## Obtener acta
-        fil = _get_acta(uuid)
-        if not fil:
-            raise AthentoseError(f'El acta {uuid} no existe')
-
-        if not fil.doctype.name == 'acta':
-            raise AthentoseError(f"El documento con uuid '{uuid}' es de tipo '{fil.doctype.label}' en lugar de 'Acta'")
-
-        ## Validar parámetros
-        #TODO: mejorar en gral la validacion de formato de todos los parámetros
-        # Validar motivo 
-        motivo = str(body.get('motivo', ''))
-        if(len(motivo.strip())==0):
-            raise AthentoseError(f"'motivo' debe ser un string no vacío en lugar de '{motivo}'")
-        
-        #TODO: Tal vez convenga validar con OTP
-        #totp_gen = TOTPGenerator(key = get_totp_key(uuid), token_validity_seconds=otp_validity_seconds)
-        #totp_gen.verify_token(otp, 0 )
-        
-        #if totp_gen.verified == False:
-        #    raise AthentoseError('El código es OTP inválido o ha expirado')
-        
-        # Verificar si el acta aún está pendiente de firma
-        lifecycle_state = fil.life_cycle_state.name
-        if lifecycle_state != titulostates.pendiente_otp:
-            raise AthentoseError(f"Sólo se puede rechazar el acta en estado '{titulostates.pendiente_otp}', pero el estado actual es '{lifecycle_state}'.")
-
-        # Verificar si el documento ya fue firmado con OTP
-        firmada_con_opt = fil.gfv('firmada.con.OTP')
-        if firmada_con_opt == "1":
-            raise AthentoseError(f"El acta ya fue firmada y no puede ser rechazada.")
-
-        ## Registrar el rechazo del acta
-
-        # Guardar fecha de rechazo
-        #tz = pytz.timezone('America/Argentina/Buenos_Aires')
-        #date_str = datetime.now(tz=tz).strftime('%Y-%m-%d')        
-        #fil.set_metadata('metadata.acta_fecha_rechazo', date_str, overwrite=True)
-
-        # Guardar el motivo de rechazo
-        #fil.set_metadata('metadata.acta_motivo_rechazo', motivo, overwrite=True)
-
-        # Notificar a UCASAL para que puedan editar el acta
-        auth_token = UcasalServices.get_auth_token(user=UcasalConfig.token_svc_user(), password = UcasalConfig.token_svc_password())
-        uuid_acta_previa = str(fil.gmv(uuid_previo_metadata_name)).replace('None', '')
-        UcasalServices.notify_rejection(auth_token=auth_token, uuid=fil.uuid, previous_uuid = uuid_acta_previa, reason=motivo)
-
-        # Cambiar estado a Rechazada (aunque la borremos luego, si hay error invocando a UCASAL, al menos que rechazada en Athento)
-        #TODO: forzar transición?
-        fil.change_life_cycle_state(titulostates.rechazada) #, force_transition=True)
-        
-        # Borrar el acta
-        fil.removed = True
-        fil.save()
-
-        # Mover el acta al espacio Papelera
-        #fil.move_to_serie(name='papelera')
-
-        return logger.exit(HttpResponse('Acta rechazada exitosamente'))            
-      
-    except AthentoseError as e:
-        return logger.exit(HttpResponse(
-            str(e), 
-            status='400'
-        ), exc_info=True)
-    except Exception as e:
-        raise logger.exit(e, exc_info=True)
-
 
 def _get_pdf_hash(fil):
     path = fil.file.path

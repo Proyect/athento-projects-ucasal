@@ -2,7 +2,7 @@
 import requests
 from core.exceptions import AthentoseError
 from custom.sp_libs.python.logging import SpLogger
-from ucasal2.utils import UcasalConfig
+from custom.ucasal2.utils import UcasalConfig
 
 
 class ProgramasServices:
